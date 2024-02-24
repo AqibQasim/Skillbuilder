@@ -1,0 +1,43 @@
+.img {
+    width: 100%; /* Adjust as needed based on your logo size and margin */
+    margin: 0 20px; /* Adjust margin as needed */
+  }
+  
+  .logos {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 40px 0;
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+  }
+  
+  .logos:before,
+  .logos:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 250px; /* Adjust based on your design */
+    height: 100%;
+    z-index: 2;
+  }
+  
+  .logos:hover .logos-slide {
+    animation-play-state: paused;
+  }
+  
+  .logos-slide {
+    display: flex;
+    animation: 50s slide infinite linear;
+  }
+  
+  @keyframes slide {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+  
