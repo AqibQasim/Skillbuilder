@@ -1,0 +1,49 @@
+version: '3'
+services:
+
+    pgsql:
+        image: postgres:14.7
+        volumes:
+            - ./db:/var/lib/postgresql/data
+            - ./postgres-initdb.sh:/docker-entrypoint-initdb.d/initdb.sh
+        ports:
+            - "5432:5432"
+        networks:
+            - dev-network
+        environment:
+            POSTGRES_USER: docker
+            POSTGRES_PASSWORD: docker
+            POSTGRES_DB: postgres
+            
+    adminer:
+        image: adminer
+        restart: always
+        ports:
+            - 8080:8080
+
+    redis:
+        image: redis:latest
+        user: redis
+        networks:
+            - dev-network
+        ports:
+            - "0.0.0.0:7779:6379"
+
+    rabbitmq:
+        build:
+            context: docker/rabbitmq
+        container_name: rabbitmq
+        hostname: rabbitmq
+        ports:
+            - 5672:5672
+            - 15672:15672
+        networks:
+            - dev-network
+        environment:
+            - RABBITMQ_DEFAULT_USER=admin
+            - RABBITMQ_DEFAULT_PASS=admin
+            - RABBITMQ_DEFAULT_VHOST=/
+
+networks:
+    dev-network:
+        driver: bridge
