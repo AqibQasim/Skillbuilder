@@ -20,7 +20,7 @@ const signIn = async (req, rep) => {
   try {
     const { email, password } = req.body;
 
-    console.log("checking");
+    console.log("checkinggg");
     console.log(email, password);
 
     // finding user by email
