@@ -1,49 +1,44 @@
-version: '3'
+version: "3.3"
 services:
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    networks:
+      - network
 
-    pgsql:
-        image: postgres:14.7
-        volumes:
-            - ./db:/var/lib/postgresql/data
-            - ./postgres-initdb.sh:/docker-entrypoint-initdb.d/initdb.sh
-        ports:
-            - "5432:5432"
-        networks:
-            - dev-network
-        environment:
-            POSTGRES_USER: docker
-            POSTGRES_PASSWORD: docker
-            POSTGRES_DB: postgres
-            
-    adminer:
-        image: adminer
-        restart: always
-        ports:
-            - 8080:8080
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - 5672:5672
+      - 15672:15672
+    environment:
+      RABBITMQ_ERLANG_COOKIE: 6085e2412b6fa88647466c6a81c0cea0
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+      RABBITMQ_DEFAULT_VHOST: /
+    volumes:
+      - ./data/rabbitmq:/var/lib/rabbitmq/mnesia/rabbit@app-rabbitmq:cached
+    networks:
+      - network
 
-    redis:
-        image: redis:latest
-        user: redis
-        networks:
-            - dev-network
-        ports:
-            - "0.0.0.0:7779:6379"
+  pgsql:
+    image: postgres:16
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postres
+      PGDATA: /var/lib/postgresql/data/pg_data
+    volumes:
+      - pg_data:/var/lib/postgresql/data/pg_data
+    networks:
+      - network
 
-    rabbitmq:
-        build:
-            context: docker/rabbitmq
-        container_name: rabbitmq
-        hostname: rabbitmq
-        ports:
-            - 5672:5672
-            - 15672:15672
-        networks:
-            - dev-network
-        environment:
-            - RABBITMQ_DEFAULT_USER=admin
-            - RABBITMQ_DEFAULT_PASS=admin
-            - RABBITMQ_DEFAULT_VHOST=/
+volumes:
+  pg_data:
+    driver: local
 
-networks:
-    dev-network:
-        driver: bridge
+networks: network
