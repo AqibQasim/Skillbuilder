@@ -11,7 +11,7 @@ const createUser = async (userInfo) => {
   return user;
 };
 
-const findUser = async (userInfo) => {
+const signInUserFunc = async (userInfo) => {
   const { email, password } = userInfo;
 
   const userRepository = dataSource.getRepository("User");
@@ -42,5 +42,5 @@ const findUser = async (userInfo) => {
 
 module.exports = {
   createUser,
-  findUser,
+  signInUserFunc,
 };
