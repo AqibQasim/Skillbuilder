@@ -1,9 +1,9 @@
 const { EntitySchema } = require("typeorm");
 
 module.exports = new EntitySchema({
-  target: "User",
-  name: "user",
-  tableName: "user",
+  target: "GoogleAuth",
+  name: "GoogleAuth",
+  tableName: "GoogleAuth",
   columns: {
     id: {
       primary: true,
@@ -16,8 +16,8 @@ module.exports = new EntitySchema({
     email: {
       type: "varchar",
     },
-    password: {
-      type: "varchar",
-    },
+    verified: {
+      type: "boolean",
+    }
   },
 })

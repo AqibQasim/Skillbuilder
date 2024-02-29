@@ -4,6 +4,7 @@ const { logger } = require('../logger');
 const { fastifyOptions } = require('../fastifyOpts');
 const dotenv = require('dotenv');
 const userRoutes = require('./routes/userRoutes');
+
 dotenv.config();
 
 const startServer = async () => {
@@ -16,7 +17,7 @@ const startServer = async () => {
             message: 'Fastify server is running '
         }
         res.send(result)
-    })
+    });
 
     app.register(userRoutes);
 
@@ -24,12 +25,12 @@ const startServer = async () => {
         await app.listen(process.env.SERVER_PORT);
         await dataSource.initialize()
         .then((conn) => {
-          logger.info("Database connection has beed established ...");
+          logger.info("Database connection has been established ...");
         })
         .catch(error => {
           logger.error(error);
-        })
-        logger.info(`Server is Listening on ${process.env.NODE_ENV}`)
+        });
+        logger.info(`Server is Listening on ${process.env.NODE_ENV}`);
 
     } catch (error) {
         logger.error(error.message);
@@ -38,5 +39,3 @@ const startServer = async () => {
 };
 
 module.exports = startServer;
-
-
