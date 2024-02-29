@@ -25,10 +25,10 @@ module.exports = new EntitySchema({
     courses: {
       target: "Course",
       type: "one-to-many",
-      inverseSide: "courseContent", // Specify the inverse side property in the Course entity
+      inverseSide: "courseContent",
       cascade: true,
       joinColumn: {
-        name: "content_id", // Add join column name
+        name: "course_id",
       },
     },
   },

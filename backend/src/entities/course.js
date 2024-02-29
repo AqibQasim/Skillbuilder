@@ -6,7 +6,7 @@ module.exports = new EntitySchema({
   name: "course",
   tableName: "course",
   columns: {
-    id: {
+    course_id: {
       primary: true,
       type: "int",
       generated: true,
@@ -25,14 +25,12 @@ module.exports = new EntitySchema({
     },
   },
   relations: {
-    instructors: {
+    instructor: {
       target: "Instructor",
-      type: "many-to-many",
+      type: "many-to-one",
       cascade: true,
-      joinTable: {
-        name: "course_instructor", // Specify the name of the join table
-        joinColumn: { name: "course_id" }, // Specify the join column in the join table
-        inverseJoinColumn: { name: "instructor_id" }, // Specify the inverse join column in the join table
+      joinColumn: {
+        name: "instructor_id",
       },
     },
   },

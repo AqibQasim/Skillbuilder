@@ -21,7 +21,7 @@ const startServer = async () => {
   app.register(userRoutes);
 
   try {
-    await app.listen(process.env.SERVER_PORT || 4000);
+    await app.listen(process.env.SERVER_PORT || 5000);
     await dataSource
       .initialize()
       .then((conn) => {
