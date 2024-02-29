@@ -96,6 +96,7 @@ const EmailVarify = async (request, reply) => {
     const storedToken = await redis.get(email);
 
     if (storedToken === verificationToken) {
+      
       await redis.del(email);
 
       reply.send("Email verified successfully!");
