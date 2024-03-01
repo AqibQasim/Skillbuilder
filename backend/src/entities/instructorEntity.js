@@ -10,9 +10,9 @@ module.exports = new EntitySchema({
             type: "int",
             generated: true,
         },
-        // image:{
-        //     type:"varchar"
-        // },
+        image:{
+            type:"varchar"
+        },
         name: {
             type: "varchar",
         },

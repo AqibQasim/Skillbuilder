@@ -26,7 +26,7 @@ module.exports = new EntitySchema({
         instructor: {
             target: "Instructor",
             type: "many-to-one",
-            joinColumn: { name: 'instructorId' },
+            joinColumn: { name: 'instructor_id' },
         },
     },
 });
