@@ -2,6 +2,7 @@ const {
   fetchAllCourses,
   CoursesRatingFunc,
   fetchAllCoursesWithDetails,
+  fetchAllRecentCourses,
 } = require("../repositories/courseRepository");
 
 const getAllCourses = async () => {
@@ -17,12 +18,18 @@ const CoursesRatingService = async () => {
 };
 
 const coursesDetailFunc = async () => {
-  const coursesRatingRecieve = await fetchAllCoursesWithDetails();
-  return coursesRatingRecieve;
+  const coursesDetailSave = await fetchAllCoursesWithDetails();
+  return coursesDetailSave;
+};
+
+const recentCoursesFunc = async () => {
+  const recentCoursesSave = await fetchAllRecentCourses();
+  return recentCoursesSave;
 };
 
 module.exports = {
   getAllCourses,
   CoursesRatingService,
   coursesDetailFunc,
+  recentCoursesFunc,
 };

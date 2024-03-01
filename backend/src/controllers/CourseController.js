@@ -3,6 +3,7 @@ const {
   getAllCourses,
   CoursesRatingService,
   coursesDetailFunc,
+  recentCoursesFunc,
 } = require("../services/courseService");
 
 const allCourses = async (request, reply) => {
@@ -35,8 +36,19 @@ const courseDetails = async (request, reply) => {
   }
 };
 
+const recentCourses = async (req, rep) => {
+  logger.info("data: ", request.body);
+  try {
+    const recentCoursesRecieve = await recentCoursesFunc();
+    reply.send(recentCoursesRecieve);
+  } catch (error) {
+    reply.status(500).send(error);
+  }
+};
+
 module.exports = {
   allCourses,
   coursesRating,
   courseDetails,
+  recentCourses,
 };

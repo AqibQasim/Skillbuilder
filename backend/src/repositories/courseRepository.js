@@ -32,8 +32,11 @@ const fetchAllCoursesWithDetails = async () => {
   return coursesWithDetails;
 };
 
+const fetchAllRecentCourses = async () => {};
+
 module.exports = {
   fetchAllCourses,
   CoursesRatingFunc,
   fetchAllCoursesWithDetails,
+  fetchAllRecentCourses,
 };
