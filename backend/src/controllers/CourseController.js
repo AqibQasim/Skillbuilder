@@ -36,7 +36,7 @@ const courseDetails = async (request, reply) => {
   }
 };
 
-const recentCourses = async (req, rep) => {
+const recentCourses = async (request, reply) => {
   logger.info("data: ", request.body);
   try {
     const recentCoursesRecieve = await recentCoursesFunc();

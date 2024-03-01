@@ -2,7 +2,6 @@ const { EntitySchema } = require("typeorm");
 const Course = require("./course");
 
 module.exports = new EntitySchema({
-  //snake case
   target: "course_content",
   name: "course_content",
   tableName: "course_content",

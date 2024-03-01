@@ -1,6 +1,4 @@
 const { EntitySchema } = require("typeorm");
-const Instructor = require("./instructor");
-const Reviews = require("./reviews");
 
 module.exports = new EntitySchema({
   target: "Course",
@@ -29,6 +27,21 @@ module.exports = new EntitySchema({
     },
     image: {
       type: "varchar",
+    },
+    created_at: {
+      type: "timestamp with time zone",
+    },
+    updated_at: {
+      type: "timestamp with time zone",
+      nullable: true,
+    },
+    created_by: {
+      type: "varchar",
+      nullable: true,
+    },
+    updated_by: {
+      type: "varchar",
+      nullable: true,
     },
   },
   relations: {
