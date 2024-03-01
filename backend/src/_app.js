@@ -23,7 +23,7 @@ const startServer = async () => {
   app.register(coursesRoutes);
 
   try {
-    await app.listen(process.env.SERVER_PORT || 5000);
+    await app.listen(process.env.SERVER_PORT);
     await dataSource
       .initialize()
       .then((conn) => {
@@ -32,7 +32,7 @@ const startServer = async () => {
       .catch((error) => {
         logger.error(error);
       });
-    logger.info(`Server is Listening on ${process.env.NODE_ENV || 5000}`);
+    logger.info(`Server is Listening on ${process.env.NODE_ENV}`);
   } catch (error) {
     logger.error(error.message);
     process.exit(1);
