@@ -6,12 +6,12 @@ const { PinoLogger, logger } = require('../logger');
 
 
 const dataSource = new DataSource({
-  type: process.env.DB_DIALECT,
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  username: process.env.DB_USERNAME,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DATABASE,
+  type: process.env.DB_DIALECT ||'postgres',
+  host: process.env.DB_HOST || 'localhost',
+  port: process.env.DB_PORT || 5432,
+  username: process.env.DB_USERNAME || 'postgres',
+  password: process.env.DB_PASSWORD || 'ehtasham24',
+  database: process.env.DATABASE || 'NewDb',
   synchronize: true,
   logging: true,
   logger: new PinoLogger,

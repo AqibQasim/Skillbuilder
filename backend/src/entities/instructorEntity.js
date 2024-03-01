@@ -1,9 +1,9 @@
 const { EntitySchema } = require("typeorm")
 
 module.exports = new EntitySchema({
-    target: 'User',
-    name: "user",
-    tableName: "user",
+    target: 'Instructor',
+    name: "Instructor",
+    tableName: "Instructor",
     columns: {
         id: {
             primary: true,
@@ -19,8 +19,11 @@ module.exports = new EntitySchema({
         bio: {
             type: "varchar",
         },
-        active: {
-            type: "boolean",
+        password: {
+            type: "varchar",
+        },
+        profession: {
+            type: "varchar",
         },
     },
 })

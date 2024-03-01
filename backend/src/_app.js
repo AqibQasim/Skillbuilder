@@ -3,7 +3,8 @@ const dataSource = require('../Infrastructure/postgres');
 const { logger } = require('../logger');
 const { fastifyOptions } = require('../fastifyOpts');
 const dotenv = require('dotenv');
-const userRoutes = require('./routes/userRoutes');
+const instructorRoutes = require('./routes/instructorRoutes');
+const skillsRoutes = require('./routes/skillsRoutes');
 dotenv.config();
 
 const startServer = async () => {
@@ -17,11 +18,12 @@ const startServer = async () => {
         }
         res.send(result)
     })
-
-    app.register(userRoutes);
+    const PORT=6000;
+    app.register(instructorRoutes);
+    app.register(skillsRoutes);
 
     try {
-        await app.listen(process.env.SERVER_PORT);
+        await app.listen(PORT);
         await dataSource.initialize()
         .then((conn) => {
           logger.info("Database connection has beed established ...");
