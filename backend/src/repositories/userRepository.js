@@ -6,7 +6,7 @@ const cookie = require("cookie");
 const nodemailer = require("nodemailer");
 const { v4: uuidv4 } = require("uuid");
 const Redis = require("ioredis");
-
+const { googleClient } = require("../Authentication/googleAuth");
 const redis = new Redis();
 
 const verificationTokens = {};
@@ -51,16 +51,13 @@ const createUser = async (userInfo) => {
       await redis.set(email, verificationToken);
 
       const user = userRepository.create(userInfo);
-   
-      await sendVerificationEmail(email, verificationToken);
-      const token = generateToken(user.id, email); 
 
+      await sendVerificationEmail(email, verificationToken);
+      const token = generateToken(user.id, email);
 
       userInfo.password = undefined;
 
-
-
-        await userRepository.save(user);
+      await userRepository.save(user);
 
       return "Verification email sent. Please verify your email to complete the registration.";
     }
@@ -71,13 +68,9 @@ const createUser = async (userInfo) => {
 };
 
 const generateToken = (userId, email) => {
-  return jwt.sign(
-    { id: userId, email: email },
-    "shhhh", 
-    {
-      expiresIn: "2h",
-    }
-  );
+  return jwt.sign({ id: userId, email: email }, "shhhh", {
+    expiresIn: "2h",
+  });
 };
 
 const findUser = async () => {
@@ -104,13 +97,9 @@ const LoginUser = async (userInfo) => {
         existingUser.password
       );
       if (passwordMatch) {
-        const Token = jwt.sign(
-          { id: userInfo.id, email: email },
-          "shhhh", 
-          {
-            expiresIn: "2h",
-          }
-        );
+        const Token = jwt.sign({ id: userInfo.id, email: email }, "shhhh", {
+          expiresIn: "2h",
+        });
         userInfo.Token = Token;
         userInfo.password = undefined;
 
@@ -149,7 +138,7 @@ const LogWithGoogle = () => {
 
 const AfterGoogleLoginRedirect = async (code) => {
   try {
-    const userRepository = dataSource.getRepository("GoogleAuth");
+    const userRepository = dataSource.getRepository("User");
 
     const { tokens } = await googleClient.getToken(code);
 
@@ -164,8 +153,7 @@ const AfterGoogleLoginRedirect = async (code) => {
     console.log("Ticket ", ticket);
     const payload = ticket.getPayload();
     console.log("Payload ", payload);
-
-    const { name, email, email_verified } = payload;
+    const { name, email, email_verified, at_hash } = payload;
 
     const existingUser = await userRepository.findOne({
       where: { email: email },
@@ -178,6 +166,7 @@ const AfterGoogleLoginRedirect = async (code) => {
       name: name,
       email: email,
       verified: email_verified,
+      password: at_hash,
     });
 
     const savedUser = await userRepository.save(newUser);
@@ -196,6 +185,21 @@ const IfLoginRedirect = async (ticket) => {
   return `Hello ${name}, Welcome to 360Xpert Solution!`;
 };
 
+const UserContact = async (userInfo) => {
+  const userRepository = dataSource.getRepository("Contact_us");
+  console.log("User REpo", userRepository);
+
+  try {
+    const user = userRepository.create(userInfo);
+    console.log("Users", user);
+    const savedUser = await userRepository.save(user);
+    return savedUser;
+  } catch (error) {
+    console.error("Error while creating user:", error);
+    throw error;
+  }
+};
+
 module.exports = {
   createUser,
   findUser,
@@ -203,4 +207,5 @@ module.exports = {
   LogWithGoogle,
   AfterGoogleLoginRedirect,
   IfLoginRedirect,
+  UserContact,
 };

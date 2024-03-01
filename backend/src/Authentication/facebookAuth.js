@@ -1,10 +1,10 @@
-const fastifySecureSession = require('fastify-secure-session');
-const fastifyPassport = require('fastify-passport');
 const FacebookStrategy = require('passport-facebook').Strategy;
+const dotenv=require('dotenv')
+dotenv.config();
 
 const facebookClient = new FacebookStrategy({
-    clientID: '1781633605596558',
-    clientSecret: 'f99ccba457cc7448d5af76e578c7592d',
+    clientID: process.env.FACEBOOK_CLIENT_ID,
+    clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
     callbackURL: "http://localhost:3000/auth/facebook/callback",
     profileFields: ['id', 'displayName', 'email'] // Specify the profile fields you want to retrieve
   },

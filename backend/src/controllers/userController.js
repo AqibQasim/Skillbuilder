@@ -1,31 +1,35 @@
-const {registerUser,FindUser,UserLogin,googleLogin,googleClient} = require("../services/userService");
+const {registerUser,FindUser,UserLogin,googleLogin,googleClient,ContactUser,} = require("../services/userService");
 const { logger } = require("../../logger");
 const bcrypt = require("bcrypt");
 const Redis = require("ioredis");
 const redis = new Redis();
+const ValidateUser = require("../Schema/userSchema");
+const ValidateContactUs = require("../Schema/contectUsSchema");
 
 const postUser = async (request, reply) => {
-  logger.info("data: ", request.body);  
+  logger.info("data: ", request.body);
+
   const { name, email, password } = request.body;
+
+  const { error } = ValidateUser.validate(request.body);
+  if (error) {
+    return reply.code(400).send({ error: error.details[0].message });
+  }
+
   try {
-    if (!name || !email || !password) {
-      return reply.code(400).send({
-        code: 400,
-        status: "failed",
-        message: "All fields are compulsory",
-      });
-    } else {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      const userInfo = { name, email, password: hashedPassword };
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const userInfo = { name, email, password: hashedPassword };
 
-      const users = await registerUser(userInfo);
-
-      reply.code(201).send({
-        users,
-      });
+    const users = await registerUser(userInfo);
+    if (!users) {
+      throw new Error("User registration failed");
     }
+
+    reply.code(201).send({
+      users,
+    });
   } catch (error) {
-    request.log.error("Error registering user:", error);
+    console.error("Error registering user:", error);
     reply
       .code(500)
       .send({ error: "An error occurred while registering user." });
@@ -88,15 +92,13 @@ const GoggleLoginCallBAck = async (request, reply) => {
   }
 };
 
-
-const EmailVarify = async (request, reply) => {
+const EmailVerify = async (request, reply) => {
   try {
     const { email, verificationToken } = request.query;
 
     const storedToken = await redis.get(email);
 
     if (storedToken === verificationToken) {
-      
       await redis.del(email);
 
       reply.send("Email verified successfully!");
@@ -109,11 +111,37 @@ const EmailVarify = async (request, reply) => {
   }
 };
 
+const ContactUS = async (request, reply) => {
+  const userInfo = request.body;
+
+  const { error } = ValidateContactUs.validate(userInfo);
+  if (error) {
+    return reply.code(400).send({ error: error.details[0].message });
+  }
+
+  console.log("User Info", userInfo);
+  try {
+    const users = await ContactUser(userInfo);
+    console.log("Users in Controller", userInfo);
+
+    reply.code(201).send({
+      users,
+    });
+  } catch (error) {
+    console.log("Error in Controller ", error);
+    request.log.error("Error registering user:", error);
+    reply
+      .code(500)
+      .send({ error: "An error occurred while registering user." });
+  }
+};
+
 module.exports = {
   postUser,
   FindAllUsers,
   Login,
   GoogleLogin,
   GoggleLoginCallBAck,
-  EmailVarify,
+  EmailVerify,
+  ContactUS,
 };
