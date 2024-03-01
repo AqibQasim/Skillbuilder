@@ -1,5 +1,6 @@
 const { logger } = require("../../logger");
 const{newInstructor,readInstructors,readInstructor,readInstructorWithSkills}=require('../repositories/instructorRepository');
+const { fetchReviews } = require("../repositories/reviewRepository");
 const{fetchSkills}=require('../repositories/skillsRepository');
 // const {getskills}=require('../controllers/skillsController');
 
@@ -7,12 +8,18 @@ const getInstructorWithSkillss = async (instructorId) => {
     try {
       const instructor = await readInstructorWithSkills(instructorId);
       const skills = await fetchSkills(instructorId);
-      console.log("Skills ",skills)
-      return { instructor, skills };
+      logger.info('skillllls value', skills);
+      const reviews =await fetchReviews(instructorId);
+    //   const reviews =['sample','data','for','review'];
+
+      logger.info('review value', reviews);
+      logger.info("Skills ", skills);
+    //   logger.info("reviews ",reviews);
+      return { instructor, skills, reviews };
     } catch (error) {
         // logger.info(error);
         console.log(error)
-      throw new Error('Error fetching instructor with skills');
+      throw new Error('Error fetching instructor with skills and review');
     }
   };
 
