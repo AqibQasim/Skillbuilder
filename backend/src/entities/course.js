@@ -1,12 +1,13 @@
 const { EntitySchema } = require("typeorm");
 const Instructor = require("./instructor");
+const Reviews = require("./reviews"); // Add this line to import Reviews entity
 
 module.exports = new EntitySchema({
   target: "Course",
   name: "course",
   tableName: "course",
   columns: {
-    course_id: {
+    id: {
       primary: true,
       type: "int",
       generated: true,
@@ -23,6 +24,9 @@ module.exports = new EntitySchema({
     active: {
       type: "boolean",
     },
+    image: {
+      type: "varchar",
+    },
   },
   relations: {
     instructor: {
@@ -32,6 +36,13 @@ module.exports = new EntitySchema({
       joinColumn: {
         name: "instructor_id",
       },
+    },
+    reviews: {
+      // Corrected relation definition
+      target: "Reviews",
+      type: "one-to-many",
+      cascade: true,
+      inverseSide: "course", // Make sure the inverse side is correctly defined in Reviews entity
     },
   },
 });

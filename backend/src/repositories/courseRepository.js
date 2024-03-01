@@ -29,12 +29,24 @@ const fetchAllCourses = async () => {
   const courseRepository = dataSource.getRepository("Course");
   const allCourses = await courseRepository
     .createQueryBuilder("course")
-    .innerJoinAndSelect("course.instructor", "instructor")
+    .leftJoinAndSelect("course.reviews", "reviews")
+    .select(["course", "reviews.rating"])
     .getMany();
   return allCourses;
 };
 
+const CoursesRatingFunc = async () => {
+  const courseRepository = dataSource.getRepository("Course");
+  const courses_rating = await courseRepository
+    .createQueryBuilder("course")
+    .leftJoinAndSelect("course.reviews", "reviews")
+    .select(["course", "reviews.rating"])
+    .orderBy("reviews.rating", "DESC")
+    .getMany();
+  return courses_rating;
+};
 // Example usage
 module.exports = {
   fetchAllCourses,
+  CoursesRatingFunc,
 };
