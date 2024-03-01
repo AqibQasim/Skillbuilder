@@ -8,7 +8,7 @@ const readInstructorWithSkills = async (id) => {
     const instructorRepository = dataSource.getRepository("Instructor");
     console.log("UserRepo",instructorRepository)
     // logger.info('instructooooooor');
-    const instructor = await instructorRepository.find({where:{id:id}}, { relations: ["skills"] });
+    const instructor = await instructorRepository.find({where:{id:id}}, { relations: ["skills","review"] });
     console.log("Instructor",instructor);
     // logger.info('instructooooooor',instructor);
     return instructor;

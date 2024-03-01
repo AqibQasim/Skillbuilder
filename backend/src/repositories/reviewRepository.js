@@ -6,6 +6,7 @@ const fetchReviews = async (instructorId) => {
     const reviewRepository = dataSource.getRepository("Review");
     logger.info("Review repooo ",reviewRepository);
     const instructorReviews = await reviewRepository.find({ where: { instructor_id:instructorId } });
+    instructorReviews.sort((a, b) => b.rating - a.rating);
     logger.info("Review Repo ",instructorReviews)
 
     return instructorReviews;
