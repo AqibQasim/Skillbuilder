@@ -5,10 +5,10 @@ const dataSource = require("../../Infrastructure/postgres");
 
 const readInstructorWithSkills = async (id) => {
   try {
-    const userRepository = dataSource.getRepository("Instructor");
-    console.log("UserRepo",userRepository)
+    const instructorRepository = dataSource.getRepository("Instructor");
+    console.log("UserRepo",instructorRepository)
     // logger.info('instructooooooor');
-    const instructor = await userRepository.find({where:{id:id}}, { relations: ["skills"] });
+    const instructor = await instructorRepository.find({where:{id:id}}, { relations: ["skills"] });
     console.log("Instructor",instructor);
     // logger.info('instructooooooor',instructor);
     return instructor;

@@ -6,7 +6,7 @@ const fetchSkills = async (instructorId) => {
     const skillRepository = dataSource.getRepository("Skills");
     logger.info("Skilss Repo ",skillRepository);
     const instructorSkills = await skillRepository.find({ where: { instructor_id:instructorId } });
-    console.log("Instructor Repo ",instructorSkills)
+    logger.info("Instructor Repo ",instructorSkills)
 
     return instructorSkills;
   } catch (error) {
