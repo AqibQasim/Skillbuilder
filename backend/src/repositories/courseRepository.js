@@ -1,27 +1,3 @@
-/* const { logger } = require("../../logger");
-const dataSource = require("../../Infrastructure/postgres");
-const { Course } = require("../entities/course");
-
-const fetchAllCourses = async () => {
-  try {
-    const courseRepository = dataSource.getRepository(Course);
-    const courses = await courseRepository
-      .createQueryBuilder("course")
-      .innerJoin("course.instructors", "instructor")
-      .getMany();
-
-    return courses;
-  } catch (error) {
-    logger.error(error.message);
-    throw error;
-  }
-};
-
-module.exports = {
-  fetchAllCourses,
-};
- */
-
 const { logger } = require("../../logger");
 const dataSource = require("../../Infrastructure/postgres");
 
@@ -30,8 +6,8 @@ const fetchAllCourses = async () => {
   const allCourses = await courseRepository
     .createQueryBuilder("course")
     .leftJoinAndSelect("course.reviews", "reviews")
-    .select(["course", "reviews.rating"])
     .getMany();
+
   return allCourses;
 };
 
@@ -40,13 +16,24 @@ const CoursesRatingFunc = async () => {
   const courses_rating = await courseRepository
     .createQueryBuilder("course")
     .leftJoinAndSelect("course.reviews", "reviews")
-    .select(["course", "reviews.rating"])
     .orderBy("reviews.rating", "DESC")
     .getMany();
   return courses_rating;
 };
-// Example usage
+
+const fetchAllCoursesWithDetails = async () => {
+  const courseRepository = dataSource.getRepository("Course");
+  const coursesWithDetails = await courseRepository
+    .createQueryBuilder("course")
+    .innerJoinAndSelect("course.instructor", "instructor")
+    .leftJoinAndSelect("course.reviews", "reviews")
+    .getMany();
+
+  return coursesWithDetails;
+};
+
 module.exports = {
   fetchAllCourses,
   CoursesRatingFunc,
+  fetchAllCoursesWithDetails,
 };

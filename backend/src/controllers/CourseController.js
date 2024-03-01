@@ -2,6 +2,7 @@ const { logger } = require("../../logger");
 const {
   getAllCourses,
   CoursesRatingService,
+  coursesDetailFunc,
 } = require("../services/courseService");
 
 const allCourses = async (request, reply) => {
@@ -24,7 +25,18 @@ const coursesRating = async (request, reply) => {
   }
 };
 
+const courseDetails = async (request, reply) => {
+  logger.info("data: ", request.body);
+  try {
+    const coursesDetailsRecieve = await coursesDetailFunc();
+    reply.send(coursesDetailsRecieve);
+  } catch (error) {
+    reply.status(500).send(error);
+  }
+};
+
 module.exports = {
   allCourses,
   coursesRating,
+  courseDetails,
 };

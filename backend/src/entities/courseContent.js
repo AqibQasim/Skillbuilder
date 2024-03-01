@@ -2,9 +2,10 @@ const { EntitySchema } = require("typeorm");
 const Course = require("./course");
 
 module.exports = new EntitySchema({
-  target: "CourseContent",
-  name: "courseContent",
-  tableName: "courseContent",
+  //snake case
+  target: "course_content",
+  name: "course_content",
+  tableName: "course_content",
   columns: {
     content_id: {
       primary: true,
@@ -24,9 +25,7 @@ module.exports = new EntitySchema({
   relations: {
     courses: {
       target: "Course",
-      type: "one-to-many",
-      inverseSide: "courseContent",
-      cascade: true,
+      type: "many-to-one",
       joinColumn: {
         name: "course_id",
       },
