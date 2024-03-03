@@ -1,21 +1,11 @@
-const {
-  postUser,
-  FindAllUsers,
-  Login,
-  GoogleLogin,
-  GoggleLoginCallBAck,
-  EmailVerify,
-  ContactUS,
-} = require("../controllers/userController");
-const dotenv = require("dotenv");
+const { postUser, getAllUsers, login, GoogleLogin, GoggleLoginCallBAck, EmailVerify, ContactUS} = require("../controllers/userController");
 
-dotenv.config();
 
 const userRoutes = async (fastify, options) => {
   // Define routes
-  fastify.post("/create-user", postUser);
-  fastify.get("/users", FindAllUsers);
-  fastify.post("/login", Login);
+  fastify.post("/user", postUser);//update
+  fastify.get("/users", getAllUsers);//update
+  fastify.post("/login", login);//update
 
   fastify.get("/auth/google", GoogleLogin);
   fastify.get("/auth/google/callback", GoggleLoginCallBAck);

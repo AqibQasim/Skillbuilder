@@ -1,11 +1,12 @@
 const fastify = require("fastify");
+const dotenv = require("dotenv");
+dotenv.config();
 const dataSource = require("../Infrastructure/postgres");
 const { logger } = require("../logger");
 const { fastifyOptions } = require("../fastifyOpts");
-const dotenv = require("dotenv");
 const userRoutes = require("./routes/userRoutes");
+const {client} = require("../Infrastructure/redis")
 // const Validation=require('./Schema/userSchema')
-dotenv.config();
 
 const startServer = async () => {
   const app = fastify(fastifyOptions);
@@ -24,10 +25,11 @@ const startServer = async () => {
 
   try {
     await app.listen(process.env.SERVER_PORT || 4000);
+
     await dataSource
-      .initialize()
-      .then((conn) => {
-        logger.info("Database connection has beed established ...");
+    .initialize()
+    .then((conn) => {
+      logger.info("Database connection has beed established ...");
       })
       .catch((error) => {
         logger.error(error);

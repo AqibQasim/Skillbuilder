@@ -1,8 +1,17 @@
-// config/redis.js
-const RedisAdapter = require('../adapters/redisAdapter');
+const redis = require('redis');
 
-const createRedisAdapter = (config) => {
-  // Initialize Redis connection using the provided configuration
+const redisConfig = {
+    host: 'localhost',
+    port: 6379,
+    // password: '', If password
 };
 
-module.exports = createRedisAdapter;
+const redisClient = redis.createClient(redisConfig);
+
+redisClient.on('error', (err) => {
+    console.log('Redis Client Error', err);
+});
+
+redisClient.connect();
+
+module.exports = {redisClient};

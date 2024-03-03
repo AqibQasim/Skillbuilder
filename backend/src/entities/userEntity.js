@@ -19,5 +19,19 @@ module.exports = new EntitySchema({
     password: {
       type: "varchar",
     },
+    profession: {
+      type: 'varchar',
+      nullable: true
+    },
+    role: {
+      type: 'enum',
+      enum: ["admin", "user" ],
+      default: 'user'
+    },
+    source: {
+      type: "enum",
+      enum: ["facebook", "google", "app"],
+      default: "app"
+    }
   },
 })
