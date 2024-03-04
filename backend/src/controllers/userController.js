@@ -6,6 +6,7 @@ const { ValidateUser, loginValidation } = require("../Schema/userSchema");
 const ValidateContactUs = require("../Schema/contectUsSchema");
 const { GoogleClient } = require("../Authentication/googleAuth");
 
+
 const postUser = async (request, reply) => {
   logger.info(['src > controllers > userController > ', request.body]);
   try {
@@ -25,7 +26,7 @@ const postUser = async (request, reply) => {
     logger.error(["Error registering user:", error.message]);
     reply
       .code(500)
-      .send({ error: "An error occurred while registering user." });
+      .send({ error: error.message });
   }
 };
 
@@ -70,10 +71,7 @@ const GoogleLogin = async (request, reply) => {
     scope: ["profile", "email"],
   });
   console.log("Url ", Url);
-  reply.code(200).send({
-    message: 'Success',
-    url: Url
-  })
+  reply.redirect(Url)
 };
 
 const GoggleLoginCallBAck = async (request, reply) => {
@@ -105,8 +103,8 @@ const EmailVerify = async (request, reply) => {
       reply.status(400).send("Link Expire");
     }
   } catch (error) {
-    logger.error(["Error verifying email:", error]);
-    reply.status(500).send("An error occurred while verifying the email.");
+    logger.error(["Error verifying email:", error.message]);
+    reply.status(500).send(error.message);
   }
 };
 

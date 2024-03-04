@@ -20,8 +20,8 @@ const createUser = async (userInfo) => {
   try {
     const userCreate = userRepository.create(userInfo);
     const result = await userRepository.save(userCreate);
-    logger.info(["userResult", result])
-
+    logger.info(["user created", result])
+    return result;
   } catch (error) {
     console.error("Error while creating user:", error);
     throw error;
