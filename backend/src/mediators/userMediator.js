@@ -18,7 +18,7 @@ const sendVerificationEmail = async (email, verificationToken) => {
             from: "fa21bscs0017@maju.edu.pk",
             to: email,
             subject: "Email Verification",
-            html: ` <a href="http://localhost:5500/verify-email?email=${encodeURIComponent(email)}&verificationToken=${verificationToken}">Verify your email</a>`,
+            html: ` <a href="http://${process.env.SERVER_HOST}:${process.env.SERVER_PORT}/verify-email?email=${encodeURIComponent(email)}&verificationToken=${verificationToken}">Verify your email</a>`,
         };
 
         await transporter.sendMail(mailOptions);

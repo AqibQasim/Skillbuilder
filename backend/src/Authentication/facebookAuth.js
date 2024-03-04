@@ -5,7 +5,7 @@ dotenv.config();
 const facebookClient = new FacebookStrategy({
     clientID: process.env.FACEBOOK_CLIENT_ID,
     clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
-    callbackURL: "http://localhost:3000/auth/facebook/callback",
+    callbackURL: `http://${process.env.SERVER_HOST}:${process.env.SERVER_PORT}/auth/facebook/callback`,
     profileFields: ['id', 'displayName', 'email'] // Specify the profile fields you want to retrieve
   },
   function(accessToken, refreshToken, profile, done) {
