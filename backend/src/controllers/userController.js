@@ -96,8 +96,11 @@ const EmailVerify = async (request, reply) => {
     const storedToken = await redis.get(email);
     if (storedToken === verificationToken) {
       await redis.del(email);
-      await createUserAfterVerification(verificationToken)
-      reply.send("Email verified successfully!");
+      let newUser = await createUserAfterVerification(verificationToken)
+      reply.code(200).send({
+        status: 'Success',
+        user: newUser
+      });
     } else {
       reply.status(400).send("Link Expire");
     }

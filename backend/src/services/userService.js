@@ -31,7 +31,9 @@ const createUserAfterVerification = async (verificationToken) => {
   }
   const hashedPassword = await bcrypt.hash(tokenData?.password, 10);
   const userData = { ...tokenData, password: hashedPassword };
-  return await createUser(userData);
+  let newUser = await createUser(userData);
+  let token = jwt.sign(newUser, process.env.JWT_SECRET);
+  return token;
 }
 
 const findAllUser = async () => {
