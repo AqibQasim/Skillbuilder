@@ -11,8 +11,8 @@ services:
         networks:
             - dev-network
         environment:
-            POSTGRES_USER: docker
-            POSTGRES_PASSWORD: docker
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
             POSTGRES_DB: postgres
             
     adminer:
@@ -30,9 +30,10 @@ services:
             - "0.0.0.0:7779:6379"
 
     rabbitmq:
-        build:
-            context: docker/rabbitmq
+        # build:
+        #     context: docker/rabbitmq
         container_name: rabbitmq
+        image: rabbitmq:latest
         hostname: rabbitmq
         ports:
             - 5672:5672

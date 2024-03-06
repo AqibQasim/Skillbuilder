@@ -8,7 +8,7 @@ const coursesRoutes = require("./routes/coursesRoutes");
 dotenv.config();
 
 const startServer = async () => {
-  const app = fastify(fastifyOptions);
+  const app = fastify(fastifyOptions)
 
   app.get("/", async (req, res) => {
     const result = {

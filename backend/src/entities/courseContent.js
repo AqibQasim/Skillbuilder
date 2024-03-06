@@ -6,7 +6,7 @@ module.exports = new EntitySchema({
   name: "course_content",
   tableName: "course_content",
   columns: {
-    content_id: {
+    id: {
       primary: true,
       type: "int",
       generated: true,

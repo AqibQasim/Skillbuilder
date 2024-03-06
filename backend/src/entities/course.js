@@ -28,6 +28,9 @@ module.exports = new EntitySchema({
     image: {
       type: "varchar",
     },
+    rating:{
+      type:"decimal",
+    },
     created_at: {
       type: "timestamp with time zone",
     },
@@ -47,7 +50,7 @@ module.exports = new EntitySchema({
   relations: {
     instructor: {
       target: "Instructor",
-      type: "many-to-one",
+      type: "many-to-one",    //It should be one to one
       cascade: true,
       joinColumn: {
         name: "instructor_id",

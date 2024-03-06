@@ -5,9 +5,9 @@ const Course = require("../entities/course");
 module.exports = new EntitySchema({
   target: "Reviews",
   name: "reviews",
-  tableName: "reviews",
+  tableName: "course_reviews",
   columns: {
-    review_id: {
+    id: {
       primary: true,
       type: "int",
       generated: true,

@@ -1,46 +1,83 @@
 const { logger } = require("../../logger");
 const {
   getAllCourses,
-  CoursesRatingService,
+  coursesRatingService,
   coursesDetailFunc,
   recentCoursesFunc,
 } = require("../services/courseService");
 
 const allCourses = async (request, reply) => {
-  logger.info("data: ", request.body);
+  logger.info("src > controller > controllerALlrCourse ", request.body);
   try {
-    const coursess = await getAllCourses();
-    reply.send(coursess);
+    const courses = await getAllCourses();
+    if (courses) {
+      reply.code(200).send({
+        courses: courses,
+        status: "Success",
+      });
+    } else {
+      reply.code(400).send({
+        courses: null,
+        status: "failed",
+        message: message,
+      });
+    }
   } catch (error) {
     reply.status(500).send(error);
   }
 };
 
 const coursesRating = async (request, reply) => {
-  logger.info("data: ", request.body);
+  logger.info("src > controller > coursesRating", request.body);
   try {
-    const coursesRatingData = await CoursesRatingService();
-    reply.send(coursesRatingData);
+    const CoursesRatingData = await coursesRatingService();
+    if (CoursesRatingData) {
+      reply.send({
+        code: 200,
+        status: "Success",
+        CoursesRatingData: CoursesRatingData,
+      });
+    } else {
+      reply.send({
+        code: 400,
+        status: "Failed",
+        CoursesRatingData: null,
+      });
+    }
   } catch (error) {
     reply.status(500).send(error);
   }
 };
 
 const courseDetails = async (request, reply) => {
-  logger.info("data: ", request.body);
+  logger.info("src > Controller > courseDetails ", request.body);
   try {
-    const coursesDetailsRecieve = await coursesDetailFunc();
-    reply.send(coursesDetailsRecieve);
+    const coursesDetailsReceive = await coursesDetailFunc();
+    console.log("ourses Detail ",coursesDetailsReceive)
+    if (coursesDetailsReceive) {
+      reply.code(200).send({
+        status: "Success",
+        coursesDetailsReceive: coursesDetailsReceive,
+      });
+    } else {
+      reply.code(400).send({
+        status: "Failed",
+        CoursesDetailsReceive: null,
+      });
+    }
   } catch (error) {
     reply.status(500).send(error);
   }
 };
 
 const recentCourses = async (request, reply) => {
-  logger.info("data: ", request.body);
+  logger.info("Src > Controller > recentCourses", request.body);
   try {
-    const recentCoursesRecieve = await recentCoursesFunc();
-    reply.send(recentCoursesRecieve);
+    const RecentCoursesReceive = await recentCoursesFunc();
+    if (RecentCoursesReceive)
+      reply.code(200).send({
+        RecentCoursesReceive: RecentCoursesReceive,
+      });
   } catch (error) {
     reply.status(500).send(error);
   }
@@ -51,4 +88,4 @@ module.exports = {
   coursesRating,
   courseDetails,
   recentCourses,
-};
+}
