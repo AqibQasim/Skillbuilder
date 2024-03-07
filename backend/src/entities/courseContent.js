@@ -1,5 +1,5 @@
 const { EntitySchema } = require("typeorm");
-const Course = require("./course");
+const Course = require("./Course");
 
 module.exports = new EntitySchema({
   target: "course_content",
@@ -24,7 +24,7 @@ module.exports = new EntitySchema({
   relations: {
     courses: {
       target: "Course",
-      type: "many-to-one",
+      type: "many-to-one", //multiple course Content and one course
       joinColumn: {
         name: "course_id",
       },

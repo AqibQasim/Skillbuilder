@@ -31,6 +31,9 @@ const coursesRating = async (request, reply) => {
   logger.info("src > controller > coursesRating", request.body);
   try {
     const CoursesRatingData = await coursesRatingService();
+
+    console.log(CoursesRatingData);
+
     if (CoursesRatingData) {
       reply.send({
         code: 200,
@@ -52,8 +55,9 @@ const coursesRating = async (request, reply) => {
 const courseDetails = async (request, reply) => {
   logger.info("src > Controller > courseDetails ", request.body);
   try {
-    const coursesDetailsReceive = await coursesDetailFunc();
-    console.log("ourses Detail ",coursesDetailsReceive)
+    const { id } = request.params;
+    const coursesDetailsReceive = await coursesDetailFunc(id);
+
     if (coursesDetailsReceive) {
       reply.code(200).send({
         status: "Success",
@@ -88,4 +92,4 @@ module.exports = {
   coursesRating,
   courseDetails,
   recentCourses,
-}
+};
