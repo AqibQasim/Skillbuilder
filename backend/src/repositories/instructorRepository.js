@@ -16,12 +16,10 @@ const readInstructorWithReviews = async (id) => {
         "instructor.id",
         "instructor.name",
         "instructor.email",
-
         "instructor.image",
         "instructor.rating",
         "instructor.bio",
         "instructor.profession",
-        // Note: Omit the password field
       ])
       .addSelect([
         "review.id",
@@ -40,28 +38,28 @@ const readInstructorWithReviews = async (id) => {
   }
 };
 
-// const readInstructorWithReviews = async (id) => {
-//   try {
-//     const instructorRepository = dataSource.getRepository("Instructor");
-
-//     const instructor = await instructorRepository
-//       .createQueryBuilder("instructor")
-//       .leftJoinAndSelect("instructor.reviews", "review")
-//       .leftJoinAndSelect("review.user", "user")
-//       .where("instructor.id = :id", { id })
-//       .getOne();
-
-//     return instructor;
-//   } catch (error) {
-//     console.error("Error reading instructor from database:", error.message);
-//     throw new Error("Error reading instructor from database");
-//   }
-// };
-
 const readInstructors = async () => {
-  const userRepository = dataSource.getRepository("Instructor");
-  const instructor = userRepository.find();
-  return instructor;
+  try {
+    const instructorRepository = dataSource.getRepository("Instructor");
+
+    const instructors = await instructorRepository
+      .createQueryBuilder("instructor")
+      .select([
+        "instructor.id",
+        "instructor.name",
+        "instructor.email",
+        "instructor.image",
+        "instructor.rating",
+        "instructor.bio",
+        "instructor.profession",
+      ])
+      .getMany();
+
+    return instructors;
+  } catch (error) {
+    console.error("Error reading instructors from database:", error.message);
+    throw new Error("Error reading instructors from database");
+  }
 };
 
 module.exports = {
