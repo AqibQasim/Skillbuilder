@@ -1,14 +1,17 @@
 const { EntitySchema } = require("typeorm");
+const Skills = require("./skills"); // Assuming "skills" is the name of the Skills entity file
 
 module.exports = new EntitySchema({
-  target: "Instructor",
-  name: "instructor",
+  name: "Instructor",
   tableName: "instructor",
   columns: {
     id: {
       primary: true,
       type: "int",
       generated: true,
+    },
+    profile: {
+      type: "varchar",
     },
     name: {
       type: "varchar",
@@ -26,4 +29,18 @@ module.exports = new EntitySchema({
       type: "varchar",
     },
   },
-});
+  relations: {
+    skills: {
+      target: "Skills",
+      type: "one-to-many",
+      cascade: true,
+      inverseSide: "instructor", 
+    },
+    reviews:{
+      target: "Reviews",
+      type: "one-to-many",
+      cascade: true,
+      inverseSide: "instructor", 
+    }
+  },
+})

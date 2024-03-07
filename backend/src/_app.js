@@ -5,6 +5,7 @@ const { fastifyOptions } = require("../fastifyOpts");
 const dotenv = require("dotenv");
 const userRoutes = require("./routes/userRoutes");
 const coursesRoutes = require("./routes/coursesRoutes");
+const instructorRoutes=require("./routes/instructorRoutes")
 dotenv.config();
 
 const startServer = async () => {
@@ -21,6 +22,7 @@ const startServer = async () => {
 
   app.register(userRoutes);
   app.register(coursesRoutes);
+  app.register(instructorRoutes)
 
   try {
     await app.listen(process.env.SERVER_PORT);

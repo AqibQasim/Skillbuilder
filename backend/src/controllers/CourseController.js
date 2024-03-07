@@ -12,8 +12,8 @@ const allCourses = async (request, reply) => {
     const courses = await getAllCourses();
     if (courses) {
       reply.code(200).send({
-        courses: courses,
         status: "Success",
+        courses: courses,
       });
     } else {
       reply.code(400).send({
@@ -23,7 +23,7 @@ const allCourses = async (request, reply) => {
       });
     }
   } catch (error) {
-    reply.status(500).send(error);
+    reply.status(500).send(error)
   }
 };
 
@@ -83,6 +83,9 @@ const recentCourses = async (request, reply) => {
   }
 };
 
+// const getAllCourses=async()=>{
+// logger.info("src > controller > getAllCourses")
+// }
 module.exports = {
   allCourses,
   coursesRating,
