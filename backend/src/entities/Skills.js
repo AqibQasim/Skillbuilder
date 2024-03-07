@@ -22,11 +22,11 @@ module.exports = new EntitySchema({
             type: "int",
         },
     },
-    relations: {
-        instructor: {
-            target: "Instructor",
-            type: "many-to-one",
-            joinColumn: { name: 'instructor_id' },
-        },
-    },
+    // relations: {
+    //     instructor: {
+    //         target: "Instructor",
+    //         type: "many-to-one",
+    //         joinColumn: { name: 'instructor_id' },
+    //     },
+    // },
 });

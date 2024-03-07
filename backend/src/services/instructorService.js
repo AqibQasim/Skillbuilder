@@ -1,40 +1,58 @@
-const { logger } = require("../../logger");
-const{newInstructor,readInstructors,readInstructor,readInstructorWithSkills}=require('../repositories/instructorRepository');
-const { fetchReviews } = require("../repositories/reviewRepository");
-const{fetchSkills}=require('../repositories/skillsRepository');
-// const {getskills}=require('../controllers/skillsController');
+const {
+  readInstructors,
+  readInstructorWithReviews,
+} = require("../repositories/instructorRepository");
 
-const getInstructorWithSkillss = async (instructorId) => {
-    try {
-      const instructor = await readInstructorWithSkills(instructorId);
-      const skills = await fetchSkills(instructorId);
-      logger.info('skillllls value', skills);
-      const reviews =await fetchReviews(instructorId);
-    //   const reviews =['sample','data','for','review'];
+const getInstructorWithReviewsAndUsers = async (instructorId) => {
+  try {
+    // Fetching the instructor details along with reviews
+    const instructor = await readInstructorWithReviews(instructorId);
+    console.log("Service Data", instructor);
+    return instructor;
 
-      logger.info('review value', reviews);
-      logger.info("Skills ", skills);
-    //   logger.info("reviews ",reviews);
-      return { instructor, skills, reviews };
-    } catch (error) {
-        // logger.info(error);
-        console.log(error)
-      throw new Error('Error fetching instructor with skills and review');
-    }
-  };
+    // if (instructor) {
+    //   // Removing password from instructor
+    //   const { password: instructorPassword, ...instructorWithoutPassword } =
+    //     instructor;
 
-const createInstructor= async(data)=>{
-    return await newInstructor(data);
+    //   // Removing password from users in reviews
+    //   const reviewsWithUsersWithoutPassword =
+    //     instructorWithoutPassword.reviews.map((review) => {
+    //       const {
+    //         user: { password: userPassword, ...userWithoutPassword },
+    //         ...reviewWithoutUserPassword
+    //       } = review;
+    //       return { ...reviewWithoutUserPassword, user: userWithoutPassword };
+    //     });
+
+    //   // Returning instructor object with reviews and users without passwords
+    //   return {
+    //     ...instructorWithoutPassword,
+    //     reviews: reviewsWithUsersWithoutPassword,
+    //   };
+    // } else {
+    //   throw new Error("Instructor not found");
+    // }
+  } catch (error) {
+    console.error(error);
+    throw new Error("Error fetching instructor with reviews and users");
+  }
 };
 
+const ReadInstructors = async () => {
+  try {
+    // Fetch instructors from the repository
+    const instructors = await readInstructors();
 
-const ReadInstructor= async(id)=>{
-    logger.info(`id value at services ${id}`);
-    return await readInstructor(id);
+    // Remove password from each instructor object
+    const instructorsWithoutPassword = instructors.map(
+      ({ password, ...instructor }) => instructor
+    );
+
+    return instructorsWithoutPassword;
+  } catch (error) {
+    throw new Error("Error reading instructors");
+  }
 };
 
-const ReadInstructors= async()=>{
-    return await readInstructors();
-};
-
-module.exports={createInstructor,ReadInstructors,ReadInstructor,getInstructorWithSkillss}
+module.exports = { ReadInstructors, getInstructorWithReviewsAndUsers };

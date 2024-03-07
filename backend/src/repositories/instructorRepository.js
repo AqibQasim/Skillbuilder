@@ -1,49 +1,70 @@
 const { logger } = require("../../logger");
+const { getConnection } = require("typeorm");
+const { Instructor } = require("../entities/instructorEntity");
 const dataSource = require("../../Infrastructure/postgres");
 
-
-
-const readInstructorWithSkills = async (id) => {
+const readInstructorWithReviews = async (id) => {
   try {
     const instructorRepository = dataSource.getRepository("Instructor");
-    console.log("UserRepo",instructorRepository)
-    // logger.info('instructooooooor');
-    const instructor = await instructorRepository.find({where:{id:id}}, { relations: ["skills","review"] });
-    console.log("Instructor",instructor);
-    // logger.info('instructooooooor',instructor);
+
+    const instructor = await instructorRepository
+      .createQueryBuilder("instructor")
+      .leftJoinAndSelect("instructor.reviews", "review")
+      .leftJoinAndSelect("review.user", "user")
+      .where("instructor.id = :id", { id })
+      .select([
+        "instructor.id",
+        "instructor.name",
+        "instructor.email",
+
+        "instructor.image",
+        "instructor.rating",
+        "instructor.bio",
+        "instructor.profession",
+        // Note: Omit the password field
+      ])
+      .addSelect([
+        "review.id",
+        "review.title",
+        "review.comment",
+        "review.rating",
+        "review.date",
+      ])
+      .addSelect(["user.id", "user.name", "user.email"])
+      .getOne();
+
     return instructor;
   } catch (error) {
-    throw new Error('Error reading instructor from database');
+    console.error("Error reading instructor from database:", error.message);
+    throw new Error("Error reading instructor from database");
   }
 };
 
+// const readInstructorWithReviews = async (id) => {
+//   try {
+//     const instructorRepository = dataSource.getRepository("Instructor");
 
+//     const instructor = await instructorRepository
+//       .createQueryBuilder("instructor")
+//       .leftJoinAndSelect("instructor.reviews", "review")
+//       .leftJoinAndSelect("review.user", "user")
+//       .where("instructor.id = :id", { id })
+//       .getOne();
 
-const newInstructor = async (data) => {
-  
+//     return instructor;
+//   } catch (error) {
+//     console.error("Error reading instructor from database:", error.message);
+//     throw new Error("Error reading instructor from database");
+//   }
+// };
+
+const readInstructors = async () => {
   const userRepository = dataSource.getRepository("Instructor");
-  const instructor = userRepository.create(data);
-  await userRepository.save(instructor);
+  const instructor = userRepository.find();
   return instructor;
 };
 
-const readInstructors = async () => {
-    const userRepository = dataSource.getRepository("Instructor");
-    const instructor = userRepository.find();
-    return instructor;
-  };
-
-  const readInstructor = async (id) => {
-    const userRepository = dataSource.getRepository("Instructor");
-    logger.info(`id value at repo:  ${id}`);
-    const instructor = userRepository.findOne({ where :{id: id} });
-    return instructor;
-  };
-
 module.exports = {
-  newInstructor,
   readInstructors,
-  readInstructor,
-  readInstructorWithSkills,
-  
+  readInstructorWithReviews,
 };

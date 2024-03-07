@@ -1,11 +1,11 @@
-const { fetchInstructorWithSkills,postInstructor,getInstructors,getInstructor } = require("../controllers/instructorController");
-// const { getInstructorWithSkills } = require("../repositories/instructorRepository");
+const {
+  fetchInstructorWithRevieww,
+  getInstructors,
+} = require("../controllers/instructorController");
 
 const instructorRoutes = async (fastify, options) => {
-//   fastify.post('/user', postInstructor);
-  fastify.get('/user', getInstructors);
-  fastify.get('/users/:id', fetchInstructorWithSkills);
-  
+  fastify.get("/allInstructors", getInstructors);
+  fastify.get("/instructorsWithReview/:id", fetchInstructorWithRevieww);
 };
 
 module.exports = instructorRoutes;
