@@ -64,5 +64,11 @@ module.exports = new EntitySchema({
       cascade: true,
       inverseSide: "course",
     },
+    course_content: {
+      target: "course_content",
+      type: "one-to-many",
+      cascade: true,
+      inverseSide: "course",
+    },
   },
 });

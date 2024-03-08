@@ -35,8 +35,10 @@ const fetchCourseWithDetailsWithId = async (id) => {
     const coursesWithDetails = await courseRepository
       .createQueryBuilder("course")
       .where("course.id = :id", { id })
+      .leftJoinAndSelect("course.course_content", "course_content")
       .leftJoinAndSelect("course.instructor", "instructor")
       .leftJoinAndSelect("course.reviews", "reviews")
+      .leftJoinAndSelect("reviews.user", "user")
       .select([
         "course.id",
         "course.amount",
@@ -50,6 +52,10 @@ const fetchCourseWithDetailsWithId = async (id) => {
         "course.updated_at",
         "course.created_by",
         "course.updated_by",
+        "course_content.id",
+        "course_content.content_type",
+        "course_content.content",
+        "course_content.order",
         "instructor.id",
         "instructor.name",
         "instructor.email",
@@ -59,9 +65,14 @@ const fetchCourseWithDetailsWithId = async (id) => {
         "reviews.rating",
         "reviews.comment",
         "reviews.date",
+        "user.id",
+        "user.name",
+        "user.email",
+        "user.active",
       ])
       .getOne();
 
+    console.log(coursesWithDetails);
     return coursesWithDetails;
   } catch (error) {
     return error;
