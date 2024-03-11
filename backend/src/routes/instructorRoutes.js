@@ -1,6 +1,6 @@
 const {
-  fetchInstructorWithRevieww,
   getInstructors,
+  fetchInstructorWithRevieww,
 } = require("../controllers/instructorController");
 
 const instructorRoutes = async (fastify, options) => {

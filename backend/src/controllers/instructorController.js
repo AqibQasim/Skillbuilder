@@ -4,8 +4,6 @@ const {
 } = require("../services/instructorService");
 const { logger } = require("../../logger");
 
-// const { getInstructorWithSkillss } = require("../services/instructorService");
-
 const fetchInstructorWithRevieww = async (req, reply) => {
   try {
     const id = req.params.id;
