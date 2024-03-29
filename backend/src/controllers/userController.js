@@ -1,32 +1,60 @@
-const { registerUser, findAllUser, UserLogin, googleClient, ContactUser, createUserAfterVerification, } = require("../services/userService");
 const { logger } = require("../../logger");
-const Redis = require("ioredis");
-const redis = new Redis();
 const { ValidateUser, loginValidation } = require("../Schema/userSchema");
-const ValidateContactUs = require("../Schema/contectUsSchema");
-const { GoogleClient } = require("../Authentication/googleAuth");
+const ValidateContactUs = require("../Schema/contactUsSchema");
+const { redisClient } = require("../../Infrastructure/redis");
+const {
+  emailVerificationForRegister,
+  findAllUser,
+  UserLogin,
+  ContactUser,
+  createUserAfterVerification,
+} = require("../services/userService");
 
-
-const postUser = async (request, reply) => {
-  logger.info(['src > controllers > userController > ', request.body]);
+const createStudent = async (request, reply) => {
+  logger.info(["src > controllers > userController > ", request.body]);
   try {
-    const { error } = ValidateUser.validate(request.body);
-    if (error) {
-      return reply.code(400).send({ error: error.details[0].message });
+    if (request.body) {
+      const { error } = ValidateUser.validate(request.body);
+      if (error) {
+        return reply.code(400).send({
+          status: false,
+          message: error.details[0].message,
+        });
+      }
+      await emailVerificationForRegister(request.body);
+      reply.code(201).send({
+        staus: true,
+        message: "Message sent to given email for email verification",
+      });
+    } else {
+      reply.code(400).send({
+        status: false,
+        message: "Cannot request without body",
+      });
     }
-
-    await registerUser(request.body);
-
-    reply.code(201).send({
-      message: 'Message sent to given email for email verification',
-    });
-
   } catch (error) {
-    console.log(error);
     logger.error(["Error registering user:", error.message]);
-    reply
-      .code(500)
-      .send({ error: error.message });
+    reply.code(500).send({
+      staus: false,
+      message: error.message,
+    });
+  }
+};
+
+const EmailVerify = async (request, reply) => {
+  try {
+    const { email, verificationToken } = request.query;
+    const storedToken = await redisClient.get(email);
+    if (storedToken === verificationToken) {
+      await redisClient.del(email);
+      let newUser = await createUserAfterVerification(verificationToken);
+      return reply.redirect(process.env.LOGINREDIRECTPAGE);
+    } else {
+      reply.status(400).send("Link Expire");
+    }
+  } catch (error) {
+    logger.error(["Error verifying email:", error.message]);
+    reply.status(500).send(error.message);
   }
 };
 
@@ -34,29 +62,48 @@ const getAllUsers = async (request, reply) => {
   logger.info("Find User: ");
   try {
     const users = await findAllUser();
-    reply.status(200).send({ users });
+    reply.code(200).send({
+      status: true,
+      message: "success",
+      data: users,
+    });
   } catch (error) {
-    reply.status(500).send({ error: error.message });
+    reply.code(500).send({
+      status: false,
+      message: error.message,
+    });
   }
 };
 
 const login = async (request, reply) => {
   logger.info("Login", request.body);
   try {
-    let payload = {
-      email: request.body.email,
-      password: request.body.password
+    if (request.body) {
+      let payload = {
+        email: request.body?.email,
+        password: request.body?.password,
+      };
+      const { error } = loginValidation.validate(payload);
+      if (error) {
+        return reply.code(400).send({
+          status: false,
+          message: error.details[0].message,
+        });
+      };
+      const user = await UserLogin(payload);
+      reply.code(200).send({
+        status: true,
+        message: 'success',
+        data: user,
+      });
+    }else {
+      reply.code(500).send({
+        staus: false,
+        message: "can't request without body",
+      });
     }
-    const { error } = loginValidation.validate(payload);
-    if (error) {
-      return reply.code(400).send({ error: error.details[0].message });
-    }
-    const user = await UserLogin(payload);
-    reply.code(200).send(user);
-
-  }
-  catch (error) {
-    logger.error("Error during login:", error);
+  } catch (error) {
+    logger.error(["Error during login:", error.message]);
     reply.status(500).send({
       code: 500,
       status: "Internal Server Error",
@@ -65,46 +112,21 @@ const login = async (request, reply) => {
   }
 };
 
-const GoogleLogin = async (request, reply) => {
-  const Url = GoogleClient.generateAuthUrl({
-    access_type: "offline",
-    scope: ["profile", "email"],
-  });
-  console.log("Url ", Url);
-  reply.redirect(Url)
-};
-
 const GoggleLoginCallBAck = async (request, reply) => {
   try {
+    console.log("request body: >>> ", request.body);
     const code = request.query.code;
-    const userInfo = await googleClient(code);
-    if (userInfo) {
-      reply.send(userInfo);
-    }
+    console.log("code: ", code);
+    reply.redirect(process.env.HOME_PAGE_REDIRECT);
+    // reply.code(200).send({
+    //   status: true,
+    //   message: 'User created successfully'
+    // })
   } catch (error) {
-    reply
-      .status(500)
-      .send({ error: "An error occurred while fetching user information." });
-  }
-};
-
-const EmailVerify = async (request, reply) => {
-  try {
-    const { email, verificationToken } = request.query;
-    const storedToken = await redis.get(email);
-    if (storedToken === verificationToken) {
-      await redis.del(email);
-      let newUser = await createUserAfterVerification(verificationToken)
-      reply.code(200).send({
-        status: 'Success',
-        user: newUser
-      });
-    } else {
-      reply.status(400).send("Link Expire");
-    }
-  } catch (error) {
-    logger.error(["Error verifying email:", error.message]);
-    reply.status(500).send(error.message);
+    reply.code(500).send({
+      status: false,
+      error: error.message,
+    });
   }
 };
 
@@ -134,10 +156,9 @@ const ContactUS = async (request, reply) => {
 };
 
 module.exports = {
-  postUser,
+  createStudent,
   getAllUsers,
   login,
-  GoogleLogin,
   GoggleLoginCallBAck,
   EmailVerify,
   ContactUS,

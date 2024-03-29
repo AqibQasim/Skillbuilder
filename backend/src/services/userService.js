@@ -5,11 +5,10 @@ const jwt = require("jsonwebtoken");
 const { logger } = require("../../logger");
 const { redisClient } = require("../../Infrastructure/redis");
 const { sendVerificationEmail, verifyPassword } = require("../mediators/userMediator");
-const { GoogleClient } = require("../Authentication/googleAuth");
 
 
-const registerUser = async (userInfo) => {
-  const { email, password } = userInfo;
+const emailVerificationForRegister = async (userInfo) => {
+  const { email } = userInfo;
   const existingUser = await findUser({ where: { email } });
   if (existingUser) {
     throw Error("User Already Exists With This Email");
@@ -37,7 +36,13 @@ const createUserAfterVerification = async (verificationToken) => {
 }
 
 const findAllUser = async () => {
-  return await readAllUser();
+  try {
+    const data = await readAllUser();
+    return data;
+  } catch (error) {
+    logger.error(error.message)
+    throw Error(error) 
+  }
 };
 
 const UserLogin = async (loginData) => {
@@ -58,50 +63,24 @@ const UserLogin = async (loginData) => {
 
   } catch (error) {
     logger.error(error.message)
-    return error;
+    throw Error(error);
   }
   // return await LoginUser(loginData);
 };
 
-const googleClient = async (code) => {
+const createGoogleUser = async (userInfo) => {
   try {
-    // const userRepository = dataSource.getRepository("User");
-    const { tokens } = await GoogleClient.getToken(code);
-    console.log("Token ", tokens);
-
-    const ticket = await GoogleClient.verifyIdToken({
-      idToken: tokens.id_token,
-      audience:
-        "310731438548-cfvtaihk2d1pnbkhta66hffn525l96vr.apps.googleusercontent.com",
-    });
-    console.log("Ticket ", ticket);
-    const payload = ticket.getPayload();
-    console.log("Payload ", payload);
-
-    const { name, email, email_verified, at_hash } = payload;
-    const existingUser = await findUser({
-      where: { email: email },
-    });
-
-    if (existingUser) {
-      return `Hello ${name} Wellcome TO Tixsee`;
+    const { email } = userInfo;
+    const existingUser = await findUser({ where: { email } });
+    if (!existingUser) {
+      let newUser = await createUser(userInfo);
+      // let token = jwt.sign(newUser, process.env.JWT_SECRET);
+      // return token; 
     }
-
-    const newUser = await createUser({
-      name: name,
-      email: email,
-      password: at_hash,
-      source: 'google'
-    });
-    return newUser;
-
   } catch (error) {
-    console.error("Error in AfterGoogleLoginRedirect:", error.message);
-    throw new Error("An error occurred while processing Google login.");
+    logger.error(['src > services > userService > 21', error.message])
   }
-};
-
-
+}
 
 const ContactUser = async (userInfo) => {
   try {
@@ -147,10 +126,10 @@ const ContactUser = async (userInfo) => {
 };
 
 module.exports = {
-  registerUser,
+  createGoogleUser,
+  emailVerificationForRegister,
   createUserAfterVerification,
   findAllUser,
   UserLogin,
-  googleClient,
   ContactUser,
 };

@@ -3,6 +3,18 @@ const dataSource = require("../../Infrastructure/postgres");
 
 const userRepository = dataSource.getRepository("User");
 
+const createUser = async (userInfo) => {
+  logger.info(['src > repository > userRepository > ', userInfo]);
+  try {
+    const userCreate = userRepository.create(userInfo);
+    const result = await userRepository.save(userCreate);
+    logger.info(["user created", result])
+    return result;
+  } catch (error) {
+    logger.error("Error while creating user:", error);
+    throw error;
+  }
+};
 
 const readAllUser = async () => {
   logger.info(['src > repository > userRepository > findAllUser' ]);
@@ -14,19 +26,6 @@ const readAllUser = async () => {
     throw error;
   }
 }
-
-const createUser = async (userInfo) => {
-  logger.info(['src > repository > userRepository > ', userInfo]);
-  try {
-    const userCreate = userRepository.create(userInfo);
-    const result = await userRepository.save(userCreate);
-    logger.info(["user created", result])
-    return result;
-  } catch (error) {
-    console.error("Error while creating user:", error);
-    throw error;
-  }
-};
 
 const findUser = async (filter) => {
   logger.info(['src > repository > userRepository > findUser' ]);
@@ -40,7 +39,6 @@ const findUser = async (filter) => {
     throw error;
   }
 };
-
 
 const UserContact = async (userInfo) => {
   const userRepository = dataSource.getRepository("Contact_us");
