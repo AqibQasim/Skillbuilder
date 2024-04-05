@@ -3,20 +3,26 @@ const { logger } = require("../../logger");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const cookie = require("cookie");
+const randomstring = require('randomstring');
+const { redisClient } = require("../../Infrastructure/redis");
+
+const transporter = nodemailer.createTransport({
+  service: "Gmail",
+  auth: {
+    user: process.env.MAIL_USER,
+    pass: process.env.MAIL_PASS,
+  },
+});
+
+const generateOTP = async () => {
+    return randomstring.generate({
+        length: 6,
+        charset: 'numeric'
+    });
+}
 
 const sendVerificationEmail = async (email, verificationToken) => {
   try {
-    if (err) {
-      console.log(err);
-    }
-    const transporter = nodemailer.createTransport({
-      service: "Gmail",
-      auth: {
-        user: process.env.MAIL_USER,
-        pass: process.env.MAIL_PASS,
-      },
-    });
-
     const mailOptions = {
       from: "fa21bscs0017@maju.edu.pk",
       to: email,
@@ -32,7 +38,7 @@ const sendVerificationEmail = async (email, verificationToken) => {
 
     logger.info("Verification email sent successfully.");
   } catch (error) {
-    console.error("Error sending verification email:", error);
+    logger.error("Error sending verification email:", error);
     throw error;
   }
 };
@@ -63,4 +69,28 @@ const verifyPassword = async (password, existingUser) => {
   return { token, option };
 };
 
-module.exports = { sendVerificationEmail, verifyPassword };
+const sendOTPMail = async (email) => {
+  try {
+    const OTP = await generateOTP();
+    console.log("generated OTPPPP >>", OTP);
+    const mailOptions = {
+      from: "captain.shahab2002@gmail.com",
+      to: email,
+      subject: "Your OTP",
+      html: `<h1> Please enter the below mentioned OTP for reset password </h1> <br> <h2> ${OTP} </h2>`,
+    };
+
+    await transporter.sendMail(mailOptions);
+    redisClient.set(`otp-${email}`, OTP)
+
+  } catch (error) {
+      logger.error(["Error in userMediator > sendOTPMail > ", error.message ])
+      throw Error(error.message)
+  }
+};
+
+module.exports = { 
+    sendVerificationEmail, 
+    verifyPassword,
+    sendOTPMail
+};

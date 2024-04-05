@@ -1,5 +1,5 @@
 const { logger } = require("../../logger");
-const { ValidateUser, loginValidation } = require("../Schema/userSchema");
+const { ValidateUser, loginValidation, validateEmailAndPassword, updateProfileValidation } = require("../Schema/userSchema");
 const ValidateContactUs = require("../Schema/contactUsSchema");
 const { redisClient } = require("../../Infrastructure/redis");
 const {
@@ -8,6 +8,10 @@ const {
   UserLogin,
   ContactUser,
   createUserAfterVerification,
+  findUserByEmail,
+  sendMailToUser,
+  passwordChange,
+  profileUpdateService
 } = require("../services/userService");
 
 const createStudent = async (request, reply) => {
@@ -89,14 +93,14 @@ const login = async (request, reply) => {
           status: false,
           message: error.details[0].message,
         });
-      };
+      }
       const user = await UserLogin(payload);
       reply.code(200).send({
         status: true,
-        message: 'success',
+        message: "success",
         data: user,
       });
-    }else {
+    } else {
       reply.code(500).send({
         staus: false,
         message: "can't request without body",
@@ -130,6 +134,110 @@ const GoggleLoginCallBAck = async (request, reply) => {
   }
 };
 
+const passwordResetHandler = async (request, reply) => {
+  try {
+    const { email } = request.query;
+    const user = await findUserByEmail(email);
+    if (!user) {
+      return reply.code(404).send({
+        status: false,
+        message: "User not found",
+      });
+    }
+
+    await sendMailToUser(user?.email);
+    reply.code(200).send({
+      status: true,
+      message: "OTP sent to the given email",
+    });
+  } catch (error) {
+    logger.error([
+      "error in userController > passowrdResetHandler",
+      error.message,
+    ]);
+    reply.code(500).send({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+
+const otpVerification = async (request, reply) => {
+  try {
+    const { otp, email } = request.query;
+    const getOtp = await redisClient.get(`otp-${email}`)
+    console.log("getOPT : ", getOtp);
+    if(otp == getOtp){
+      reply.code(200).send({
+        status: true,
+        message: "OTP verification successful"
+      });
+      redisClient.del(`otp-${email}`)
+    }else {
+      reply.code(200).send({
+        status: false,
+        message: "Invalid OTP"
+      });
+    }
+
+  } catch (error) {
+    logger.error(["error in userController > otpVerificatio", error.message])
+    reply.code(500).send({
+      status: false,
+      message: error.message
+    })
+  }
+};
+
+const changePassword = async (request, reply) => {
+  try {
+    const userData = request.body;
+    const {error} = validateEmailAndPassword.validate(userData);
+    if (error) {
+      return reply.code(403).send({
+        status: false,
+        message: error.details[0].message
+      })
+    };
+    const updatePassword = await passwordChange(userData);
+    reply.code(200).send({
+      status: true,
+      message: "update password sucessfully"
+    })
+    // logger.info([ "update password in userController > ", updatePassword ]);
+  } catch (error) {
+    reply.code(500).send({
+      status: false,
+      message: error.message
+    })
+  }
+}
+
+const profileUpdateHandler = async (request, reply) => {
+  try {
+    const requestedData = request?.body;
+    const {error} = updateProfileValidation.validate(requestedData);
+    if (error) {
+      return reply.code(403).send({
+        status: false,
+        message: error.details[0].message
+      })
+    };
+    const result = await profileUpdateService(requestedData);
+    reply.code(200).send({
+      status: true,
+      message: "User updated successully",
+      data: result
+    })
+
+  } catch (err) {
+    reply.code(500).send({
+      status: false,
+      message: err.message
+    })
+  }
+}
+
 const ContactUS = async (request, reply) => {
   const userInfo = request.body;
 
@@ -161,5 +269,9 @@ module.exports = {
   login,
   GoggleLoginCallBAck,
   EmailVerify,
+  passwordResetHandler,
+  otpVerification,
+  changePassword,
+  profileUpdateHandler,
   ContactUS,
 };

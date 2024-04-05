@@ -23,6 +23,22 @@ module.exports = new EntitySchema({
       type: 'varchar',
       nullable: true
     },
+    location: {
+      type: 'varchar',
+      nullable: true
+    },
+    facebook_profile: {
+      type: 'varchar',
+      nullable: true
+    },
+    twitter_profile: {
+      type: 'varchar',
+      nullable: true
+    },
+    linkedin_profile: {
+      type: 'varchar',
+      nullable: true
+    },
     role: {
       type: 'enum',
       enum: ["admin", "user" ],

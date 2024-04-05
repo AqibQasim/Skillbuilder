@@ -1,5 +1,5 @@
 const { default: passport } = require("@fastify/passport");
-const { createStudent, getAllUsers, login, GoggleLoginCallBAck, EmailVerify, ContactUS} = require("../controllers/userController");
+const { createStudent, getAllUsers, login, GoggleLoginCallBAck, EmailVerify, ContactUS, passwordResetHandler, otpVerification, changePassword, profileUpdateHandler} = require("../controllers/userController");
 
 const userRoutes = async (fastify, options) => {
 
@@ -17,6 +17,14 @@ const userRoutes = async (fastify, options) => {
   fastify.get("/auth/google", passport.authenticate('google', {scope: ['profile', "email"]}));
   fastify.get("/auth/google/callback", {preValidation: passport.authenticate('google',{scope:['profile']})}, GoggleLoginCallBAck);
 
+  //forgot password
+  fastify.get("/password-reset", passwordResetHandler);
+  fastify.get("/otp-verification", otpVerification);
+  fastify.post("/change-password", changePassword)
+
+  //update profile
+  fastify.post("/update-profile", profileUpdateHandler)
+  
   //Contact Us
   fastify.post("/contact-us", ContactUS);
 };
