@@ -160,30 +160,29 @@ const ContactUser = async (userInfo) => {
       const transporter = nodemailer.createTransport({
         service: "Gmail",
         auth: {
-          user: "fa21bscs0017@maju.edu.pk",
-          pass: "ncld ucwk kfac hzvh",
+          user: process.env.MAIL_USER,
+          pass: process.env.MAIL_PASS,
         },
       });
 
       const UsermailOptions = {
-        from: "fa21bscs0017@maju.edu.pk",
-        to: `${userInfo.email} }  `,
+        from: process.env.MAIL_USER,
+        to: `${userInfo.email}`,
         subject: `Message From SkillBuilder`,
-        html: `<p>Hello ${userInfo.FirstName} ${userInfo.LastName},</p>
+        html: `<h3>Hello ${userInfo.firstName} ${userInfo.lastName},</h3>
                  <p>Thank you for contacting us. We have received your email. Our team will review it shortly and contact you as soon as possible.</p>`,
       };
       const AdminmailOptions = {
         from: `${userInfo.email}`,
-        to: `${"rajaasgharali009@gmail.com"} }  `,
-        subject: `${userInfo.Subject}`,
-        html: `<p>New Message From${userInfo.FirstName} ${userInfo.LastName},</p>
-               <p>${userInfo.Text}</p>`,
+        to: `${process.env.MAIL_USER} }  `,
+        subject: `${userInfo.subject}`,
+        html: `<h3>New Message From ${userInfo.firstName} ${userInfo.lastName},</h3>
+               <p>${userInfo.text}</p>`,
       };
-      console.log("AdminMail", AdminmailOptions);
 
       await transporter.sendMail(UsermailOptions);
       await transporter.sendMail(AdminmailOptions);
-      console.log(
+      logger.info(
         `Email Successfully Send t0 ${
           userInfo.email
         } ${"rajaasgharali009@gmail.com"}`
@@ -191,7 +190,7 @@ const ContactUser = async (userInfo) => {
       return ContactUs;
     }
   } catch (error) {
-    console.error("Error sending verification email:", error);
+    logger.error("Error sending verification email:", error);
     throw error;
   }
 };

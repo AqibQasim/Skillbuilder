@@ -10,25 +10,25 @@ module.exports = new EntitySchema({
       type: "int",
       generated: true,
     },
-    FirstName: {
+    firstName: {
       type: "varchar",
     },
-    LastName: {
+    lastName: {
       type: "varchar",
     },
     email: {
       type: "varchar",
     },
-    Phone: {
+    phone: {
       type: "varchar",
     },
-    Subject: {
+    subject: {
       type: "varchar",
     },
-    Text: {
+    text: {
       type: "varchar",
     },
-    Here_From: {
+    source: {
       type: "varchar",
     },
   },
