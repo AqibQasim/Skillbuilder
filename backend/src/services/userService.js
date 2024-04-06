@@ -183,9 +183,7 @@ const ContactUser = async (userInfo) => {
       await transporter.sendMail(UsermailOptions);
       await transporter.sendMail(AdminmailOptions);
       logger.info(
-        `Email Successfully Send t0 ${
-          userInfo.email
-        } ${"rajaasgharali009@gmail.com"}`
+        `Email Successfully Send to ${userInfo.email}`
       );
       return ContactUs;
     }
