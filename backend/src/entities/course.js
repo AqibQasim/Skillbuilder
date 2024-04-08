@@ -28,8 +28,10 @@ module.exports = new EntitySchema({
     image: {
       type: "varchar",
     },
-    rating:{
-      type:"decimal",
+    rating: {
+      type: "decimal",
+      precision: 3,
+      scale: 1,
     },
     created_at: {
       type: "timestamp with time zone",
@@ -50,14 +52,20 @@ module.exports = new EntitySchema({
   relations: {
     instructor: {
       target: "Instructor",
-      type: "many-to-one",    //It should be one to one
+      type: "many-to-one", //multiple courses one instructor
       cascade: true,
       joinColumn: {
         name: "instructor_id",
       },
     },
     reviews: {
-      target: "Reviews",
+      target: "courseReviews",
+      type: "one-to-many", //one courses multiple reviews
+      cascade: true,
+      inverseSide: "course",
+    },
+    course_content: {
+      target: "course_content",
       type: "one-to-many",
       cascade: true,
       inverseSide: "course",

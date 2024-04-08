@@ -3,5 +3,5 @@ node_modules/
 # npm-debug.log
 .env
 # src/env/local.json
-# db/
+db/
 package-lock.json

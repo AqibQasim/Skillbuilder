@@ -3,8 +3,8 @@ const User = require("../entities/userEntity");
 const Course = require("../entities/course");
 
 module.exports = new EntitySchema({
-  target: "Reviews",
-  name: "reviews",
+  target: "courseReviews",
+  name: "courseReviews",
   tableName: "course_reviews",
   columns: {
     id: {
@@ -13,7 +13,7 @@ module.exports = new EntitySchema({
       generated: true,
     },
     rating: {
-      type: "decimal", // Use "decimal" for decimal numbers
+      type: "decimal",
       precision: 3,
       scale: 1,
     },
@@ -21,20 +21,20 @@ module.exports = new EntitySchema({
       type: "varchar",
     },
     date: {
-      type: "timestamp",
+      type: "timestamp with time zone",
     },
   },
   relations: {
     user: {
       target: "User",
-      type: "many-to-one",
+      type: "many-to-one", //multiple course reviews and one user
       joinColumn: {
         name: "user_id",
       },
     },
     course: {
       target: "Course",
-      type: "many-to-one",
+      type: "many-to-one", //multiple course reviews and one course
       joinColumn: {
         name: "course_id",
       },

@@ -6,10 +6,10 @@ const {
 } = require("../controllers/CourseController");
 
 const coursesRoutes = async (fastify, options) => {
-  fastify.get("/all-courses",    allCourses);
+  fastify.get("/all-courses", allCourses);
   fastify.get("/courses-rating", coursesRating);
   fastify.get("/recent-courses", recentCourses);
-  fastify.get("/courses-detail", courseDetails);
+  fastify.get("/course-details/:id", courseDetails);
 
 
 };

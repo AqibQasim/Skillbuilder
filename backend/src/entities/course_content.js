@@ -22,11 +22,12 @@ module.exports = new EntitySchema({
     },
   },
   relations: {
-    courses: {
+    course: {
       target: "Course",
-      type: "many-to-one",
+      type: "many-to-one", // many course contents belong to one course
       joinColumn: {
         name: "course_id",
+        referencedColumnName: "id", // referencing the id column of Course
       },
     },
   },
