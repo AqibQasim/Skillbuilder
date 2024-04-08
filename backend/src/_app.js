@@ -10,6 +10,8 @@ const dataSource = require("../Infrastructure/postgres");
 const { logger } = require("../logger");
 const { fastifyOptions } = require("../fastifyOpts");
 const userRoutes = require("./routes/userRoutes");
+const coursesRoutes = require("./routes/coursesRoutes");
+const instructorRoutes=require("./routes/instructorRoutes")
 require('./Authentication/googleAuth');  
 
 
@@ -42,6 +44,8 @@ const startServer = async () => {
   });
 
   app.register(userRoutes);
+  app.register(coursesRoutes);
+  app.register(instructorRoutes)
 
   try {
 

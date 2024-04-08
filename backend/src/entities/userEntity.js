@@ -50,4 +50,4 @@ module.exports = new EntitySchema({
       default: "app"
     }
   },
-})
+});
