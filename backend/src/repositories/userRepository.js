@@ -1,6 +1,5 @@
 const { logger } = require("../../logger");
 const dataSource = require("../../Infrastructure/postgres");
-
 const userRepository = dataSource.getRepository("User");
 
 const createUser = async (userInfo) => {
@@ -72,18 +71,17 @@ const updateUserById = async (id, payload) => {
       },
     });
     if (!user) {
-      throw new Error("User not found");
+      throw Error("User not found");
     }
 
     let update = await userRepository.merge(user, payload);
     let updatedUser = await userRepository.save(update);
     return updatedUser;
-    
   } catch (error) {
     console.error("Error updating user:", error.message);
     throw error;
   }
-}
+};
 
 const UserContact = async (userInfo) => {
   const userRepository = dataSource.getRepository("Contact_us");

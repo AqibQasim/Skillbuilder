@@ -29,6 +29,7 @@ module.exports = new EntitySchema({
         name: "course_id",
         referencedColumnName: "id", // referencing the id column of Course
       },
+
     },
   },
 });

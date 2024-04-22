@@ -44,7 +44,9 @@ const createUserAfterVerification = async (verificationToken) => {
     throw Error("User already exist with this email");
   }
   const hashedPassword = await bcrypt.hash(tokenData?.password, 10);
-  const userData = { ...tokenData, password: hashedPassword };
+  const currentTime = new Date();
+  console.log("currentTime: ", currentTime);
+  const userData = { ...tokenData, password: hashedPassword, created_at: currentTime};
   let newUser = await createUser(userData);
   let token = jwt.sign(newUser, process.env.JWT_SECRET);
   return token;
@@ -111,6 +113,24 @@ const findUserByEmail = async (email) => {
   } catch (error) {
     logger.error([
       "error in fetching user by email in userService",
+      error.message,
+    ]);
+    throw Error(error?.message);
+  }
+};
+
+const findUserById = async (id) => {
+  try {
+    const filter = {
+      where: {
+        id: id,
+      },
+    };
+    const result = await findUser(filter);
+    return result;
+  } catch (error) {
+    logger.error([
+      "error in fetching user by id in userService",
       error.message,
     ]);
     throw Error(error?.message);
@@ -200,6 +220,7 @@ module.exports = {
   findAllUser,
   UserLogin,
   findUserByEmail,
+  findUserById,
   sendMailToUser,
   passwordChange,
   profileUpdateService,

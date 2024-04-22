@@ -5,6 +5,7 @@ const { default: fastifySecureSession } = require('@fastify/secure-session')
 const fs = require('fs');
 const path = require("path");
 const GoogleStrategy = require("passport-google-oauth2").Strategy;
+const multipart = require('@fastify/multipart');
 const fastifyPassport = require("@fastify/passport");
 const dataSource = require("../Infrastructure/postgres");
 const { logger } = require("../logger");
@@ -22,7 +23,6 @@ const startServer = async () => {
   app.register(require("@fastify/cors"), {
     origin: "http://localhost:3000:"
   });
-
   app.register(fastifySecureSession, {
     cookieName: 'key',
     key: fs.readFileSync(path.join(__dirname, 'secret-key')),
@@ -30,9 +30,11 @@ const startServer = async () => {
       path: '/'
     }
   });
-
   app.register(fastifyPassport.default.initialize())
   app.register(fastifyPassport.default.secureSession())
+  app.register(require('fastify-multipart'), {
+    addToBody: true, 
+  });
 
   app.get("/", async (req, res) => {
     const result = {
@@ -43,16 +45,18 @@ const startServer = async () => {
     res.send(result);
   });
 
+  
   app.register(userRoutes);
   app.register(coursesRoutes);
   app.register(instructorRoutes)
-
+  
   try {
-
+    
     await dataSource
-      .initialize()
-      .then(async (conn) => {
-        logger.info("Database connection has beed established ...");
+    .initialize()
+    .then(async (conn) => {
+      logger.info("Database connection has beed established ...");
+      console.log("variable testing>", process.env.S3_URL);
         await app.listen(process.env.SERVER_PORT, '0.0.0.0', (err) => {
           err ? logger.error(err) : '' ; 
           logger.info(`Server is Listening on port ${process.env.SERVER_PORT} and environment is ${process.env.NODE_ENV}`);

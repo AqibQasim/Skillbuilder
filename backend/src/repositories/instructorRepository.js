@@ -1,52 +1,83 @@
 const { logger } = require("../../logger");
 const dataSource = require("../../Infrastructure/postgres");
-const { orderBy } = require("lodash");
-const instructor = require("../entities/instructor");
-const skills = require("../entities/skills");
+const instructorRepository = dataSource.getRepository("instructor");
+
+const instructorCreate = async (instructorPayload) => {
+  logger.info("src > repositories > instructorRepositry");
+  try {
+    const creating = instructorRepository.create(instructorPayload);
+    const result = instructorRepository.save(creating);
+    logger.info(["Instructor created: ", result]);
+    return result;
+  } catch (error) {
+    logger.error("src repositories > instructorRepository");
+    logger.error(error.message);
+    throw Error(error);
+  }
+};
 
 const fetchAllInstructor = async () => {
   logger.info("src > instructorRepository > fetchAllInstructor");
   try {
-    const courseRepository = dataSource.getRepository("instructor");
-    const allInstructor = await courseRepository
-      .createQueryBuilder("instructor")
-      .select([
-        "instructor.id AS id",
-        "instructor.name AS name",
-        "instructor.email AS email",
-        "instructor.profile AS profile",
-        "instructor.bio AS bio",
-        "instructor.profession AS profession",
-      ])
-      .getRawMany();
+    // const courseRepository = dataSource.getRepository("instructor");
+    // const allInstructor = await courseRepository
+    //   .createQueryBuilder("instructor")
+    //   .select(["instructor.id AS id", "instructor.name AS name", "instructor.email AS email", "instructor.profile AS profile", "instructor.bio AS bio", "instructor.profession AS profession"])
+    //   .getRawMany();
+
+    const allInstructor = await instructorRepository.find({
+      relations: ["skills"],
+      // select: ["id", "experience"],
+    })
+
+    if (allInstructor.length == 0) {
+      return null;
+    }
     return allInstructor;
   } catch (error) {
-    return error;
+    logger.error(error);
+    throw error;
   }
 };
 
-const fetchAllInstructorWithSkills = async (id) => {
-  logger.info("src > instructorRepository > fetchAllInstructorWithSkills");
+const findByFilter = async (filter) => {
   try {
-    const instructorRepository = dataSource.getRepository("instructor");
-    const instructor = await instructorRepository.findOne({
-      where: { id },
-      relations: ["skills","reviews"],
-      select:["id", "name","email"]
+    const instructorExist = await instructorRepository.findOne({
+      ...filter,
+      relations: ["skills", "reviews", "education"],
     });
-    console.log("instructorrrrr ------------- ",instructor);
-    if (instructor) {
-        return instructor;
-
-    } else {
-      return "Teacher Not Found With This ID";
+    if (instructorExist) {
+      return instructorExist;
     }
+    return null;
   } catch (error) {
-    return error;
+    logger.error(["src > reposirtory > instructorRepository > findByFilter > error", error.message]);
+    throw new Error(error);
   }
 };
+
+// const fetchAllInstructorWithSkills = async (id) => {
+//   logger.info("src > instructorRepository > fetchAllInstructorWithSkills");
+//   try {
+//     const instructor = await instructorRepository.findOne({
+//       where: { id },
+//       relations: ["skills", "reviews", "education"],
+//       // select: ["id", "name", "email"],
+//     });
+//     console.log("instructorrrrr ------------- ", instructor);
+//     if (instructor) {
+//       return instructor;
+//     } else {
+//       return "Teacher Not Found With This ID";
+//     }
+//   } catch (error) {
+//     return error;
+//   }
+// };
 
 module.exports = {
+  instructorCreate,
   fetchAllInstructor,
-  fetchAllInstructorWithSkills,
+  findByFilter,
+  // fetchAllInstructorWithSkills,
 };

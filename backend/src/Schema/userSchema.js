@@ -1,7 +1,8 @@
 const Joi = require('joi');
 
 const ValidateUser = Joi.object({
-    name: Joi.string().required(),
+    first_name: Joi.string().required(),
+    last_name: Joi.string().required(),
     email: Joi.string().pattern(new RegExp(/(\w+|\.+\w+){1,10}@[a-zA-Z0-9]+\.([a-zA-Z0-9]+|\.[a-zA-Z0-9]+){1,3}/)).required().messages({
         'string.pattern.base': 'Please provide a valid email address',
         'any.required': 'Email is required'

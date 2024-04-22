@@ -1,11 +1,9 @@
 const { EntitySchema } = require("typeorm");
-const User = require("../entities/userEntity");
-const Course = require("../entities/course");
 
 module.exports = new EntitySchema({
-  target: "instructor_reviews",
-  name: "instructor_reviews",
-  tableName: "instructor_reviews",
+  target: "instructor_education",
+  name: "instructor_education",
+  tableName: "instructor_education",
   columns: {
     id: {
       primary: true,
@@ -15,16 +13,13 @@ module.exports = new EntitySchema({
     instructor_id: {
       type: 'int'
     },
-    rating: {
-      type: "decimal", // Use "decimal" for decimal numbers
-      precision: 3,
-      scale: 1,
+    percentage: {
+      type: "decimal", 
+      precision: 4,
+      scale: 2,
     },
-    comment: {
+    degree: {
       type: "varchar",
-    },
-    date: {
-      type: "timestamp",
     },
   },
   relations: {
@@ -32,9 +27,8 @@ module.exports = new EntitySchema({
       target: "Instructor",
       type: "many-to-one",
       joinColumn: {
-        name: "instructor_id"
+        name: "instructor_id",
       },
     },
- 
   },
 });
