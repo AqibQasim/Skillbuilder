@@ -2,6 +2,11 @@ const { logger } = require("../../logger");
 const { ValidateUser, loginValidation, validateEmailAndPassword, updateProfileValidation } = require("../Schema/userSchema");
 const ValidateContactUs = require("../Schema/contactUsSchema");
 const { redisClient } = require("../../Infrastructure/redis");
+
+
+
+
+
 const {
   emailVerificationForRegister,
   findAllUser,
@@ -167,13 +172,13 @@ const otpVerification = async (request, reply) => {
     const { otp, email } = request.query;
     const getOtp = await redisClient.get(`otp-${email}`)
     console.log("getOPT : ", getOtp);
-    if(otp == getOtp){
+    if (otp == getOtp) {
       reply.code(200).send({
         status: true,
         message: "OTP verification successful"
       });
       redisClient.del(`otp-${email}`)
-    }else {
+    } else {
       reply.code(200).send({
         status: false,
         message: "Invalid OTP"
@@ -192,7 +197,7 @@ const otpVerification = async (request, reply) => {
 const changePassword = async (request, reply) => {
   try {
     const userData = request.body;
-    const {error} = validateEmailAndPassword.validate(userData);
+    const { error } = validateEmailAndPassword.validate(userData);
     if (error) {
       return reply.code(403).send({
         status: false,
@@ -216,7 +221,7 @@ const changePassword = async (request, reply) => {
 const profileUpdateHandler = async (request, reply) => {
   try {
     const requestedData = request?.body;
-    const {error} = updateProfileValidation.validate(requestedData);
+    const { error } = updateProfileValidation.validate(requestedData);
     if (error) {
       return reply.code(403).send({
         status: false,
@@ -263,6 +268,9 @@ const ContactUS = async (request, reply) => {
   }
 };
 
+
+
+
 module.exports = {
   createStudent,
   getAllUsers,
@@ -274,4 +282,6 @@ module.exports = {
   changePassword,
   profileUpdateHandler,
   ContactUS,
+ 
+
 };

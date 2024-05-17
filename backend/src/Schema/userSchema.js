@@ -50,9 +50,16 @@ const updateProfileValidation = Joi.object({
     linkedin_profile: Joi.string(),
 });
 
+
+
+
+
+
+
 module.exports = {
-    ValidateUser, 
+    ValidateUser,
     loginValidation,
     validateEmailAndPassword,
-    updateProfileValidation
+    updateProfileValidation,
+
 };

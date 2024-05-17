@@ -4,8 +4,11 @@ const {
   findUser,
   UserContact,
   updateUserByEmail,
-  updateUserById
+  updateUserById,
+  addToCartDb
 } = require("../repositories/userRepository");
+
+
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -46,7 +49,7 @@ const createUserAfterVerification = async (verificationToken) => {
   const hashedPassword = await bcrypt.hash(tokenData?.password, 10);
   const currentTime = new Date();
   console.log("currentTime: ", currentTime);
-  const userData = { ...tokenData, password: hashedPassword, created_at: currentTime};
+  const userData = { ...tokenData, password: hashedPassword, created_at: currentTime };
   let newUser = await createUser(userData);
   let token = jwt.sign(newUser, process.env.JWT_SECRET);
   return token;
@@ -148,7 +151,7 @@ const sendMailToUser = async (email) => {
 const passwordChange = async (userData) => {
   try {
     const hashedPassword = await bcrypt.hash(userData?.password, 10);
-    const updatedUser = await updateUserByEmail(userData.email, {...userData, password: hashedPassword});
+    const updatedUser = await updateUserByEmail(userData.email, { ...userData, password: hashedPassword });
     console.log(updatedUser);
     return updatedUser;
   } catch (error) {
@@ -212,6 +215,9 @@ const ContactUser = async (userInfo) => {
     throw error;
   }
 };
+
+
+
 
 module.exports = {
   createGoogleUser,

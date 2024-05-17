@@ -2,6 +2,8 @@ const { logger } = require("../../logger");
 const dataSource = require("../../Infrastructure/postgres");
 const userRepository = dataSource.getRepository("User");
 
+
+
 const createUser = async (userInfo) => {
   logger.info(["src > repository > userRepository > ", userInfo]);
   try {
@@ -98,6 +100,12 @@ const UserContact = async (userInfo) => {
   }
 };
 
+
+
+
+
+
+
 module.exports = {
   createUser,
   readAllUser,
@@ -105,4 +113,5 @@ module.exports = {
   updateUserByEmail,
   updateUserById,
   UserContact,
+
 };

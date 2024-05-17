@@ -66,10 +66,10 @@ module.exports = new EntitySchema({
   },
   relations: {
     instructor: {
-        target: "Instructor",
-        type: "one-to-one",
-        inverseSide: "user",
-        joinColumn: true
+      target: "Instructor",
+      type: "one-to-one",
+      inverseSide: "user",
+      joinColumn: true
     }
-}
+  }
 });
