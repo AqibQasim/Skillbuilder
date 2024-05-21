@@ -3,8 +3,8 @@ const User = require("../entities/userEntity");
 const Course = require("../entities/course");
 
 module.exports = new EntitySchema({
-  target: "courseReviews",
-  name: "courseReviews",
+  target: "course_reviews",
+  name: "course_reviews",
   tableName: "course_reviews",
   columns: {
     id: {
@@ -17,7 +17,7 @@ module.exports = new EntitySchema({
       precision: 3,
       scale: 1,
     },
-    comment: {
+    review: {
       type: "varchar",
     },
     date: {
@@ -27,14 +27,14 @@ module.exports = new EntitySchema({
   relations: {
     user: {
       target: "User",
-      type: "many-to-one", //multiple course reviews and one user
+      type: "one-to-one", // multiple course reviews and one user
       joinColumn: {
         name: "user_id",
       },
     },
     course: {
       target: "Course",
-      type: "many-to-one", //multiple course reviews and one course
+      type: "many-to-one", // multiple course reviews and one course
       joinColumn: {
         name: "course_id",
       },

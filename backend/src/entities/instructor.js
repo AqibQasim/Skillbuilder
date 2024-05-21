@@ -51,5 +51,10 @@ module.exports = new EntitySchema({
       type: "one-to-many",
       inverseSide: "instructor",
     },
+    courses: {
+      target: "Course",
+      type: "one-to-many",
+      inverseSide: "instructor",
+    }
   },
 });

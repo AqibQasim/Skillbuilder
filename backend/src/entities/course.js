@@ -10,20 +10,48 @@ module.exports = new EntitySchema({
       type: "int",
       generated: true,
     },
-    amount: {
-      type: "int",
+    instructor_id: {
+      type: 'int',
     },
     title: {
       type: "varchar",
     },
-    description: {
-      type: "varchar",
+    creation_duration_hours: {
+      type: "int",
+    },
+    learning_outcomes: {
+      type: "varchar"
+    },
+    category: {
+      type: "varchar"
+    },
+    modulesCount: {
+      type: "int"
+    },
+    amount: {
+      type: "decimal",
+      // precision: 7,
+      // scale: 5
     },
     discount: {
       type: "decimal",
+      // precision: 4,
+      // scale: 2,
+      default: 0
+    },
+    charges: {
+      type: "decimal",
+      // precision: 7,
+      // scale: 5
     },
     active: {
       type: "boolean",
+      default: false
+    },
+    status: {
+      type: "enum",
+      enum: ['pending', 'approved', 'declined'],
+      default: 'pending'
     },
     image: {
       type: "varchar",
@@ -32,6 +60,7 @@ module.exports = new EntitySchema({
       type: "decimal",
       precision: 3,
       scale: 1,
+      nullable: true
     },
     created_at: {
       type: "timestamp with time zone",
@@ -40,10 +69,10 @@ module.exports = new EntitySchema({
       type: "timestamp with time zone",
       nullable: true,
     },
-    created_by: {
-      type: "varchar",
-      nullable: true,
-    },
+    // created_by: {
+    //   type: "integer",
+    //   nullable: true,
+    // },
     updated_by: {
       type: "varchar",
       nullable: true,
@@ -52,23 +81,27 @@ module.exports = new EntitySchema({
   relations: {
     instructor: {
       target: "Instructor",
-      type: "many-to-one", //multiple courses one instructor
-      cascade: true,
+      type: "many-to-one", 
       joinColumn: {
-        name: "instructor_id",
-      },
+        name: "instructor_id"
+      },  
     },
     reviews: {
-      target: "courseReviews",
-      type: "one-to-many", //one courses multiple reviews
-      cascade: true,
+      target: "course_reviews",
+      type: "one-to-many", 
       inverseSide: "course",
     },
-    course_content: {
-      target: "course_content",
+    modules: {
+      target: "content_module",
       type: "one-to-many",
-      cascade: true,
       inverseSide: "course",
+    },
+    purchased_course: {
+      target: "purchased_course",
+      type: "many-to-one", 
+      joinColumn: {
+        name: "purchased_courses_id"
+      },  
     },
   },
 });
