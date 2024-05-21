@@ -12,9 +12,10 @@ const { logger } = require("../logger");
 const { fastifyOptions } = require("../fastifyOpts");
 const userRoutes = require("./routes/userRoutes");
 const coursesRoutes = require("./routes/coursesRoutes");
-const instructorRoutes=require("./routes/instructorRoutes")
-require('./Authentication/googleAuth');  
-
+const instructorRoutes = require("./routes/instructorRoutes")
+require('./Authentication/googleAuth');
+const orderRoutes = require('./routes/orderRoutes')
+const paymentRoutes = require('./routes/paymentRoutes')
 
 
 const startServer = async () => {
@@ -33,7 +34,7 @@ const startServer = async () => {
   app.register(fastifyPassport.default.initialize())
   app.register(fastifyPassport.default.secureSession())
   app.register(require('fastify-multipart'), {
-    addToBody: true, 
+    addToBody: true,
   });
 
   app.get("/", async (req, res) => {
@@ -45,20 +46,25 @@ const startServer = async () => {
     res.send(result);
   });
 
-  
+
   app.register(userRoutes);
   app.register(coursesRoutes);
   app.register(instructorRoutes)
-  
+
+
+  // payment stripe routes
+  app.register(orderRoutes)
+  app.register(paymentRoutes)
+
   try {
-    
+
     await dataSource
-    .initialize()
-    .then(async (conn) => {
-      logger.info("Database connection has beed established ...");
-      console.log("variable testing>", process.env.S3_URL);
+      .initialize()
+      .then(async (conn) => {
+        logger.info("Database connection has beed established ...");
+        console.log("variable testing>", process.env.S3_URL);
         await app.listen(process.env.SERVER_PORT, '0.0.0.0', (err) => {
-          err ? logger.error(err) : '' ; 
+          err ? logger.error(err) : '';
           logger.info(`Server is Listening on port ${process.env.SERVER_PORT} and environment is ${process.env.NODE_ENV}`);
         });
       })

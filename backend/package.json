@@ -46,6 +46,7 @@
     "redis": "^4.6.13",
     "reflect-metadata": "^0.2.1",
     "some-plugin": "^0.0.1-security",
+    "stripe": "^15.7.0",
     "typeorm": "^0.3.19",
     "uuid": "^9.0.1"
   }

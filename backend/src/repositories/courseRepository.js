@@ -95,9 +95,16 @@ const fetchAllRecentCourses = async () => {
   }
 };
 
+// this method is using in orderservice
+const findOneById = async (id) => {
+  const courseRepository = dataSource.getRepository("Course");
+  return await courseRepository.findOne({ where: { id: id } });
+}
+
 module.exports = {
   fetchAllCourses,
   coursesRatingFunc,
   fetchCourseWithDetailsWithId,
   fetchAllRecentCourses,
+  findOneById
 };
