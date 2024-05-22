@@ -13,4 +13,46 @@ const ValidateContactUs = Joi.object({
   source: Joi.string().required()
 });
 
-module.exports = ValidateContactUs;
+
+// Route: /contact-us
+const contactUsSchema = {
+  schema: {
+    description: "Contact us",
+    tags: ["contact"],
+    summary: "Contact Us",
+    body: {
+      type: "object",
+      properties: {
+        firstName: { type: "string" },
+        lastName: { type: "string" },
+        email: { type: "string", format: "email" },
+        phone: { type: "string" },
+        subject: { type: "string" },
+        text: { type: "string" },
+        source: { type: "string" }
+      },
+      required: ["firstName", "lastName", "email", "phone", "subject", "text", "source"]
+    },
+    response: {
+      200: {
+        description: "Message successfully sent",
+        type: "object",
+        properties: {
+          success: { type: "boolean" },
+          message: { type: "string" }
+        }
+      },
+      default: {
+        description: "Unexpected error",
+        type: "object",
+        properties: {
+          message: { type: "string" }
+        }
+      }
+    }
+  }
+};
+
+
+
+module.exports = { ValidateContactUs, contactUsSchema };
