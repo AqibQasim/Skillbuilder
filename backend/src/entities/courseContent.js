@@ -11,25 +11,29 @@ module.exports = new EntitySchema({
       type: "int",
       generated: true,
     },
+    title: {
+      type: "varchar"  
+    },
     content_type: {
       type: "varchar",
     },
     content: {
       type: "varchar",
     },
+    module_id: {
+      type: "int",
+    },
     order: {
       type: "int",
     },
   },
   relations: {
-    course: {
-      target: "Course",
-      type: "many-to-one", // many course contents belong to one course
+    modules: {
+      target: "content_module",
+      type: "many-to-one",
       joinColumn: {
-        name: "course_id",
-        referencedColumnName: "id", // referencing the id column of Course
+        name: "module_id",
       },
-
     },
   },
 });

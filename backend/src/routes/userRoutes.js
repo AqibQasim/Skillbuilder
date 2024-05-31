@@ -2,16 +2,15 @@ const { default: passport } = require("@fastify/passport");
 const { createStudent, getAllUsers, login, GoggleLoginCallBAck, EmailVerify, ContactUS, passwordResetHandler, otpVerification, changePassword, profileUpdateHandler, addToCartHandler } = require("../controllers/userController");
 
 const userRoutes = async (fastify, options) => {
-
   //signup as student
-  fastify.post("/signup-student", createStudent);
+  fastify.post("/signup", userSwaggerSchema, createStudent);
   fastify.get("/verify-email", EmailVerify);
 
   //get all students
-  fastify.get("/students", getAllUsers);
+  fastify.get("/users", getAllUsers);
 
   //signin as student
-  fastify.post("/login-student", login);
+  fastify.post("/login", login);
 
   //sign in with google
   fastify.get("/auth/google", passport.authenticate('google', { scope: ['profile', "email"] }));
@@ -20,10 +19,10 @@ const userRoutes = async (fastify, options) => {
   //forgot password
   fastify.get("/password-reset", passwordResetHandler);
   fastify.get("/otp-verification", otpVerification);
-  fastify.post("/change-password", changePassword)
+  fastify.post("/change-password", changePassword);
 
   //update profile
-  fastify.post("/update-profile", profileUpdateHandler)
+  fastify.post("/update-profile", profileUpdateHandler);
 
   //Contact Us
   fastify.post("/contact-us", ContactUS);

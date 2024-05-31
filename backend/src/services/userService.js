@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 const {
   createUser,
   readAllUser,
@@ -9,16 +10,15 @@ const {
 } = require("../repositories/userRepository");
 
 
+=======
+const { createUser, readAllUser, findUser, UserContact, updateUserByEmail, updateUserById } = require("../repositories/userRepository");
+>>>>>>> 7635d92 (add courses apis and much work)
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { logger } = require("../../logger");
 const { redisClient } = require("../../Infrastructure/redis");
-const {
-  sendVerificationEmail,
-  verifyPassword,
-  sendOTPMail,
-} = require("../mediators/userMediator");
+const { sendVerificationEmail, verifyPassword, sendOTPMail } = require("../mediators/userMediator");
 
 const emailVerificationForRegister = async (userInfo) => {
   const { email } = userInfo;
@@ -30,10 +30,7 @@ const emailVerificationForRegister = async (userInfo) => {
   const verificationToken = jwt.sign(userInfo, process.env.JWT_SECRET, {
     expiresIn: "1h",
   });
-  logger.info([
-    "src > repository > userRepository > verificationToken",
-    verificationToken,
-  ]);
+  logger.info(["src > repository > userRepository > verificationToken", verificationToken]);
   await redisClient.set(email, verificationToken);
   await sendVerificationEmail(email, verificationToken);
 };
@@ -71,10 +68,7 @@ const UserLogin = async (loginData) => {
     const isUserExist = await findUser({
       where: { email: email },
     });
-    logger.info([
-      "src > services > userService > UserLogin ? existingUser: ",
-      isUserExist,
-    ]);
+    logger.info(["src > services > userService > UserLogin ? existingUser: ", isUserExist]);
     if (!isUserExist) {
       throw Error("User does not exist");
     }
@@ -114,10 +108,7 @@ const findUserByEmail = async (email) => {
     const result = await findUser(filter);
     return result;
   } catch (error) {
-    logger.error([
-      "error in fetching user by email in userService",
-      error.message,
-    ]);
+    logger.error(["error in fetching user by email in userService", error.message]);
     throw Error(error?.message);
   }
 };
@@ -132,10 +123,7 @@ const findUserById = async (id) => {
     const result = await findUser(filter);
     return result;
   } catch (error) {
-    logger.error([
-      "error in fetching user by id in userService",
-      error.message,
-    ]);
+    logger.error(["error in fetching user by id in userService", error.message]);
     throw Error(error?.message);
   }
 };
@@ -167,12 +155,12 @@ const profileUpdateService = async (userData) => {
       const hashedPassword = await bcrypt.hash(userData.password, 10);
       userData.password = hashedPassword;
     }
-    const updatedUser = await updateUserById(id, userData)
+    const updatedUser = await updateUserById(id, userData);
     return updatedUser;
   } catch (error) {
-    logger.error(["error in userService > profileUpdateService > ", error.message])
+    logger.error(["error in userService > profileUpdateService > ", error.message]);
     throw Error(error);
-  };
+  }
 };
 
 const ContactUser = async (userInfo) => {
@@ -205,9 +193,7 @@ const ContactUser = async (userInfo) => {
 
       await transporter.sendMail(UsermailOptions);
       await transporter.sendMail(AdminmailOptions);
-      logger.info(
-        `Email Successfully Send to ${userInfo.email}`
-      );
+      logger.info(`Email Successfully Send to ${userInfo.email}`);
       return ContactUs;
     }
   } catch (error) {

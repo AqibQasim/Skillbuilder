@@ -1,16 +1,46 @@
 const { logger } = require("../../logger");
 const dataSource = require("../../Infrastructure/postgres");
+const courseRepository = dataSource.getRepository("Course");
 
-const fetchAllCourses = async () => {
+
+const createCourse = async (data) => {
+  try {
+    const courseCreating = courseRepository.create(data);
+    const courseBasics = await courseRepository.save(courseCreating);
+    return courseBasics;
+  } catch (error) {
+    logger.error("src > repository > courseRepository");
+    logger.error(error.message);
+    throw new Error(error)
+  }
+
+};
+
+const findAllCourses = async () => {
   logger.info("src > Repository > fetchAllCourses");
   try {
-    const courseRepository = dataSource.getRepository("Course");
     const allCourses = await courseRepository.find();
     return allCourses;
   } catch (error) {
-    return error;
+    logger.error("Error : src > repositories > courseRepository")
+    logger.error(error.message)
+    throw new Error(error);
   }
 };
+
+const findOneCourse = async (filter) => {
+  try {
+    const findOne = await courseRepository.findOne({
+      ...filter,
+      relations: ['instructor', 'reviews', 'modules.content'],
+  });
+    return findOne;
+  } catch (error) {
+    logger.error("Error: src > repositories > courseRepository")
+    logger.error(error.message)
+    throw new Error(error);
+  }
+}
 
 const coursesRatingFunc = async () => {
   logger.info("Src > Repository > coursesRatingFunc");
@@ -95,8 +125,11 @@ const fetchAllRecentCourses = async () => {
   }
 };
 
+
 module.exports = {
-  fetchAllCourses,
+  createCourse,
+  findAllCourses,
+  findOneCourse,
   coursesRatingFunc,
   fetchCourseWithDetailsWithId,
   fetchAllRecentCourses,
