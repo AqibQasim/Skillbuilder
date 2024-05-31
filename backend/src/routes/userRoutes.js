@@ -1,18 +1,30 @@
 const { default: passport } = require("@fastify/passport");
 const {
+ 
   createStudent,
+ 
   getAllUsers,
+ 
   login,
+ 
   GoggleLoginCallBAck,
+ 
   EmailVerify,
+ 
   ContactUS,
+ 
   passwordResetHandler,
+ 
   otpVerification,
+ 
   changePassword,
+ 
   profileUpdateHandler,
 } = require("../controllers/userController");
 const { ValidateUser, userSwaggerSchema, loginSchema, updateProfileSchema, changePasswordSchema, verifyEmailSchema, passwordResetSchema, otpVerificationSchema, googleAuthSchema, googleAuthCallbackSchema, getAllUsersSchema } = require("../Schema/userSchema");
 const { contactUsSchema } = require("../Schema/contactUsSchema.js")
+const { ValidateUser, userSwaggerSchema } = require("../Schema/userSchema");
+
 const userRoutes = async (fastify, options) => {
   //signup as student
   fastify.post("/signup", userSwaggerSchema, createStudent);
@@ -35,6 +47,8 @@ const userRoutes = async (fastify, options) => {
 
   //update profile
   fastify.post("/update-profile", updateProfileSchema, profileUpdateHandler);
+
+  fastify.post("/update-profile", profileUpdateHandler);
 
   //Contact Us
   fastify.post("/contact-us", contactUsSchema, ContactUS);

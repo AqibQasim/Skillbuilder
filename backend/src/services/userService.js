@@ -1,4 +1,22 @@
+<<<<<<< HEAD
 const { createUser, readAllUser, findUser, UserContact, updateUserByEmail, updateUserById } = require("../repositories/userRepository");
+=======
+<<<<<<< HEAD
+const {
+  createUser,
+  readAllUser,
+  findUser,
+  UserContact,
+  updateUserByEmail,
+  updateUserById,
+  addToCartDb
+} = require("../repositories/userRepository");
+
+
+=======
+const { createUser, readAllUser, findUser, UserContact, updateUserByEmail, updateUserById } = require("../repositories/userRepository");
+>>>>>>> 7635d92 (add courses apis and much work)
+>>>>>>> c25baf8
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -187,6 +205,9 @@ const ContactUser = async (userInfo) => {
     throw error;
   }
 };
+
+
+
 
 module.exports = {
   createGoogleUser,

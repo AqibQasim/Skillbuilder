@@ -12,3 +12,4 @@ const coursesRoutes = async (fastify, options) => {
 };
 
 module.exports = coursesRoutes;
+ 

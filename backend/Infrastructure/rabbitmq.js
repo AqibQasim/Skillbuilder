@@ -103,7 +103,7 @@ const purgeQueue = async (queueName) => {
       console.log(clear);
       console.log(`Queue "${queueName}" purged successfully.`);
       return `Queue "${queueName}" purged successfully.`;
-      
+
     } catch (error) {
       console.log(error);
     }

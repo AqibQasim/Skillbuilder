@@ -2,6 +2,11 @@ const { logger } = require("../../logger");
 const { ValidateUser, loginValidation, validateEmailAndPassword, updateProfileValidation } = require("../Schema/userSchema");
 const ValidateContactUs = require("../Schema/contactUsSchema");
 const { redisClient } = require("../../Infrastructure/redis");
+
+
+
+
+
 const {
   emailVerificationForRegister,
   findAllUser,
@@ -263,6 +268,9 @@ const ContactUS = async (request, reply) => {
   }
 };
 
+
+
+
 module.exports = {
   createStudent,
   getAllUsers,
@@ -274,4 +282,6 @@ module.exports = {
   changePassword,
   profileUpdateHandler,
   ContactUS,
+ 
+
 };
