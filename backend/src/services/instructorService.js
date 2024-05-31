@@ -3,7 +3,7 @@ const { logger } = require("../../logger");
 const { findUserById } = require("./userService");
 const { skillsInstuctorCreate } = require("./instructorSkillService");
 const { educationInstuctorCreate } = require("./instructorEducationService");
-const { uploadOnS3 } = require("../mediators/instructorMediator");
+const { uploadSingle } = require("../mediators/s3Mediator");
 
 const createNewInstructor = async (instructorData) => {
   try {
@@ -18,7 +18,7 @@ const createNewInstructor = async (instructorData) => {
       specialization,
       created_at: new Date(),
     };
-    const video_url = await uploadOnS3(video);
+    const video_url = await uploadSingle(video);
     console.log("upload video", video_url);
 
     const isInstructorExist = await findByFilter({ where: { id: id } });
@@ -52,7 +52,6 @@ const getInstructorById = async (id) => {
   try {
     logger.info("src > instructorServices > getInstructorById");
     const InstructorReceive = await findByFilter({where: {id: id}});
-    console.log("Service Instructor", InstructorReceive);
     return InstructorReceive;
   } catch (error) {
     throw new Error(error);

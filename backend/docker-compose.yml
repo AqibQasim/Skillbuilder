@@ -27,7 +27,7 @@ services:
         networks:
             - dev-network
         ports:
-            - "0.0.0.0:6379:6379"
+            - "0.0.0.0:6378:6379"
 
     rabbitmq:
         container_name: rabbitmq

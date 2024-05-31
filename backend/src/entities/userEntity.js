@@ -47,8 +47,8 @@ module.exports = new EntitySchema({
       nullable: true,
     },
     is_active: {
-      type: 'bool',
-      default: true
+      type: "bool",
+      default: true,
     },
     role: {
       type: "enum",
@@ -61,15 +61,47 @@ module.exports = new EntitySchema({
       default: "app",
     },
     created_at: {
-      type: 'timestamp with time zone'
-    }
+      type: "timestamp with time zone",
+    },
   },
   relations: {
     instructor: {
-        target: "Instructor",
-        type: "one-to-one",
-        inverseSide: "user",
-        joinColumn: true
+      target: "Instructor",
+      type: "one-to-one",
+      inverseSide: "user",
+<<<<<<< HEAD
+      joinColumn: true,
+    },
+    reviews: {
+      target: "course_reviews",
+      type: "one-to-one",
+      inverseSide: "user",
+    },
+    purchased_courses: {
+      target: 'purchased_course',
+      type: 'one-to-many'
     }
-}
+
+  },
+=======
+<<<<<<< HEAD
+      joinColumn: true
+    }
+  }
+=======
+      joinColumn: true,
+    },
+    reviews: {
+      target: "course_reviews",
+      type: "one-to-one",
+      inverseSide: "user",
+    },
+    purchased_courses: {
+      target: 'purchased_course',
+      type: 'one-to-many'
+    }
+
+  },
+>>>>>>> 7635d92 (add courses apis and much work)
+>>>>>>> c25baf8
 });

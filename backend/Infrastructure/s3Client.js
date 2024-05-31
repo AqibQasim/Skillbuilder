@@ -1,12 +1,15 @@
-const { S3Client } = require("@aws-sdk/client-s3");
+const { S3 } = require("aws-sdk");
 // import fs from "node:fs";
 // import { promisify } from "node:util";
 // import { pipeline } from "node:stream";
 
-const s3 = new S3Client({
+const s3Client = new S3({
   region: process.env.AWS_REGION,
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
+  signatureVersion: 'v4'
 });
 
-module.exports = { s3 };
+module.exports = { s3Client };
