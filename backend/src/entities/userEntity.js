@@ -69,7 +69,7 @@ module.exports = new EntitySchema({
       target: "Instructor",
       type: "one-to-one",
       inverseSide: "user",
-<<<<<<< HEAD
+// <<<<<<< HEAD
       joinColumn: true,
     },
     reviews: {
@@ -83,25 +83,9 @@ module.exports = new EntitySchema({
     }
 
   },
-=======
-<<<<<<< HEAD
-      joinColumn: true
-    }
-  }
-=======
-      joinColumn: true,
-    },
-    reviews: {
-      target: "course_reviews",
-      type: "one-to-one",
-      inverseSide: "user",
-    },
-    purchased_courses: {
-      target: 'purchased_course',
-      type: 'one-to-many'
-    }
-
-  },
->>>>>>> 7635d92 (add courses apis and much work)
->>>>>>> c25baf8
+// =======
+  //     joinColumn: true
+  //   }
+  // }
+// >>>>>>> c25baf8
 });

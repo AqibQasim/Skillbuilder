@@ -4,9 +4,6 @@ const ValidateContactUs = require("../Schema/contactUsSchema");
 const { redisClient } = require("../../Infrastructure/redis");
 
 
-
-
-
 const {
   emailVerificationForRegister,
   findAllUser,
@@ -23,25 +20,29 @@ const createStudent = async (request, reply) => {
   logger.info(["src > controllers > userController > ", request.body]);
   try {
     if (request.body) {
+      console.log('req:', request.body);
       const { error } = ValidateUser.validate(request.body);
       if (error) {
-        return reply.code(400).send({
-          status: false,
-          message: error.details[0].message,
-        });
+        console.log('validation error:',error)
+        return reply.code(400).send({message: error});
       }
+      console.log("hey1");
       await emailVerificationForRegister(request.body);
+      console.log('hey3');
       reply.code(201).send({
         staus: true,
         message: "Message sent to given email for email verification",
       });
     } else {
+
+      console.log('hello from else')
       reply.code(400).send({
         status: false,
         message: "Cannot request without body",
       });
     }
   } catch (error) {
+    console.log("error:",err)
     logger.error(["Error registering user:", error.message]);
     reply.code(500).send({
       staus: false,
@@ -52,11 +53,13 @@ const createStudent = async (request, reply) => {
 
 const EmailVerify = async (request, reply) => {
   try {
-    const { email, verificationToken } = request.query;
+    const { email, token } = request?.query;
+    console.log('params:',request?.query);
     const storedToken = await redisClient.get(email);
-    if (storedToken === verificationToken) {
+    if (storedToken === token) {
       await redisClient.del(email);
-      let newUser = await createUserAfterVerification(verificationToken);
+      let newUser = await createUserAfterVerification(token);
+      console.log('newUser creation status:', newUser);
       return reply.redirect(process.env.LOGINREDIRECTPAGE);
     } else {
       reply.status(400).send("Link Expire");
@@ -64,7 +67,7 @@ const EmailVerify = async (request, reply) => {
   } catch (error) {
     logger.error(["Error verifying email:", error.message]);
     reply.status(500).send(error.message);
-  }
+  };
 };
 
 const getAllUsers = async (request, reply) => {

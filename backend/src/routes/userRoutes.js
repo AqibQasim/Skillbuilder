@@ -21,9 +21,9 @@ const {
  
   profileUpdateHandler,
 } = require("../controllers/userController");
-const { ValidateUser, userSwaggerSchema, loginSchema, updateProfileSchema, changePasswordSchema, verifyEmailSchema, passwordResetSchema, otpVerificationSchema, googleAuthSchema, googleAuthCallbackSchema, getAllUsersSchema } = require("../Schema/userSchema");
+const { ValidateUser , userSwaggerSchema, loginSchema, updateProfileSchema, changePasswordSchema, verifyEmailSchema, passwordResetSchema, otpVerificationSchema, googleAuthSchema, googleAuthCallbackSchema, getAllUsersSchema } = require("../Schema/userSchema");
 const { contactUsSchema } = require("../Schema/contactUsSchema.js")
-const { ValidateUser, userSwaggerSchema } = require("../Schema/userSchema");
+// const { ValidateUser, userSwaggerSchema } = require("../Schema/userSchema");
 
 const userRoutes = async (fastify, options) => {
   //signup as student
@@ -48,7 +48,7 @@ const userRoutes = async (fastify, options) => {
   //update profile
   fastify.post("/update-profile", updateProfileSchema, profileUpdateHandler);
 
-  fastify.post("/update-profile", profileUpdateHandler);
+  // fastify.post("/update-profile", profileUpdateHandler);
 
   //Contact Us
   fastify.post("/contact-us", contactUsSchema, ContactUS);

@@ -13,13 +13,13 @@ const ValidateUser = Joi.object({
     }),
   password: Joi.string()
     .required()
-    .pattern(new RegExp(/^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/))
+    .pattern(new RegExp(/^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&\#])[A-Za-z\d@$!%*?&\#]{8,}$/))
     .messages({
       "string.pattern.base": "Password must contain at least one letter, one number, one special character, and be at least 8 characters long",
       "any.required": "Password is required",
     }),
-  profession: Joi.string().required(),
-  source: Joi.string(),
+  profession: Joi.string().optional(),
+  source: Joi.string().optional(),
 });
 
 const loginValidation = Joi.object({
@@ -91,8 +91,8 @@ const userSwaggerSchema = {
         last_name: { type: "string", default: "Roy" },
         email: { type: "string", default: "test@gmail.com" },
         password: { type: "string", default: "Password@12345" },
-        profession: { type: "string", default: "software engineer" },
-        source: { type: "string", default: "" },
+        // profession: { type: "string", default: "software engineer" },
+        // source: { type: "string", default: "" },
         obj: {
           type: "object",
           properties: {
@@ -250,25 +250,30 @@ const updateProfileSchema = {
   }
 };
 
-
-
-
-
-
 // get apis schemas
 
-
-
-
 // /verify-email/:token
+// const verifyEmailSchema = {
+//   schema: {
+//     params: {
+//       type: "object",
+//       properties: {
+//         token: { type: "string", description: "Email verification token" }
+//       },
+//       required: ["token"]
+//     }
+//   }
+// };
+
 const verifyEmailSchema = {
   schema: {
-    params: {
+    querystring: {
       type: "object",
       properties: {
+        email: { type: "string", format: "email", description: "User email address" },
         token: { type: "string", description: "Email verification token" }
       },
-      required: ["token"]
+      required: ["email", "token"]
     }
   }
 };

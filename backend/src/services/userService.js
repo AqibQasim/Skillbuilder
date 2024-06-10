@@ -1,22 +1,22 @@
-<<<<<<< HEAD
-const { createUser, readAllUser, findUser, UserContact, updateUserByEmail, updateUserById } = require("../repositories/userRepository");
-=======
-<<<<<<< HEAD
-const {
-  createUser,
-  readAllUser,
-  findUser,
-  UserContact,
-  updateUserByEmail,
-  updateUserById,
-  addToCartDb
-} = require("../repositories/userRepository");
+// <<<<<<< HEAD
+// const { createUser, readAllUser, findUser, UserContact, updateUserByEmail, updateUserById } = require("../repositories/userRepository");
+// =======
+// <<<<<<< HEAD
+// const {
+//   createUser,
+//   readAllUser,
+//   findUser,
+//   UserContact,
+//   updateUserByEmail,
+//   updateUserById,
+//   addToCartDb
+// } = require("../repositories/userRepository");
 
 
-=======
+// =======
 const { createUser, readAllUser, findUser, UserContact, updateUserByEmail, updateUserById } = require("../repositories/userRepository");
->>>>>>> 7635d92 (add courses apis and much work)
->>>>>>> c25baf8
+// >>>>>>> 7635d92 (add courses apis and much work)
+// >>>>>>> c25baf8
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -25,35 +25,48 @@ const { redisClient } = require("../../Infrastructure/redis");
 const { sendVerificationEmail, verifyPassword, sendOTPMail } = require("../mediators/userMediator");
 
 const emailVerificationForRegister = async (userInfo) => {
-  const { email } = userInfo;
-  const existingUser = await findUser({ where: { email } });
-  if (existingUser) {
-    throw Error("User Already Exists With This Email");
-  }
+  try {
+    console.log('user info:', userInfo);
+    console.log("Hey2");
+    const { email } = userInfo;
+    const existingUser = await findUser({ where: { email } });
+    if (existingUser) {
+      throw Error("User Already Exists With This Email");
+    }
 
-  const verificationToken = jwt.sign(userInfo, process.env.JWT_SECRET, {
-    expiresIn: "1h",
-  });
-  logger.info(["src > repository > userRepository > verificationToken", verificationToken]);
-  await redisClient.set(email, verificationToken);
-  await sendVerificationEmail(email, verificationToken);
+    const verificationToken = jwt.sign(userInfo, process.env.JWT_SECRET, {
+      expiresIn: "10h",
+    });
+
+    logger.info(["src > repository > userRepository > verificationToken", verificationToken]);
+    await redisClient.set(email, verificationToken);
+    await sendVerificationEmail(email, verificationToken);
+  } catch (err) {
+    console.log("error:", err);
+  }
 };
 
 const createUserAfterVerification = async (verificationToken) => {
-  const tokenData = jwt.decode(verificationToken, process.env.JWT_SECRET);
-  console.log("userdata: ", tokenData);
-  const isUserExist = await findUser({ where: { email: tokenData?.email } });
-  if (isUserExist) {
-    logger.info(["user already exists", isUserExist]);
-    throw Error("User already exist with this email");
+  try {
+    const tokenData = jwt.decode(verificationToken, process.env.JWT_SECRET);  
+    console.log("userdata: ", tokenData);
+    const isUserExist = await findUser({ where: { email: tokenData?.email } });
+    if (isUserExist) {
+      logger.info(["user already exists", isUserExist]);
+      throw Error("User already exist with this email");
+      
+    }
+    const hashedPassword = await bcrypt.hash(tokenData?.password, 10);
+    const currentTime = new Date();
+    console.log("currentTime: ", currentTime);
+    const userData = { ...tokenData, password: hashedPassword, created_at: currentTime };
+    let newUser = await createUser(userData);
+    let token = jwt.sign(newUser, process.env.JWT_SECRET);
+    return token;
+  } catch (err){
+    console.log('error:',err);
+    return;
   }
-  const hashedPassword = await bcrypt.hash(tokenData?.password, 10);
-  const currentTime = new Date();
-  console.log("currentTime: ", currentTime);
-  const userData = { ...tokenData, password: hashedPassword, created_at: currentTime };
-  let newUser = await createUser(userData);
-  let token = jwt.sign(newUser, process.env.JWT_SECRET);
-  return token;
 };
 
 const findAllUser = async () => {
@@ -85,7 +98,6 @@ const UserLogin = async (loginData) => {
     logger.error(error.message);
     throw Error(error);
   }
-  // return await LoginUser(loginData);
 };
 
 const createGoogleUser = async (userInfo) => {

@@ -31,7 +31,7 @@ const sendVerificationEmail = async (email, verificationToken) => {
         process.env.SERVER_PORT
       }/verify-email?email=${encodeURIComponent(
         email
-      )}&verificationToken=${verificationToken}">Verify your email</a>`,
+      )}&token=${verificationToken}">Verify your email</a>`,
     };
 
     await transporter.sendMail(mailOptions);
