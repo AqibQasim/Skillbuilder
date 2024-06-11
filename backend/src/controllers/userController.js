@@ -3,7 +3,8 @@ const { ValidateUser, loginValidation, validateEmailAndPassword, updateProfileVa
 const ValidateContactUs = require("../Schema/contactUsSchema");
 const { redisClient } = require("../../Infrastructure/redis");
 const jwt = require('jsonwebtoken');
-
+const User = require('../entities/userEntity');
+const {findUser}= require("../repositories/userRepository");
 
 const {
   emailVerificationForRegister,
@@ -65,13 +66,9 @@ const createStudent = async (request, reply) => {
           message: error.details[0].message,
         });
       }
-      await emailVerificationForRegister(request.body);
-      reply.code(201).send({
-        status: true,
-        message: "Message sent to given email for email verification",
-      });
+      const result = await emailVerificationForRegister(request.body);
+      reply.code(result.code).send(result.message);
     } else {
-      console.log('hello from else');
       reply.code(400).send({
         status: false,
         message: "Cannot request without body",
@@ -115,14 +112,16 @@ const EmailVerify = async (request, reply) => {
       await redisClient.del(email);
       let newUser = await createUserAfterVerification(token);
       console.log('newUser creation status:', newUser);
-      // reply.redirect(process.env.LOGINREDIRECTPAGE);
-      reply.status(200).send('Verification Email Sent Successfully');
+      reply.redirect(process.env.LOGINREDIRECTPAGE);
+      return;
     } else {
       reply.status(400).send("Link Expired");
+      return;
     }
   } catch (error) {
     logger.error(["Error verifying email:", error.message]);
     reply.status(500).send(error.message);
+    return;
   }
 };
 
@@ -179,6 +178,9 @@ const login = async (request, reply) => {
 
 const GoggleLoginCallBAck = async (request, reply) => {
   try {
+    const { email } = request.user;
+    // Check if user exists or create a new user
+    let user = await findUser({ where: { email } });
     console.log("request body: >>> ", request?.body);
     const code = request.query.code;
     console.log("code: ", code);

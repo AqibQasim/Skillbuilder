@@ -15,10 +15,10 @@ const transporter = nodemailer.createTransport({
 });
 
 const generateOTP = async () => {
-    return randomstring.generate({
-        length: 6,
-        charset: 'numeric'
-    });
+  return randomstring.generate({
+    length: 6,
+    charset: 'numeric'
+  });
 }
 
 const sendVerificationEmail = async (email, verificationToken) => {
@@ -27,19 +27,20 @@ const sendVerificationEmail = async (email, verificationToken) => {
       from: "fa21bscs0017@maju.edu.pk",
       to: email,
       subject: "Email Verification",
-      html: `<a href="http://${process.env.SERVER_HOST}:${
-        process.env.SERVER_PORT
-      }/verify-email?email=${encodeURIComponent(
-        email
-      )}&token=${verificationToken}">Verify your email</a>`,
+      html: `<a href="http://${process.env.SERVER_HOST}:${process.env.SERVER_PORT
+        }/verify-email?email=${encodeURIComponent(
+          email
+        )}&token=${verificationToken}">Verify your email</a>`,
     };
 
     await transporter.sendMail(mailOptions);
 
     logger.info("Verification email sent successfully.");
+    return "Verification email has been sent to your email, please confirm your email."
   } catch (error) {
+
     logger.error("Error sending verification email:", error);
-    throw error;
+    return "Unsuccessful to send a verification mail."
   }
 };
 
@@ -84,13 +85,13 @@ const sendOTPMail = async (email) => {
     redisClient.set(`otp-${email}`, OTP)
 
   } catch (error) {
-      logger.error(["Error in userMediator > sendOTPMail > ", error.message ])
-      throw Error(error.message)
+    logger.error(["Error in userMediator > sendOTPMail > ", error.message])
+    throw Error(error.message)
   }
 };
 
-module.exports = { 
-    sendVerificationEmail, 
-    verifyPassword,
-    sendOTPMail
+module.exports = {
+  sendVerificationEmail,
+  verifyPassword,
+  sendOTPMail
 };

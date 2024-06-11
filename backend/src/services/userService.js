@@ -52,7 +52,10 @@ const emailVerificationForRegister = async (userInfo) => {
     const { email } = userInfo;
     const existingUser = await findUser({ where: { email } });
     if (existingUser) {
-      throw new Error("User Already Exists With This Email");
+      return {
+        code: 400,
+        message: "User Already Exists With This Email"
+      }
     }
 
     const verificationToken = jwt.sign(userInfo, process.env.JWT_SECRET, {
@@ -61,10 +64,18 @@ const emailVerificationForRegister = async (userInfo) => {
 
     logger.info(["src > repository > userRepository > verificationToken", verificationToken]);
     await redisClient.set(email, verificationToken);
-    await sendVerificationEmail(email, verificationToken);
+    const resultFromEmail = await sendVerificationEmail(email, verificationToken);
+    return {
+      code: 200,
+      message: resultFromEmail
+    };
   } catch (err) {
     console.log("error:", err);
-    throw err; 
+    return {
+      code: 400,
+      message: err
+    };
+    // throw err; 
   }
 };
 
