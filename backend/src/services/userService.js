@@ -24,14 +24,35 @@ const { logger } = require("../../logger");
 const { redisClient } = require("../../Infrastructure/redis");
 const { sendVerificationEmail, verifyPassword, sendOTPMail } = require("../mediators/userMediator");
 
+// const emailVerificationForRegister = async (userInfo) => {
+//   try {
+//     console.log('user info:', userInfo);
+//     console.log("Hey2");
+//     const { email } = userInfo;
+//     const existingUser = await findUser({ where: { email } });
+//     if (existingUser) {
+//       throw Error("User Already Exists With This Email");
+//     }
+
+//     const verificationToken = jwt.sign(userInfo, process.env.JWT_SECRET, {
+//       expiresIn: "10h",
+//     });
+
+//     logger.info(["src > repository > userRepository > verificationToken", verificationToken]);
+//     await redisClient.set(email, verificationToken);
+//     await sendVerificationEmail(email, verificationToken);
+//   } catch (err) {
+//     console.log("error:", err);
+//   }
+// };
+
 const emailVerificationForRegister = async (userInfo) => {
   try {
     console.log('user info:', userInfo);
-    console.log("Hey2");
     const { email } = userInfo;
     const existingUser = await findUser({ where: { email } });
     if (existingUser) {
-      throw Error("User Already Exists With This Email");
+      throw new Error("User Already Exists With This Email");
     }
 
     const verificationToken = jwt.sign(userInfo, process.env.JWT_SECRET, {
@@ -43,31 +64,56 @@ const emailVerificationForRegister = async (userInfo) => {
     await sendVerificationEmail(email, verificationToken);
   } catch (err) {
     console.log("error:", err);
+    throw err; 
   }
 };
 
+
+// const createUserAfterVerification = async (verificationToken) => {
+//   try {
+//     const tokenData = jwt.decode(verificationToken, process.env.JWT_SECRET);  
+//     console.log("userdata: ", tokenData);
+//     const isUserExist = await findUser({ where: { email: tokenData?.email } });
+//     if (isUserExist) {
+//       logger.info(["user already exists", isUserExist]);
+//       throw Error("User already exist with this email");
+      
+//     }
+//     const hashedPassword = await bcrypt.hash(tokenData?.password, 10);
+//     const currentTime = new Date();
+//     console.log("currentTime: ", currentTime);
+//     const userData = { ...tokenData, password: hashedPassword, created_at: currentTime };
+//     let newUser = await createUser(userData);
+//     let token = jwt.sign(newUser, process.env.JWT_SECRET);
+//     return token;
+//   } catch (err){
+//     console.log('error:',err);
+//     return;
+//   }
+// };
+
 const createUserAfterVerification = async (verificationToken) => {
   try {
-    const tokenData = jwt.decode(verificationToken, process.env.JWT_SECRET);  
+    const tokenData = jwt.decode(verificationToken, process.env.JWT_SECRET);
     console.log("userdata: ", tokenData);
     const isUserExist = await findUser({ where: { email: tokenData?.email } });
     if (isUserExist) {
       logger.info(["user already exists", isUserExist]);
-      throw Error("User already exist with this email");
-      
+      throw new Error("User already exists with this email");
     }
     const hashedPassword = await bcrypt.hash(tokenData?.password, 10);
     const currentTime = new Date();
     console.log("currentTime: ", currentTime);
     const userData = { ...tokenData, password: hashedPassword, created_at: currentTime };
     let newUser = await createUser(userData);
-    let token = jwt.sign(newUser, process.env.JWT_SECRET);
+    let token = jwt.sign({ id: newUser.id }, process.env.JWT_SECRET);
     return token;
-  } catch (err){
-    console.log('error:',err);
-    return;
+  } catch (err) {
+    console.log('error:', err);
+    throw err; 
   }
 };
+
 
 const findAllUser = async () => {
   try {

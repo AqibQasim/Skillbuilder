@@ -305,22 +305,36 @@ const otpVerificationSchema = {
 };
 
 // Schema for /auth/google
-const googleAuthSchema = {
-  schema: {
-    querystring: {
-      type: "object",
-      properties: {
-        scope: {
-          type: "array",
-          items: {
-            type: "string"
-          }
-        }
-      },
-      required: ["scope"]
-    }
-  }
-};
+// const googleAuthSchema = {
+//   schema: {
+//     querystring: {
+//       type: "object",
+//       properties: {
+//         scope: {
+//           type: "array",
+//           items: {
+//             type: "string"
+//           }
+//         }
+//       },
+//       required: ["scope"]
+//     }
+//   }
+// };
+
+// const googleAuthSchema = {
+//   schema: {
+//     querystring: {
+//       type: 'object',
+//       properties: {
+//         scope: { type: 'string' }
+//       },
+//       required: ['scope']
+//     }
+//   }
+// };
+
+
 
 // Schema for /auth/google/callback
 const googleAuthCallbackSchema = {
@@ -389,6 +403,6 @@ module.exports = {
   passwordResetSchema,
   otpVerificationSchema,
   googleAuthCallbackSchema,
-  googleAuthSchema,
+  // googleAuthSchema,
   getAllUsersSchema
 };

@@ -25,6 +25,7 @@ module.exports = new EntitySchema({
     },
     password: {
       type: "varchar",
+      nullable: true,
     },
     profession: {
       type: "varchar",
@@ -61,7 +62,12 @@ module.exports = new EntitySchema({
       default: "app",
     },
     created_at: {
-      type: "timestamp with time zone",
+      type: "timestamp",
+      createDate: true,
+    },
+    updated_at: {
+      type: "timestamp",
+      updateDate: true, 
     },
   },
   relations: {

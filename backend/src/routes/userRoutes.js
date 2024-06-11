@@ -1,27 +1,27 @@
 const { default: passport } = require("@fastify/passport");
 const {
- 
+
   createStudent,
- 
+
   getAllUsers,
- 
+
   login,
- 
+
   GoggleLoginCallBAck,
- 
+
   EmailVerify,
- 
+
   ContactUS,
- 
+
   passwordResetHandler,
- 
+
   otpVerification,
- 
+
   changePassword,
- 
+
   profileUpdateHandler,
 } = require("../controllers/userController");
-const { ValidateUser , userSwaggerSchema, loginSchema, updateProfileSchema, changePasswordSchema, verifyEmailSchema, passwordResetSchema, otpVerificationSchema, googleAuthSchema, googleAuthCallbackSchema, getAllUsersSchema } = require("../Schema/userSchema");
+const { ValidateUser, userSwaggerSchema, loginSchema, updateProfileSchema, changePasswordSchema, verifyEmailSchema, passwordResetSchema, otpVerificationSchema,  googleAuthCallbackSchema, getAllUsersSchema } = require("../Schema/userSchema");
 const { contactUsSchema } = require("../Schema/contactUsSchema.js")
 // const { ValidateUser, userSwaggerSchema } = require("../Schema/userSchema");
 
@@ -37,7 +37,7 @@ const userRoutes = async (fastify, options) => {
   fastify.post("/login", loginSchema, login);
 
   //sign in with google
-  fastify.get("/auth/google", googleAuthSchema, passport.authenticate("google", { scope: ["profile", "email"] }));
+  fastify.get("/auth/google",  passport.authenticate("google", { scope: ["profile", "email"] }));
   fastify.get("/auth/google/callback", { preValidation: passport.authenticate("google", { scope: ["profile"] }) }, GoggleLoginCallBAck, googleAuthCallbackSchema);
 
   //forgot password

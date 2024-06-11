@@ -9,11 +9,17 @@ fastifyPassport.use('google', new GoogleStrategy({
     callbackURL: "http://localhost:4000/auth/google/callback"
 }, async function (accessToken, refreshToken, profile, cb) {
     cb(undefined, profile)
+    const fullName = profile.displayName;
+    const [first_name, ...last_name_arr] = fullName.split(' ');
+    const last_name = last_name_arr.join(' ');
+
     const userData = {
-        name: profile.displayName,
-        email: profile.email,
+        first_name : first_name,
+        last_name : last_name,
+        email: profile.emails[0].value,
         source: profile.provider
-    };
+    }
+
     await createGoogleUser(userData);
 }
 ))

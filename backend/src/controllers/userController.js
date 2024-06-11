@@ -2,6 +2,7 @@ const { logger } = require("../../logger");
 const { ValidateUser, loginValidation, validateEmailAndPassword, updateProfileValidation } = require("../Schema/userSchema");
 const ValidateContactUs = require("../Schema/contactUsSchema");
 const { redisClient } = require("../../Infrastructure/redis");
+const jwt = require('jsonwebtoken');
 
 
 const {
@@ -16,6 +17,41 @@ const {
   profileUpdateService
 } = require("../services/userService");
 
+// const createStudent = async (request, reply) => {
+//   logger.info(["src > controllers > userController > ", request.body]);
+//   try {
+//     if (request.body) {
+//       console.log('req:', request.body);
+//       const { error } = ValidateUser.validate(request.body);
+//       if (error) {
+//         console.log('validation error:',error)
+//         return reply.code(400).send({message: error});
+//       }
+//       console.log("hey1");
+//       await emailVerificationForRegister(request.body);
+//       console.log('hey3');
+//       reply.code(201).send({
+//         staus: true,
+//         message: "Message sent to given email for email verification",
+//       });
+//     } else {
+
+//       console.log('hello from else')
+//       reply.code(400).send({
+//         status: false,
+//         message: "Cannot request without body",
+//       });
+//     }
+//   } catch (error) {
+//     console.log("error:",err)
+//     logger.error(["Error registering user:", error.message]);
+//     reply.code(500).send({
+//       staus: false,
+//       message: error.message,
+//     });
+//   }
+// };
+
 const createStudent = async (request, reply) => {
   logger.info(["src > controllers > userController > ", request.body]);
   try {
@@ -23,51 +59,71 @@ const createStudent = async (request, reply) => {
       console.log('req:', request.body);
       const { error } = ValidateUser.validate(request.body);
       if (error) {
-        console.log('validation error:',error)
-        return reply.code(400).send({message: error});
+        console.log('validation error:', error);
+        return reply.code(400).send({
+          status: false,
+          message: error.details[0].message,
+        });
       }
-      console.log("hey1");
       await emailVerificationForRegister(request.body);
-      console.log('hey3');
       reply.code(201).send({
-        staus: true,
+        status: true,
         message: "Message sent to given email for email verification",
       });
     } else {
-
-      console.log('hello from else')
+      console.log('hello from else');
       reply.code(400).send({
         status: false,
         message: "Cannot request without body",
       });
     }
   } catch (error) {
-    console.log("error:",err)
+    console.log("error:", error);
     logger.error(["Error registering user:", error.message]);
     reply.code(500).send({
-      staus: false,
+      status: false,
       message: error.message,
     });
   }
 };
 
+// const EmailVerify = async (request, reply) => {
+//   try {
+//     const { email, token } = request?.query;
+//     console.log('params:',request?.query);
+//     const storedToken = await redisClient.get(email);
+//     if (storedToken === token) {
+//       await redisClient.del(email);
+//       let newUser = await createUserAfterVerification(token);
+//       console.log('newUser creation status:', newUser);
+//       return reply.redirect(process.env.LOGINREDIRECTPAGE);
+//     } else {
+//       reply.status(400).send("Link Expire");
+//     }
+//   } catch (error) {
+//     logger.error(["Error verifying email:", error.message]);
+//     reply.status(500).send(error.message);
+//   };
+// };
+
 const EmailVerify = async (request, reply) => {
   try {
-    const { email, token } = request?.query;
-    console.log('params:',request?.query);
+    const { email, token } = request.query;
+    console.log('params:', request.query);
     const storedToken = await redisClient.get(email);
     if (storedToken === token) {
       await redisClient.del(email);
       let newUser = await createUserAfterVerification(token);
       console.log('newUser creation status:', newUser);
-      return reply.redirect(process.env.LOGINREDIRECTPAGE);
+      // reply.redirect(process.env.LOGINREDIRECTPAGE);
+      reply.status(200).send('Verification Email Sent Successfully');
     } else {
-      reply.status(400).send("Link Expire");
+      reply.status(400).send("Link Expired");
     }
   } catch (error) {
     logger.error(["Error verifying email:", error.message]);
     reply.status(500).send(error.message);
-  };
+  }
 };
 
 const getAllUsers = async (request, reply) => {
@@ -101,13 +157,10 @@ const login = async (request, reply) => {
           status: false,
           message: error.details[0].message,
         });
-      }
+      };
       const user = await UserLogin(payload);
-      reply.code(200).send({
-        status: true,
-        message: "success",
-        data: user,
-      });
+      console.log('user:',user);
+      reply.code(200).send(user);
     } else {
       reply.code(500).send({
         staus: false,
@@ -126,14 +179,12 @@ const login = async (request, reply) => {
 
 const GoggleLoginCallBAck = async (request, reply) => {
   try {
-    console.log("request body: >>> ", request.body);
+    console.log("request body: >>> ", request?.body);
     const code = request.query.code;
     console.log("code: ", code);
+    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: "1h" });
     reply.redirect(process.env.HOME_PAGE_REDIRECT);
-    // reply.code(200).send({
-    //   status: true,
-    //   message: 'User created successfully'
-    // })
+    reply.code(200).send({ token });
   } catch (error) {
     reply.code(500).send({
       status: false,
