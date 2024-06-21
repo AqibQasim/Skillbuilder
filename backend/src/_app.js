@@ -18,7 +18,7 @@ const startServer = async () => {
   const app = fastify(fastifyOptions);
 
   app.register(require("@fastify/cors"), {
-    origin: "http://localhost:3000:",
+    origin: "http://localhost:3001",
   });
   app.register(fastifySecureSession, {
     cookieName: "key",

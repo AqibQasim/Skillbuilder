@@ -186,7 +186,7 @@ const GoggleLoginCallBAck = async (request, reply) => {
     console.log("code: ", code);
     const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: "1h" });
     reply.redirect(process.env.HOME_PAGE_REDIRECT);
-    reply.code(200).send({ token });
+    return reply.code(200).send({ token });
   } catch (error) {
     reply.code(500).send({
       status: false,
