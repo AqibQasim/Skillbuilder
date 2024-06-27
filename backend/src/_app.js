@@ -18,7 +18,7 @@ const startServer = async () => {
   const app = fastify(fastifyOptions);
 
   app.register(require("@fastify/cors"), {
-    origin: "http://localhost:3000:",
+    origin: "http://localhost:3000",
   });
   app.register(fastifySecureSession, {
     cookieName: "key",
@@ -76,7 +76,9 @@ const startServer = async () => {
         console.log("variable testing>", process.env.S3_URL);
         await app.listen(process.env.SERVER_PORT, "0.0.0.0", (err) => {
           err ? logger.error(err) : "";
-          logger.info(`Server is Listening on port ${process.env.SERVER_PORT} and environment is ${process.env.NODE_ENV}`);
+          logger.info(
+            `Server is Listening on port ${process.env.SERVER_PORT} and environment is ${process.env.NODE_ENV}`
+          );
         });
       })
       .catch((error) => {
