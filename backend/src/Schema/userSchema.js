@@ -125,22 +125,22 @@ const loginSchema = {
       },
       required: ["email", "password"] // Make sure to include required properties as an array
     },
-    response: {
-      200: {
-        description: "Successful login",
-        type: "object",
-        properties: {
-          token: { type: "string" }
-        }
-      },
-      default: {
-        description: "Unexpected error",
-        type: "object",
-        properties: {
-          message: { type: "string" }
-        }
-      }
-    }
+    // response: {
+    //   200: {
+    //     description: "Successful login",
+    //     type: "object",
+    //     properties: {
+    //       token: { type: "string" }
+    //     }
+    //   },
+    //   default: {
+    //     description: "Unexpected error",
+    //     type: "object",
+    //     properties: {
+    //       message: { type: "string" }
+    //     }
+    //   }
+    // }
   }
 };
 

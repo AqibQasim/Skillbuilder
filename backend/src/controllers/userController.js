@@ -158,9 +158,12 @@ const login = async (request, reply) => {
         });
       };
       const user = await UserLogin(payload);
-      console.log('user:',user?.userId);
-      if(user && user?.userId){
-        reply.status(200).send(user?.userId);
+      console.log('user:',user);
+      if( user && user?.userId && user?.token ){
+        reply.status(200).send({
+          token : user?.token,
+          userId: user?.userId
+        });
       }
     } else {
       reply.code(500).send({
@@ -189,7 +192,9 @@ const GoggleLoginCallBAck = async (request, reply) => {
     const token = jwt.sign({ id: user?.id, email: user?.email }, process.env.JWT_SECRET, { expiresIn: "10h" });
     console.log("token:",token);
     // reply.redirect(process.env.HOME_PAGE_REDIRECT);
-    return reply.status(200).send({ token });
+    if(user?.id){
+      return reply.status(200).send({ token , userId: user?.id});
+    }
   } catch (error) {
     reply.code(500).send({
       status: false,  

@@ -129,6 +129,7 @@ const UserLogin = async (loginData) => {
     const isUserExist = await findUser({
       where: { email: email },
     });
+    
     logger.info(["src > services > userService > UserLogin ? existingUser: ", isUserExist]);
     if (!isUserExist) {
       throw Error("User does not exist");
