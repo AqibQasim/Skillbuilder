@@ -67,7 +67,7 @@ const verifyPassword = async (password, existingUser) => {
     },
   };
 
-  return { token, option };
+  return { token , userId : existingUser?.id , option };
 };
 
 const sendOTPMail = async (email) => {

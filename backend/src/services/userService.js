@@ -1,22 +1,6 @@
-// <<<<<<< HEAD
-// const { createUser, readAllUser, findUser, UserContact, updateUserByEmail, updateUserById } = require("../repositories/userRepository");
-// =======
-// <<<<<<< HEAD
-// const {
-//   createUser,
-//   readAllUser,
-//   findUser,
-//   UserContact,
-//   updateUserByEmail,
-//   updateUserById,
-//   addToCartDb
-// } = require("../repositories/userRepository");
 
-
-// =======
 const { createUser, readAllUser, findUser, UserContact, updateUserByEmail, updateUserById } = require("../repositories/userRepository");
-// >>>>>>> 7635d92 (add courses apis and much work)
-// >>>>>>> c25baf8
+
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -75,7 +59,6 @@ const emailVerificationForRegister = async (userInfo) => {
       code: 400,
       message: err
     };
-    // throw err; 
   }
 };
 
@@ -117,8 +100,12 @@ const createUserAfterVerification = async (verificationToken) => {
     console.log("currentTime: ", currentTime);
     const userData = { ...tokenData, password: hashedPassword, created_at: currentTime };
     let newUser = await createUser(userData);
+    console.log("id:",newUser?.id);
     let token = jwt.sign({ id: newUser.id }, process.env.JWT_SECRET);
-    return token;
+    return {
+      token: token,
+      userId : newUser?.id
+    }
   } catch (err) {
     console.log('error:', err);
     throw err; 
