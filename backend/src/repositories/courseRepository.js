@@ -13,7 +13,6 @@ const createCourse = async (data) => {
     logger.error(error.message);
     throw new Error(error)
   }
-
 };
 
 const findAllCourses = async () => {

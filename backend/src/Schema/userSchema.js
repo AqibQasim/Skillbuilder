@@ -73,17 +73,6 @@ const updateProfileValidation = Joi.object({
 const userSwaggerSchema = {
   schema: {
     description: "post signup data",
-    // tags: ["user", "code"],
-    // summary: "qwerty",
-    // params: {
-    //   type: "object",
-    //   properties: {
-    //     id: {
-    //       type: "number",
-    //       description: "user id",
-    //     },
-    //   },
-    // },
     body: {
       type: "object",
       properties: {
@@ -91,8 +80,6 @@ const userSwaggerSchema = {
         last_name: { type: "string", default: "Roy" },
         email: { type: "string", default: "test@gmail.com" },
         password: { type: "string", default: "Password@12345" },
-        // profession: { type: "string", default: "software engineer" },
-        // source: { type: "string", default: "" },
         obj: {
           type: "object",
           properties: {

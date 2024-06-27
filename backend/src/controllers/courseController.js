@@ -16,7 +16,7 @@ const postCourse = async (request, reply) => {
       await createCourseWithDetails(data);
       reply.send({
         status: true,
-        message: "course has been created succesfully",
+        message: "course has been created succesfully", 
       });
     } else {
       reply.code(400).send({

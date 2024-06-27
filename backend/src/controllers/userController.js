@@ -158,8 +158,10 @@ const login = async (request, reply) => {
         });
       };
       const user = await UserLogin(payload);
-      console.log('user:',user);
-      reply.code(200).send(user);
+      console.log('user:',user?.userId);
+      if(user && user?.userId){
+        reply.status(200).send(user?.userId);
+      }
     } else {
       reply.code(500).send({
         staus: false,
@@ -182,14 +184,15 @@ const GoggleLoginCallBAck = async (request, reply) => {
     // Check if user exists or create a new user
     let user = await findUser({ where: { email } });
     console.log("request body: >>> ", request?.body);
-    const code = request.query.code;
+    const code = request?.query?.code;
     console.log("code: ", code);
-    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: "1h" });
-    reply.redirect(process.env.HOME_PAGE_REDIRECT);
-    reply.code(200).send({ token });
+    const token = jwt.sign({ id: user?.id, email: user?.email }, process.env.JWT_SECRET, { expiresIn: "10h" });
+    console.log("token:",token);
+    // reply.redirect(process.env.HOME_PAGE_REDIRECT);
+    return reply.status(200).send({ token });
   } catch (error) {
     reply.code(500).send({
-      status: false,
+      status: false,  
       error: error.message,
     });
   }
