@@ -310,18 +310,19 @@ const profileUpdateHandler = async (request, reply) => {
 const ContactUS = async (request, reply) => {
   const userInfo = request.body;
 
-  const { error } = ValidateContactUs.validate(userInfo);
-  if (error) {
-    return reply.code(400).send({ error: error.details[0].message });
-  }
+  // const { error } = ValidateContactUs.validate(userInfo);
+  // if (error) {
+  //   return reply.code(400).send({ error: error.details[0].message });
+  // }
 
   console.log("User Info", userInfo);
   try {
-    const users = await ContactUser(userInfo);
+    const sentMail = await ContactUser(userInfo);
     console.log("Users in Controller", userInfo);
 
     reply.code(201).send({
-      users,
+      success: true,
+      message : sentMail
     });
   } catch (error) {
     console.log("Error in Controller ", error);

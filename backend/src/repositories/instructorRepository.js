@@ -6,8 +6,10 @@ const instructorCreate = async (instructorPayload) => {
   logger.info("src > repositories > instructorRepositry");
   try {
     const creating = instructorRepository.create(instructorPayload);
+    
     const result = instructorRepository.save(creating);
-    logger.info(["Instructor created: ", result]);
+    // logger.info(["Instructor created: ", result]);
+    console.log('instructor created:',result);
     return result;
   } catch (error) {
     logger.error("src repositories > instructorRepository");

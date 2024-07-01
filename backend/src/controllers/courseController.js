@@ -36,20 +36,22 @@ const postCourse = async (request, reply) => {
 const allCourses = async (request, reply) => {
   logger.info("src > controller > controllerALlrCourse ", request.body);
   try {
+    console.log('req body:',request?.body);
     const courses = await getAllCourses();
-    if (courses) {
-      reply.code(200).send({
+    console.log('courses:',courses);
+    // if (courses) {
+      return reply.status(200).send({
         status: true,
         message: "success",
         data: courses,
       });
-    } else {
-      reply.code(200).send({
-        status: true,
-        message: "success",
-        data: null,
-      });
-    }
+    // } else {
+    //   return reply.status(200).send({
+    //     status: true,
+    //     message: "success",
+    //     data: null,
+    //   });
+    // }
   } catch (error) {
     logger.error(error);
     reply.status(500).send({

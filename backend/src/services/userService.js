@@ -255,7 +255,7 @@ const ContactUser = async (userInfo) => {
       await transporter.sendMail(UsermailOptions);
       await transporter.sendMail(AdminmailOptions);
       logger.info(`Email Successfully Send to ${userInfo.email}`);
-      return ContactUs;
+      return 'A mail has successfully being sent to the user.';
     }
   } catch (error) {
     logger.error("Error sending verification email:", error);

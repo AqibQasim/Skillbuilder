@@ -31,26 +31,26 @@ const createCourseSchema = {
       },
       required: ["instructor_id", "title", "learning_outcomes", "category", "modulesCount", "amount", "charges"]
     },
-    response: {
-      201: {
-        description: "Course created successfully",
-        type: "object",
-        properties: {
-          id: { type: "integer" },
-          title: { type: "string" },
-          category: { type: "string" },
-          amount: { type: "number" },
-          charges: { type: "number" },
-        }
-      },
-      default: {
-        description: "Unexpected error",
-        type: "object",
-        properties: {
-          message: { type: "string" }
-        }
-      }
-    }
+    // response: {
+    //   201: {
+    //     description: "Course created successfully",
+    //     type: "object",
+    //     properties: {
+    //       id: { type: "integer" },
+    //       title: { type: "string" },
+    //       category: { type: "string" },
+    //       amount: { type: "number" },
+    //       charges: { type: "number" },
+    //     }
+    //   },
+    //   default: {
+    //     description: "Unexpected error",
+    //     type: "object",
+    //     properties: {
+    //       message: { type: "string" }
+    //     }
+    //   }
+    // }
   }
 };
 
@@ -131,20 +131,20 @@ const allCoursesSchema = {
     description: "Get all courses",
     tags: ["course"],
     summary: "Get all courses",
-    response: {
-      200: {
-        description: "List of all courses",
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            id: { type: "integer" },
-            title: { type: "string" },
-            // Add more properties as needed
-          }
-        }
-      }
-    }
+    // response: {
+    //   200: {
+    //     description: "List of all courses",
+    //     type: "array",
+    //     items: {
+    //       type: "object",
+    //       properties: {
+    //         id: { type: "integer" },
+    //         title: { type: "string" },
+    //         // Add more properties as needed
+    //       }
+    //     }
+    //   }
+    // }
   }
 };
 

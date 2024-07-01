@@ -7,7 +7,7 @@ const { uploadSingle } = require("../mediators/s3Mediator");
 
 const createNewInstructor = async (instructorData) => {
   try {
-    const { id, experience, specialization, qualifications, skills, video } = instructorData;
+    const { id, experience, specialization, qualifications, skills, video_url } = instructorData;
     const user = await findUserById(id);
     if (!user) {
       throw new Error("user not exist");
@@ -18,22 +18,25 @@ const createNewInstructor = async (instructorData) => {
       specialization,
       created_at: new Date(),
     };
-    const video_url = await uploadSingle(video);
-    console.log("upload video", video_url);
+
+    // const video_url = await uploadSingle(video);
+    // const video_url = 'temporary video url';
+    console.log("upload video:", video_url);
 
     const isInstructorExist = await findByFilter({ where: { id: id } });
     if (isInstructorExist) {
       throw new Error("Instructor already Exist");
     }
     await instructorCreate({...instructorPayload, video_url});
-    const skillsJson = JSON.parse(skills);
-    const qualificationJson = JSON.parse(qualifications);
-    await skillsInstuctorCreate(skillsJson, id);
-    await educationInstuctorCreate(qualificationJson, id);
+    // const skillsJson = JSON.parse(skills);
+    // const qualificationJson = JSON.parse(qualifications);
+    await skillsInstuctorCreate(skills, id);  
+    await educationInstuctorCreate(qualifications, id);
 
     // console.log("update user in instructor service > ", updateUser);
   } catch (error) {
-    logger.error(["src > services > instructorService", error.message]);
+    // logger.error(["src > services > instructorService", error.message]);
+    console.log("message:",error)
     throw Error(error);
   }
 };

@@ -4,9 +4,9 @@ const { logger } = require("../../logger");
 const createInstructor = async (request, reply) => {
   try {
     logger.info("src > controllers > InstructorController > createInstructor");
-    const body = JSON.parse(request.body);
-    logger.info(body);
-    await createNewInstructor(body);
+    // const body = JSON.parse(request.body);
+    logger.info(request?.body);
+    await createNewInstructor(request?.body);
     reply.send({
       status: true,
       message: "create instructor successfully ",
