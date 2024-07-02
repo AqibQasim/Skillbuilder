@@ -23,7 +23,11 @@ const saveReview = async (data) => {
                 console.log('err:',err)
             }
         console.log("--------------------", data);
-        const reviewCreating = courseRevRep.create(data);
+        const reviewCreating = courseRevRep.create({
+            ...data,
+            course_id,
+            user_id
+        });
         const saved = courseRevRep.save(reviewCreating);
         return 'Review has been successfully posted.';
         } 

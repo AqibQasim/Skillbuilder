@@ -24,6 +24,9 @@ module.exports = new EntitySchema({
       type: "timestamp with time zone",
       default: () => "CURRENT_TIMESTAMP"
     },
+    course_id: {
+      type: "int"
+    }
   },
   relations: {
     user: {
