@@ -76,9 +76,21 @@ const updateUserById = async (id, payload) => {
       throw Error("User not found");
     }
 
-    let update = await userRepository.merge(user, payload);
-    let updatedUser = await userRepository.save(update);
-    return updatedUser;
+    
+    let update= await userRepository.update(id,payload);
+    console.log("updated data: ", update.affected)
+    if(update.affected>0){
+      return {
+        status:true,
+        message:"Profile updated successfully",
+        data: payload
+      }
+    }else{
+      throw new Error("Profile not updated");
+    }
+    // let update = await userRepository.merge(user, payload);
+    // let updatedUser = await userRepository.save(update);
+    // return updatedUser;
   } catch (error) {
     console.error("Error updating user:", error.message);
     throw error;

@@ -181,6 +181,7 @@ const changePasswordSchema = {
 // Route: /update-profile
 const updateProfileSchema = {
   schema: {
+    
     description: "Update user profile",
     tags: ["user"],
     summary: "Update profile",
@@ -199,41 +200,42 @@ const updateProfileSchema = {
       },
       required: ["id"]
     },
-    response: {
-      200: {
-        description: "Profile successfully updated",
-        content: {
-          "application/json": {
-            schema: {
-              type: "object",
-              properties: {
-                profile: { type: "string", nullable: true },
-                first_name: { type: "string" },
-                last_name: { type: "string" },
-                profession: { type: "string", nullable: true },
-                location: { type: "string", nullable: true },
-                facebook_profile: { type: "string", nullable: true },
-                twitter_profile: { type: "string", nullable: true },
-                linkedin_profile: { type: "string", nullable: true }
-              }
-            }
-          }
-        }
-      },
-      default: {
-        description: "Unexpected error",
-        content: {
-          "application/json": {
-            schema: {
-              type: "object",
-              properties: {
-                message: { type: "string" }
-              }
-            }
-          }
-        }
-      }
-    }
+    // response: {
+    //   200: {
+    //     description: "Profile successfully updated",
+        
+    //     content: {
+    //       "application/json": {
+    //         schema: {
+    //           type: "object",
+    //           properties: {
+    //             profile: { type: "string", nullable: true },
+    //             first_name: { type: "string" },
+    //             last_name: { type: "string" },
+    //             profession: { type: "string", nullable: true },
+    //             location: { type: "string", nullable: true },
+    //             facebook_profile: { type: "string", nullable: true },
+    //             twitter_profile: { type: "string", nullable: true },
+    //             linkedin_profile: { type: "string", nullable: true }
+    //           }
+    //         }
+    //       }
+    //     }
+    //   },
+    //   default: {
+    //     description: "Unexpected error",
+    //     content: {
+    //       "application/json": {
+    //         schema: {
+    //           type: "object",
+    //           properties: {
+    //             message: { type: "string" }
+    //           }
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
   }
 };
 

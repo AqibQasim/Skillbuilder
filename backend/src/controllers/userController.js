@@ -293,11 +293,9 @@ const profileUpdateHandler = async (request, reply) => {
       })
     };
     const result = await profileUpdateService(requestedData);
-    reply.code(200).send({
-      status: true,
-      message: "User updated successully",
-      data: result
-    })
+
+    logger.info("updated result: ",result)
+    reply.code(200).send(result)
 
   } catch (err) {
     reply.code(500).send({
