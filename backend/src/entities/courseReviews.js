@@ -3,14 +3,14 @@ const User = require("../entities/userEntity");
 const Course = require("../entities/course");
 
 module.exports = new EntitySchema({
-  target: "course_reviews",
+  target: "courseReviews",
   name: "course_reviews",
   tableName: "course_reviews",
   columns: {
     id: {
       primary: true,
       type: "int",
-      generated: true,
+      generated: true,  
     },
     rating: {
       type: "decimal",
@@ -22,6 +22,7 @@ module.exports = new EntitySchema({
     },
     date: {
       type: "timestamp with time zone",
+      default: () => "CURRENT_TIMESTAMP"
     },
   },
   relations: {

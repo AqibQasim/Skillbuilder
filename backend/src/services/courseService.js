@@ -1,7 +1,8 @@
 const { logger } = require("../../logger");
 const { createCourseContent } = require("../mediators/courseMediator");
 const { uploadOnS3 } = require("../mediators/instructorMediator");
-const { createCourse, findAllCourses, coursesRatingFunc, fetchCourseWithDetailsWithId, fetchAllRecentCourses, findOneCourse } = require("../repositories/courseRepository");
+const { createCourse, findAllCourses, coursesRatingFunc, fetchCourseWithDetailsWithId, fetchAllRecentCourses, findOneCourse  } = require("../repositories/courseRepository");
+const {saveReview} = require("../repositories/courseReviewRepository.js");
 
 const createCourseWithDetails = async (requestedData) => {
   try {
@@ -88,6 +89,15 @@ const recentCoursesFunc = async () => {
   }
 };
 
+const postReviewService = async (data) => {
+  try{
+    const postReview = await saveReview(data);
+    return postReview;
+  } catch(e) {
+    console.log("ERR:",e);
+  }
+};
+
 module.exports = {
   createCourseWithDetails,
   getAllCourses,
@@ -95,4 +105,5 @@ module.exports = {
   coursesRatingService,
   coursesDetailFunc,
   recentCoursesFunc,
+  postReviewService
 };
