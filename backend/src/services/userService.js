@@ -129,6 +129,7 @@ const UserLogin = async (loginData) => {
     const isUserExist = await findUser({
       where: { email: email },
     });
+    
     logger.info(["src > services > userService > UserLogin ? existingUser: ", isUserExist]);
     if (!isUserExist) {
       throw Error("User does not exist");
@@ -254,7 +255,7 @@ const ContactUser = async (userInfo) => {
       await transporter.sendMail(UsermailOptions);
       await transporter.sendMail(AdminmailOptions);
       logger.info(`Email Successfully Send to ${userInfo.email}`);
-      return ContactUs;
+      return 'A mail has successfully being sent to the user.';
     }
   } catch (error) {
     logger.error("Error sending verification email:", error);

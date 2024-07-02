@@ -29,7 +29,9 @@ module.exports = new EntitySchema({
       type: "varchar",
     },
     source: {
-      type: "varchar",
+      type: "enum",
+      enum: ['glassdoor', 'indeed', 'linkedin','facebook','instagram'],
+      default: 'linkedin'
     },
   },
 });

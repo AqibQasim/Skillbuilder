@@ -13,7 +13,7 @@ const ValidateContactUs = Joi.object({
   source: Joi.string().required()
 });
 
-
+  
 // Route: /contact-us
 const contactUsSchema = {
   schema: {
@@ -33,23 +33,23 @@ const contactUsSchema = {
       },
       required: ["firstName", "lastName", "email", "phone", "subject", "text", "source"]
     },
-    response: {
-      200: {
-        description: "Message successfully sent",
-        type: "object",
-        properties: {
-          success: { type: "boolean" },
-          message: { type: "string" }
-        }
-      },
-      default: {
-        description: "Unexpected error",
-        type: "object",
-        properties: {
-          message: { type: "string" }
-        }
-      }
-    }
+    // response: {
+    //   200: {
+    //     description: "Message successfully sent",
+    //     type: "object",
+    //     properties: {
+    //       success: { type: "boolean" },
+    //       message: { type: "string" }
+    //     }
+    //   },
+    //   default: {
+    //     description: "Unexpected error",
+    //     type: "object",
+    //     properties: {
+    //       message: { type: "string" }
+    //     }
+    //   }
+    // }
   }
 };
 

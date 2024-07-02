@@ -46,7 +46,7 @@ const uploadSingle = async (fileData) => {
     // ACL: "public-read"
   };
   const upload = await s3Client.upload(putObjectCommand).promise();
-  if (upload){
+  if (upload) {
     return uniqueName;
   };
   // if (upload) {

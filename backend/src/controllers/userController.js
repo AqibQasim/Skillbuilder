@@ -158,9 +158,12 @@ const login = async (request, reply) => {
         });
       };
       const user = await UserLogin(payload);
-      console.log('user:',user?.userId);
-      if(user && user?.userId){
-        reply.status(200).send(user?.userId);
+      console.log('user:',user);
+      if( user && user?.userId && user?.token ){
+        reply.status(200).send({
+          token : user?.token,
+          userId: user?.userId
+        });
       }
     } else {
       reply.code(500).send({
@@ -189,7 +192,9 @@ const GoggleLoginCallBAck = async (request, reply) => {
     const token = jwt.sign({ id: user?.id, email: user?.email }, process.env.JWT_SECRET, { expiresIn: "10h" });
     console.log("token:",token);
     // reply.redirect(process.env.HOME_PAGE_REDIRECT);
-    return reply.status(200).send({ token });
+    if(user?.id){
+      return reply.status(200).send({ token , userId: user?.id});
+    }
   } catch (error) {
     reply.code(500).send({
       status: false,  
@@ -305,18 +310,19 @@ const profileUpdateHandler = async (request, reply) => {
 const ContactUS = async (request, reply) => {
   const userInfo = request.body;
 
-  const { error } = ValidateContactUs.validate(userInfo);
-  if (error) {
-    return reply.code(400).send({ error: error.details[0].message });
-  }
+  // const { error } = ValidateContactUs.validate(userInfo);
+  // if (error) {
+  //   return reply.code(400).send({ error: error.details[0].message });
+  // }
 
   console.log("User Info", userInfo);
   try {
-    const users = await ContactUser(userInfo);
+    const sentMail = await ContactUser(userInfo);
     console.log("Users in Controller", userInfo);
 
     reply.code(201).send({
-      users,
+      success: true,
+      message : sentMail
     });
   } catch (error) {
     console.log("Error in Controller ", error);
