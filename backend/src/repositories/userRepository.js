@@ -1,6 +1,7 @@
 const { logger } = require("../../logger");
 const dataSource = require("../../Infrastructure/postgres");
 const userRepository = dataSource.getRepository("User");
+const bcrypt = require("bcrypt");
 
 
 
@@ -45,18 +46,44 @@ const updateUserByEmail = async (email, newData) => {
   try {
     console.log("email", email);
     console.log("password: ", newData);
+
     const user = await userRepository.findOne({
       where: {
         email: email,
       },
     });
+
+
     if (!user) {
-      throw new Error("User not found");
+      return {
+        status: false,
+        message: "Email is incorrect"
+      }
+      //throw new Error("Email or password does not match");
+    } else {
+      const passwordMatch = await bcrypt.compare(newData.current_password, user?.password);
+
+      if (!passwordMatch) {
+        return {
+          status: false,
+          message: "Password does not match"
+        }
+      } else {
+        user.password = await bcrypt.hash(newData.new_password,10);
+        //let update = await userRepository.merge(user, {password: new_password});
+        let updatedUser = await userRepository.save(user);
+        return {
+          status: true,
+          message: "Password updated successfully",
+          userData: updatedUser
+        };
+      }
+
     }
 
-    let update = await userRepository.merge(user, newData);
-    let updatedUser = await userRepository.save(update);
-    return updatedUser;
+    // let update = await userRepository.merge(user, newData);
+    // let updatedUser = await userRepository.save(update);
+    // return updatedUser;
   } catch (error) {
     console.error("Error updating user:", error.message);
     throw error;
@@ -76,9 +103,21 @@ const updateUserById = async (id, payload) => {
       throw Error("User not found");
     }
 
-    let update = await userRepository.merge(user, payload);
-    let updatedUser = await userRepository.save(update);
-    return updatedUser;
+
+    let update = await userRepository.update(id, payload);
+    console.log("updated data: ", update.affected)
+    if (update.affected > 0) {
+      return {
+        status: true,
+        message: "Profile updated successfully",
+        data: payload
+      }
+    } else {
+      throw new Error("Profile not updated");
+    }
+    // let update = await userRepository.merge(user, payload);
+    // let updatedUser = await userRepository.save(update);
+    // return updatedUser;
   } catch (error) {
     console.error("Error updating user:", error.message);
     throw error;

@@ -198,11 +198,28 @@ const sendMailToUser = async (email) => {
 };
 
 const passwordChange = async (userData) => {
+  console.log(userData)
   try {
-    const hashedPassword = await bcrypt.hash(userData?.password, 10);
-    const updatedUser = await updateUserByEmail(userData.email, { ...userData, password: hashedPassword });
-    console.log(updatedUser);
-    return updatedUser;
+    // const currentHashedPassword = await bcrypt.hash(userData?.current_password, 10);
+    // const newHashedPassword = await bcrypt.hash(userData?.new_password, 10);
+    const {status,message} = await updateUserByEmail(userData.email, 
+      { ...userData, current_password: userData?.current_password, new_password: userData?.new_password });
+
+    if(status){
+      return {
+        code: 200,
+        status,
+        message
+      }
+    }else{
+      return {
+        code: 400,
+        status,
+        message
+      }
+    }
+    // console.log(updatedUser);
+    // return updatedUser;
   } catch (error) {
     logger.error(["error in userService > passwordChange > ", error.message]);
     throw Error(error);
