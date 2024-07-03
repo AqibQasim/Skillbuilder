@@ -157,23 +157,23 @@ const changePasswordSchema = {
       },
       required: ["email", "current_password", "new_password"] // Define required properties as an array
     },
-    response: {
-      200: {
-        description: "Password successfully changed",
-        type: "object",
-        properties: {
-          success: { type: "boolean" },
-          message: { type: "string" }
-        }
-      },
-      default: {
-        description: "Unexpected error",
-        type: "object",
-        properties: {
-          message: { type: "string" }
-        }
-      }
-    }
+    // response: {
+    //   200: {
+    //     description: "Password successfully changed",
+    //     type: "object",
+    //     properties: {
+    //       success: { type: "boolean" },
+    //       message: { type: "string" }
+    //     }
+    //   },
+    //   default: {
+    //     description: "Unexpected error",
+    //     type: "object",
+    //     properties: {
+    //       message: { type: "string" }
+    //     }
+    //   }
+    // }
   }
 };
 
@@ -181,7 +181,7 @@ const changePasswordSchema = {
 // Route: /update-profile
 const updateProfileSchema = {
   schema: {
-    
+
     description: "Update user profile",
     tags: ["user"],
     summary: "Update profile",
@@ -203,7 +203,7 @@ const updateProfileSchema = {
     // response: {
     //   200: {
     //     description: "Profile successfully updated",
-        
+
     //     content: {
     //       "application/json": {
     //         schema: {

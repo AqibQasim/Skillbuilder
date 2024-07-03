@@ -260,18 +260,22 @@ const otpVerification = async (request, reply) => {
 
 const changePassword = async (request, reply) => {
   try {
-    const userData = request.body;
-    const { error } = validateEmailAndPassword.validate(userData);
+    const {email, current_password, new_password} = request.body;
+    
+    const { error } = validateEmailAndPassword.validate({
+      email,
+      password: current_password
+    });
     if (error) {
       return reply.code(403).send({
         status: false,
         message: error.details[0].message
       })
     };
-    const updatePassword = await passwordChange(userData);
-    reply.code(200).send({
-      status: true,
-      message: "update password sucessfully"
+    const {status,code,message} = await passwordChange(request.body);
+    reply.code(code).send({
+      status,
+      message
     })
     // logger.info([ "update password in userController > ", updatePassword ]);
   } catch (error) {
