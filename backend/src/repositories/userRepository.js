@@ -111,7 +111,7 @@ const updateUserById = async (id, payload) => {
       return {
         status: true,
         message: "Profile updated successfully",
-        data: payload
+        data: update
       }
     } else {
       throw new Error("Profile not updated");
