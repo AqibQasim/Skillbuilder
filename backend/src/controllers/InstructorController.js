@@ -1,4 +1,8 @@
-const { getInstructors, getInstructorById, createNewInstructor } = require("../services/instructorService.js");
+const {
+  getInstructors,
+  getInstructorById,
+  createNewInstructor,
+} = require("../services/instructorService.js");
 const { logger } = require("../../logger");
 
 const createInstructor = async (request, reply) => {
