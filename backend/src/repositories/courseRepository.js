@@ -38,7 +38,7 @@ const findOneCourse = async (filter) => {
     return findOne;
   } catch (error) {
     logger.error("Error: src > repositories > courseRepository")
-    logger.error(error.message)
+    logger.error(error.message) 
     throw new Error(error);
   }
 }

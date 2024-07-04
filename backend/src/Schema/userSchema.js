@@ -190,7 +190,8 @@ const updateProfileSchema = {
       type: "object",
       properties: {
         id: { type: "number" },
-        name: { type: "string" },
+        first_name: { type: "string" },
+        last_name: { type: "string" },
         email: { type: "string" },
         password: { type: "string" },
         profession: { type: "string" },
