@@ -32,8 +32,9 @@ const findUser = async (filter) => {
   logger.info(["src > repository > userRepository > findUser"]);
   try {
     const userRepository = dataSource.getRepository("User");
-    const user = await userRepository.findOne(filter);
-    // logger.info([user]);
+    const user = await userRepository.findOne({
+      where: filter
+    });
     return user ? user : null;
   } catch (error) {
     console.error("Error fetching users:", error);

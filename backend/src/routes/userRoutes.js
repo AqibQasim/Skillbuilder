@@ -38,7 +38,12 @@ const userRoutes = async (fastify, options) => {
 
   //sign in with google
   fastify.get("/auth/google",  passport.authenticate("google", { scope: ["profile", "email"] }));
-  fastify.get("/auth/google/callback", { preValidation: passport.authenticate("google", { scope: ["profile"] }) }, GoggleLoginCallBAck);
+  fastify.get("/auth/google/callback", { preValidation: passport.authenticate("google", { failureMessage: 
+    {
+      status: false,
+      message: "google authentication failed",
+    } 
+  }) }, GoggleLoginCallBAck);
 
   //forgot password
   fastify.get("/password-reset", passwordResetSchema, passwordResetHandler);

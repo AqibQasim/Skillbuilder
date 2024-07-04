@@ -9,27 +9,27 @@ fastifyPassport.use('google', new GoogleStrategy({
     callbackURL: "http://localhost:4000/auth/google/callback"
 }, async function (accessToken, refreshToken, profile, cb) {
     cb(undefined, profile)
-    const fullName = profile.displayName;
-    const [first_name, ...last_name_arr] = fullName.split(' ');
-    const last_name = last_name_arr.join(' ');
+    // const fullName = profile.displayName;
+    // const [first_name, ...last_name_arr] = fullName.split(' ');
+    // const last_name = last_name_arr.join(' ');
 
-    const userData = {
-        first_name : first_name,
-        last_name : last_name,
-        email: profile.emails[0].value,
-        source: profile.provider
-    }
-
-    await createGoogleUser(userData);
+    // const userData = {
+    //     first_name : first_name,
+    //     last_name : last_name,
+    //     email: profile.email,
+    //     source: profile.provider
+    // };
+    // console.log(userData);
+    // await createGoogleUser(userData);
 }
 ))
 
 fastifyPassport.default.registerUserSerializer(async (user, req) => {
-    logger.info([ "user in serializer: ", user ])
+    // logger.info([ "user in serializer: ", user ])
     return user;
 })
 
 fastifyPassport.default.registerUserDeserializer(async (user, req) => {
-    logger.info(["user in deserializer: ", user])
+    // logger.info(["user in deserializer: ", user])
     return user;
 }) 
