@@ -1,5 +1,6 @@
 const Joi = require("joi");
 const { EmailVerify } = require("../controllers/userController");
+const { query } = require("pg-monitor");
 
 const ValidateUser = Joi.object({
   first_name: Joi.string().required(),
@@ -270,7 +271,7 @@ const verifyEmailSchema = {
 // /password-reset/:email
 const passwordResetSchema = {
   schema: {
-    params: {
+    query: {
       type: "object",
       properties: {
         email: { type: "string", description: "User email for password reset" }

@@ -15,43 +15,10 @@ const {
   findUserByEmail,
   sendMailToUser,
   passwordChange,
-  profileUpdateService
+  profileUpdateService,
+  createGoogleUser
 } = require("../services/userService");
 
-// const createStudent = async (request, reply) => {
-//   logger.info(["src > controllers > userController > ", request.body]);
-//   try {
-//     if (request.body) {
-//       console.log('req:', request.body);
-//       const { error } = ValidateUser.validate(request.body);
-//       if (error) {
-//         console.log('validation error:',error)
-//         return reply.code(400).send({message: error});
-//       }
-//       console.log("hey1");
-//       await emailVerificationForRegister(request.body);
-//       console.log('hey3');
-//       reply.code(201).send({
-//         staus: true,
-//         message: "Message sent to given email for email verification",
-//       });
-//     } else {
-
-//       console.log('hello from else')
-//       reply.code(400).send({
-//         status: false,
-//         message: "Cannot request without body",
-//       });
-//     }
-//   } catch (error) {
-//     console.log("error:",err)
-//     logger.error(["Error registering user:", error.message]);
-//     reply.code(500).send({
-//       staus: false,
-//       message: error.message,
-//     });
-//   }
-// };
 
 const createStudent = async (request, reply) => {
   logger.info(["src > controllers > userController > ", request.body]);
@@ -83,25 +50,6 @@ const createStudent = async (request, reply) => {
     });
   }
 };
-
-// const EmailVerify = async (request, reply) => {
-//   try {
-//     const { email, token } = request?.query;
-//     console.log('params:',request?.query);
-//     const storedToken = await redisClient.get(email);
-//     if (storedToken === token) {
-//       await redisClient.del(email);
-//       let newUser = await createUserAfterVerification(token);
-//       console.log('newUser creation status:', newUser);
-//       return reply.redirect(process.env.LOGINREDIRECTPAGE);
-//     } else {
-//       reply.status(400).send("Link Expire");
-//     }
-//   } catch (error) {
-//     logger.error(["Error verifying email:", error.message]);
-//     reply.status(500).send(error.message);
-//   };
-// };
 
 const EmailVerify = async (request, reply) => {
   try {
@@ -183,18 +131,17 @@ const login = async (request, reply) => {
 
 const GoggleLoginCallBAck = async (request, reply) => {
   try {
-    const { email } = request.user;
-    // Check if user exists or create a new user
-    let user = await findUser({ where: { email } });
-    console.log("request body: >>> ", request?.body);
-    const code = request?.query?.code;
+    const user = request.user;
+    console.log("google callback: >>>>>> ", user);
+    const code = request.query?.code;
     console.log("code: ", code);
-    const token = jwt.sign({ id: user?.id, email: user?.email }, process.env.JWT_SECRET, { expiresIn: "10h" });
-    console.log("token:",token);
-    // reply.redirect(process.env.HOME_PAGE_REDIRECT);
-    if(user?.id){
-      return reply.status(200).send({ token , userId: user?.id});
-    }
+    const userCreation = await createGoogleUser(user)
+    console.log("userCreation: ", userCreation);
+    reply.send({
+      status: true,
+      message: "logged in successfully",
+      data: userCreation
+    })
   } catch (error) {
     reply.code(500).send({
       status: false,  
@@ -349,6 +296,6 @@ module.exports = {
   changePassword,
   profileUpdateHandler,
   ContactUS,
- 
+  
 
 };
