@@ -1,10 +1,15 @@
 const { logger } = require("../../logger");
-const { ValidateUser, loginValidation, validateEmailAndPassword, updateProfileValidation } = require("../Schema/userSchema");
+const {
+  ValidateUser,
+  loginValidation,
+  validateEmailAndPassword,
+  updateProfileValidation,
+} = require("../Schema/userSchema");
 const ValidateContactUs = require("../Schema/contactUsSchema");
 const { redisClient } = require("../../Infrastructure/redis");
-const jwt = require('jsonwebtoken');
-const User = require('../entities/userEntity');
-const {findUser}= require("../repositories/userRepository");
+const jwt = require("jsonwebtoken");
+const User = require("../entities/userEntity");
+const { findUser } = require("../repositories/userRepository");
 
 const {
   emailVerificationForRegister,
@@ -16,18 +21,17 @@ const {
   sendMailToUser,
   passwordChange,
   profileUpdateService,
-  createGoogleUser
+  createGoogleUser,
 } = require("../services/userService");
-
 
 const createStudent = async (request, reply) => {
   logger.info(["src > controllers > userController > ", request.body]);
   try {
     if (request.body) {
-      console.log('req:', request.body);
+      console.log("req:", request.body);
       const { error } = ValidateUser.validate(request.body);
       if (error) {
-        console.log('validation error:', error);
+        console.log("validation error:", error);
         return reply.code(400).send({
           status: false,
           message: error.details[0].message,
@@ -54,12 +58,12 @@ const createStudent = async (request, reply) => {
 const EmailVerify = async (request, reply) => {
   try {
     const { email, token } = request.query;
-    console.log('params:', request.query);
+    console.log("params:", request.query);
     const storedToken = await redisClient.get(email);
     if (storedToken === token) {
       await redisClient.del(email);
       let newUser = await createUserAfterVerification(token);
-      console.log('newUser creation status:', newUser);
+      console.log("newUser creation status:", newUser);
       reply.redirect(process.env.LOGINREDIRECTPAGE);
       return;
     } else {
@@ -104,13 +108,13 @@ const login = async (request, reply) => {
           status: false,
           message: error.details[0].message,
         });
-      };
+      }
       const user = await UserLogin(payload);
-      console.log('user:',user);
-      if( user && user?.userId && user?.token ){
+      console.log("user:", user);
+      if (user && user?.userId && user?.token) {
         reply.status(200).send({
-          token : user?.token,
-          userId: user?.userId
+          token: user?.token,
+          userId: user?.userId,
         });
       }
     } else {
@@ -135,16 +139,16 @@ const GoggleLoginCallBAck = async (request, reply) => {
     console.log("google callback: >>>>>> ", user);
     const code = request.query?.code;
     console.log("code: ", code);
-    const userCreation = await createGoogleUser(user)
+    const userCreation = await createGoogleUser(user);
     console.log("userCreation: ", userCreation);
     reply.send({
       status: true,
       message: "logged in successfully",
-      data: userCreation
-    })
+      data: userCreation,
+    });
   } catch (error) {
     reply.code(500).send({
-      status: false,  
+      status: false,
       error: error.message,
     });
   }
@@ -181,57 +185,56 @@ const passwordResetHandler = async (request, reply) => {
 const otpVerification = async (request, reply) => {
   try {
     const { otp, email } = request.query;
-    const getOtp = await redisClient.get(`otp-${email}`)
+    const getOtp = await redisClient.get(`otp-${email}`);
     console.log("getOPT : ", getOtp);
     if (otp == getOtp) {
       reply.code(200).send({
         status: true,
-        message: "OTP verification successful"
+        message: "OTP verification successful",
       });
-      redisClient.del(`otp-${email}`)
+      redisClient.del(`otp-${email}`);
     } else {
       reply.code(200).send({
         status: false,
-        message: "Invalid OTP"
+        message: "Invalid OTP",
       });
     }
-
   } catch (error) {
-    logger.error(["error in userController > otpVerificatio", error.message])
+    logger.error(["error in userController > otpVerificatio", error.message]);
     reply.code(500).send({
       status: false,
-      message: error.message
-    })
+      message: error.message,
+    });
   }
 };
 
 const changePassword = async (request, reply) => {
   try {
-    const {email, current_password, new_password} = request.body;
-    
+    const { email, current_password, new_password } = request.body;
+
     const { error } = validateEmailAndPassword.validate({
       email,
-      password: current_password
+      password: current_password,
     });
     if (error) {
       return reply.code(403).send({
         status: false,
-        message: error.details[0].message
-      })
-    };
-    const {status,code,message} = await passwordChange(request.body);
+        message: error.details[0].message,
+      });
+    }
+    const { status, code, message } = await passwordChange(request.body);
     reply.code(code).send({
       status,
-      message
-    })
+      message,
+    });
     // logger.info([ "update password in userController > ", updatePassword ]);
   } catch (error) {
     reply.code(500).send({
       status: false,
-      message: error.message
-    })
+      message: error.message,
+    });
   }
-}
+};
 
 const profileUpdateHandler = async (request, reply) => {
   try {
@@ -240,21 +243,20 @@ const profileUpdateHandler = async (request, reply) => {
     if (error) {
       return reply.code(403).send({
         status: false,
-        message: error.details[0].message
-      })
-    };
+        message: error.details[0].message,
+      });
+    }
     const result = await profileUpdateService(requestedData);
 
-    logger.info("updated result: ",result)
-    reply.code(200).send(result)
-
+    logger.info("updated result: ", result);
+    reply.code(200).send(result);
   } catch (err) {
     reply.code(500).send({
       status: false,
-      message: err.message
-    })
+      message: err.message,
+    });
   }
-}
+};
 
 const ContactUS = async (request, reply) => {
   const userInfo = request.body;
@@ -268,22 +270,16 @@ const ContactUS = async (request, reply) => {
   try {
     const sentMail = await ContactUser(userInfo);
     console.log("Users in Controller", userInfo);
-
     reply.code(201).send({
       success: true,
-      message : sentMail
+      message: sentMail,
     });
   } catch (error) {
     console.log("Error in Controller ", error);
-    request.log.error("Error registering user:", error);
-    reply
-      .code(500)
-      .send({ error: "An error occurred while registering user." });
+    request.log.error("Error while Contacting:", error);
+    reply.code(500).send({ error: "An Error Occured" });
   }
 };
-
-
-
 
 module.exports = {
   createStudent,
@@ -296,6 +292,4 @@ module.exports = {
   changePassword,
   profileUpdateHandler,
   ContactUS,
-  
-
 };

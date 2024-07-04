@@ -32,6 +32,4 @@ fastifyPassport.default.registerUserSerializer(async (user, req) => {
 fastifyPassport.default.registerUserDeserializer(async (user, req) => {
     // logger.info(["user in deserializer: ", user])
     return user;
-})
-
- 
+}) 
