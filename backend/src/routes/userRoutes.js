@@ -51,7 +51,7 @@ const userRoutes = async (fastify, options) => {
   fastify.post("/change-password", changePasswordSchema, changePassword);
 
   //update profile
-  fastify.post("/update-profile", updateProfileSchema, profileUpdateHandler);
+  fastify.put("/update-profile", updateProfileSchema, profileUpdateHandler);
 
   // fastify.post("/update-profile", profileUpdateHandler);
 

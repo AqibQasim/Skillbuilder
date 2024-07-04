@@ -1,5 +1,6 @@
 const Joi = require("joi");
 const { EmailVerify } = require("../controllers/userController");
+const { query } = require("pg-monitor");
 
 const ValidateUser = Joi.object({
   first_name: Joi.string().required(),
@@ -157,23 +158,23 @@ const changePasswordSchema = {
       },
       required: ["email", "current_password", "new_password"] // Define required properties as an array
     },
-    response: {
-      200: {
-        description: "Password successfully changed",
-        type: "object",
-        properties: {
-          success: { type: "boolean" },
-          message: { type: "string" }
-        }
-      },
-      default: {
-        description: "Unexpected error",
-        type: "object",
-        properties: {
-          message: { type: "string" }
-        }
-      }
-    }
+    // response: {
+    //   200: {
+    //     description: "Password successfully changed",
+    //     type: "object",
+    //     properties: {
+    //       success: { type: "boolean" },
+    //       message: { type: "string" }
+    //     }
+    //   },
+    //   default: {
+    //     description: "Unexpected error",
+    //     type: "object",
+    //     properties: {
+    //       message: { type: "string" }
+    //     }
+    //   }
+    // }
   }
 };
 
@@ -181,6 +182,7 @@ const changePasswordSchema = {
 // Route: /update-profile
 const updateProfileSchema = {
   schema: {
+
     description: "Update user profile",
     tags: ["user"],
     summary: "Update profile",
@@ -199,41 +201,42 @@ const updateProfileSchema = {
       },
       required: ["id"]
     },
-    response: {
-      200: {
-        description: "Profile successfully updated",
-        content: {
-          "application/json": {
-            schema: {
-              type: "object",
-              properties: {
-                profile: { type: "string", nullable: true },
-                first_name: { type: "string" },
-                last_name: { type: "string" },
-                profession: { type: "string", nullable: true },
-                location: { type: "string", nullable: true },
-                facebook_profile: { type: "string", nullable: true },
-                twitter_profile: { type: "string", nullable: true },
-                linkedin_profile: { type: "string", nullable: true }
-              }
-            }
-          }
-        }
-      },
-      default: {
-        description: "Unexpected error",
-        content: {
-          "application/json": {
-            schema: {
-              type: "object",
-              properties: {
-                message: { type: "string" }
-              }
-            }
-          }
-        }
-      }
-    }
+    // response: {
+    //   200: {
+    //     description: "Profile successfully updated",
+
+    //     content: {
+    //       "application/json": {
+    //         schema: {
+    //           type: "object",
+    //           properties: {
+    //             profile: { type: "string", nullable: true },
+    //             first_name: { type: "string" },
+    //             last_name: { type: "string" },
+    //             profession: { type: "string", nullable: true },
+    //             location: { type: "string", nullable: true },
+    //             facebook_profile: { type: "string", nullable: true },
+    //             twitter_profile: { type: "string", nullable: true },
+    //             linkedin_profile: { type: "string", nullable: true }
+    //           }
+    //         }
+    //       }
+    //     }
+    //   },
+    //   default: {
+    //     description: "Unexpected error",
+    //     content: {
+    //       "application/json": {
+    //         schema: {
+    //           type: "object",
+    //           properties: {
+    //             message: { type: "string" }
+    //           }
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
   }
 };
 
@@ -268,7 +271,7 @@ const verifyEmailSchema = {
 // /password-reset/:email
 const passwordResetSchema = {
   schema: {
-    params: {
+    query: {
       type: "object",
       properties: {
         email: { type: "string", description: "User email for password reset" }
