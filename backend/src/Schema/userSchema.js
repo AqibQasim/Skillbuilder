@@ -53,7 +53,8 @@ const validateEmailAndPassword = Joi.object({
 
 const updateProfileValidation = Joi.object({
   id: Joi.number().required(),
-  name: Joi.string(),
+  first_name: Joi.string(),
+  last_name: Joi.string(),
   email: Joi.string()
     .pattern(new RegExp(/(\w+|\.+\w+){1,10}@[a-zA-Z0-9]+\.([a-zA-Z0-9]+|\.[a-zA-Z0-9]+){1,3}/))
     .messages({
