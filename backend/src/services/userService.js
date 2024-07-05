@@ -44,7 +44,7 @@ const emailVerificationForRegister = async (userInfo) => {
   try {
     console.log("user info:", userInfo);
     const { email } = userInfo;
-    const existingUser = await findUser({ where: { email } });
+    const existingUser = await findUser({ email } );
     if (existingUser) {
       return {
         code: 400,
@@ -105,7 +105,7 @@ const createUserAfterVerification = async (verificationToken) => {
   try {
     const tokenData = jwt.decode(verificationToken, process.env.JWT_SECRET);
     console.log("userdata: ", tokenData);
-    const isUserExist = await findUser({ where: { email: tokenData?.email } });
+    const isUserExist = await findUser({ email: tokenData?.email } );
     if (isUserExist) {
       logger.info(["user already exists", isUserExist]);
       throw new Error("User already exists with this email");
@@ -204,9 +204,7 @@ const findUserByEmail = async (email) => {
 const findUserById = async (id) => {
   try {
     const filter = {
-      where: {
         id: id,
-      },
     };
     const result = await findUser(filter);
     return result;
