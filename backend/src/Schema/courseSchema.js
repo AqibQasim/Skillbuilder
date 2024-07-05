@@ -102,24 +102,24 @@ const getCourseByIdSchema = {
       },
       required: ["id"]
     },
-    response: {
-      200: {
-        description: "Course found",
-        type: "object",
-        properties: {
-          id: { type: "integer" },
-          title: { type: "string" },
-          // Add more properties as needed
-        }
-      },
-      404: {
-        description: "Course not found",
-        type: "object",
-        properties: {
-          message: { type: "string" }
-        }
-      }
-    }
+    // response: {
+    //   200: {
+    //     description: "Course found",
+    //     type: "object",
+    //     properties: {
+    //       id: { type: "integer" },
+    //       title: { type: "string" },
+    //       // Add more properties as needed
+    //     }
+    //   },
+    //   404: {
+    //     description: "Course not found",
+    //     type: "object",
+    //     properties: {
+    //       message: { type: "string" }
+    //     }
+    //   }
+    // }
   }
 };
 

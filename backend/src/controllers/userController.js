@@ -111,10 +111,10 @@ const login = async (request, reply) => {
       }
       const user = await UserLogin(payload);
       console.log("user:", user);
-      if (user && user?.userId && user?.token) {
+      if (user) {
         reply.status(200).send({
           token: user?.token,
-          userId: user?.userId,
+          user: user?.user,
         });
       }
     } else {
