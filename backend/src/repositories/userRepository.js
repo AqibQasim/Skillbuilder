@@ -43,6 +43,22 @@ const findUser = async (filter) => {
   }
 };
 
+const findOneUser = async (id) => {
+  console.log("id in find one user method:", id)
+  try {
+    const userRepository = dataSource.getRepository("User");
+    const user = await userRepository.findOne({
+      where: {
+        id: id
+      }
+    });
+    return user ? user : null;
+  } catch(err){
+    console.log("ERR:", err);
+    return
+  }
+}
+
 const updateUserByEmail = async (email, newData) => {
   try {
     console.log("email", email);
@@ -53,14 +69,11 @@ const updateUserByEmail = async (email, newData) => {
         email: email,
       },
     });
-
-
     if (!user) {
       return {
         status: false,
         message: "Email is incorrect"
       }
-      //throw new Error("Email or password does not match");
     } else {
       const passwordMatch = await bcrypt.compare(newData.current_password, user?.password);
 
@@ -153,5 +166,5 @@ module.exports = {
   updateUserByEmail,
   updateUserById,
   UserContact,
-
+  findOneUser
 };

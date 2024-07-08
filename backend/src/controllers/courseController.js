@@ -1,5 +1,5 @@
 const { logger } = require("../../logger");
-const { createCourseWithDetails, getAllCourses, coursesRatingService, coursesDetailFunc, recentCoursesFunc, courseGetById, postReviewService } = require("../services/courseService");
+const { createCourseWithDetails, getAllCourses, coursesRatingService, coursesDetailFunc, recentCoursesFunc, courseGetById, postReviewService, getReviewsService } = require("../services/courseService");
 const { getInstructorById } = require("../services/instructorService");
 const { postPurchasedCourse, findAllPurchasedCourse } = require("../services/purchasedCourseService");
 
@@ -187,6 +187,16 @@ const postReview = async (req, res) => {
   }
 }
 
+const getReviews = async (req, res) => {
+  const id = req?.params?.id;
+  const result = await getReviewsService(id);
+    console.log("result of posting a review:", result);
+    res.code(200).send({
+      success: true,
+      message: result
+    })
+}
+
 module.exports = {
   postCourse,
   allCourses,
@@ -196,5 +206,6 @@ module.exports = {
   recentCourses,
   createPurchasedCourse,
   getMyCourses,
-  postReview
+  postReview,
+  getReviews
 };

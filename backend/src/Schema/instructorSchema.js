@@ -81,25 +81,25 @@ const instructorDetailSchema = {
             },
             required: ["id"]
         },
-        response: {
-            200: {
-                description: "Details of the instructor",
-                type: "object",
-                properties: {
-                    id: { type: "integer" },
-                    name: { type: "string" },
-                    specialization: { type: "string" },
-                    // Add more properties as needed
-                }
-            },
-            default: {
-                description: "Unexpected error",
-                type: "object",
-                properties: {
-                    message: { type: "string" }
-                }
-            }
-        }
+        // response: {
+        //     200: {
+        //         description: "Details of the instructor",
+        //         type: "object",
+        //         properties: {
+        //             id: { type: "integer" },
+        //             name: { type: "string" },
+        //             specialization: { type: "string" },
+        //             // Add more properties as needed
+        //         }
+        //     },
+        //     default: {
+        //         description: "Unexpected error",
+        //         type: "object",
+        //         properties: {
+        //             message: { type: "string" }
+        //         }
+        //     }
+        // }
     }
 };
 
