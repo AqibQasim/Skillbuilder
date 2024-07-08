@@ -22,6 +22,7 @@ const {
   passwordChange,
   profileUpdateService,
   createGoogleUser,
+  getOneUserService
 } = require("../services/userService");
 
 const createStudent = async (request, reply) => {
@@ -132,6 +133,20 @@ const login = async (request, reply) => {
     });
   }
 };
+
+const getOneUser = async (req,res) => {
+  try{
+    const id = req?.params?.id;
+    const result = await getOneUserService(id);
+    console.log("result:", result);  
+    res.send({
+      success: true,
+      message : result
+    })
+  } catch(err){
+    console.log("ERR:",err);
+  }
+}
 
 const GoggleLoginCallBAck = async (request, reply) => {
   try {
@@ -292,4 +307,5 @@ module.exports = {
   changePassword,
   profileUpdateHandler,
   ContactUS,
+  getOneUser
 };

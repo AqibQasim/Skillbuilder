@@ -26,6 +26,14 @@ module.exports = new EntitySchema({
     order: {
       type: "int",
     },
+    duration: {
+      type: "varchar"
+    },
+    lock_status : {
+      type: "enum",
+      enum : ["lock", "preview"],
+      default: "lock"
+    },
   },
   relations: {
     modules: {

@@ -5,6 +5,7 @@ const {
   UserContact,
   updateUserByEmail,
   updateUserById,
+  findOneUser,
 } = require("../repositories/userRepository");
 
 const nodemailer = require("nodemailer");
@@ -164,6 +165,20 @@ const UserLogin = async (loginData) => {
   }
 };
 
+const getOneUserService = async (id) => {
+  try{
+    let user = await findOneUser(id);
+    if(user){
+      console.log('User:', user);
+      return user;
+    } else{
+      return 'There is no such user.'
+    }
+  } catch (e){
+    console.log("ERR:", e);
+  }
+}
+
 const createGoogleUser = async (userInfo) => {
   try {
     const { email } = userInfo;
@@ -309,4 +324,5 @@ module.exports = {
   passwordChange,
   profileUpdateService,
   ContactUser,
+  getOneUserService
 };

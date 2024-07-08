@@ -20,6 +20,8 @@ const {
   changePassword,
 
   profileUpdateHandler,
+
+  getOneUser
 } = require("../controllers/userController");
 const { ValidateUser, userSwaggerSchema, loginSchema, updateProfileSchema, changePasswordSchema, verifyEmailSchema, passwordResetSchema, otpVerificationSchema,  googleAuthCallbackSchema, getAllUsersSchema } = require("../Schema/userSchema");
 const { contactUsSchema } = require("../Schema/contactUsSchema.js")
@@ -27,11 +29,12 @@ const { contactUsSchema } = require("../Schema/contactUsSchema.js")
 
 const userRoutes = async (fastify, options) => {
   //signup as student
-  fastify.post("/signup", userSwaggerSchema, createStudent);
+  fastify.post("/signup", createStudent);
   fastify.get("/verify-email", verifyEmailSchema, EmailVerify);
 
   //get all students
   fastify.get("/users", getAllUsersSchema, getAllUsers);
+  fastify.get("/user/:id",getOneUser)
 
   //signin as student
   fastify.post("/login", loginSchema, login);
