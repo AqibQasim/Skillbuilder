@@ -72,11 +72,13 @@ const sendMailSchema = {
       type: "object",
       properties: {
         email: { type: "string", format: "email" },
+        subject : { type : "string"},
         content: { type: "string" },
       },
       required: [
         "email",
         "content",
+        "subject"
       ],
     },
     // response: {

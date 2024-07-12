@@ -87,12 +87,12 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const sendEmailService = async (email,content) => {
+const sendEmailService = async (email,content,subject) => {
   try {
     const mailOptions = {
       from: "fa21bscs0017@maju.edu.pk",
       to: email,
-      subject: "Email Verification",
+      subject: subject,
       html:` <p>
       ${content}
       </p>`,
