@@ -21,10 +21,11 @@ const {
 
   profileUpdateHandler,
 
-  getOneUser
+  getOneUser,
+  sendEmail
 } = require("../controllers/userController");
 const { ValidateUser, userSwaggerSchema, loginSchema, updateProfileSchema, changePasswordSchema, verifyEmailSchema, passwordResetSchema, otpVerificationSchema,  googleAuthCallbackSchema, getAllUsersSchema } = require("../Schema/userSchema");
-const { contactUsSchema } = require("../Schema/contactUsSchema.js")
+const { contactUsSchema, sendMailSchema } = require("../Schema/contactUsSchema.js")
 // const { ValidateUser, userSwaggerSchema } = require("../Schema/userSchema");
 
 const userRoutes = async (fastify, options) => {
@@ -60,6 +61,7 @@ const userRoutes = async (fastify, options) => {
 
   //Contact Us
   fastify.post("/contact-us", contactUsSchema, ContactUS);
+  fastify.post("/send-email", sendMailSchema ,sendEmail)
 };
 
 module.exports = userRoutes;

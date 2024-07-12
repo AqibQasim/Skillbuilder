@@ -22,7 +22,8 @@ const {
   passwordChange,
   profileUpdateService,
   createGoogleUser,
-  getOneUserService
+  getOneUserService,
+  sendEmailService
 } = require("../services/userService");
 
 const createStudent = async (request, reply) => {
@@ -55,6 +56,18 @@ const createStudent = async (request, reply) => {
     });
   }
 };
+
+const sendEmail = async  (req,res) => {
+  try{
+    const {email, content} = req?.body;
+    console.log("body data:", email, content);
+    const result = await sendEmailService(email,content);
+    res.status(200).send(result)
+  } catch(e){
+    console.log("Error while sending a mail:", e);
+    res.status(200).send("Some error occured:",e);
+  }
+}
 
 const EmailVerify = async (request, reply) => {
   try {
@@ -307,5 +320,6 @@ module.exports = {
   changePassword,
   profileUpdateHandler,
   ContactUS,
-  getOneUser
+  getOneUser,
+  sendEmail
 };

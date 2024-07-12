@@ -79,6 +79,36 @@ const emailVerificationForRegister = async (userInfo) => {
   }
 };
 
+const transporter = nodemailer.createTransport({
+  service: "Gmail",
+  auth: {
+    user: process.env.MAIL_USER,
+    pass: process.env.MAIL_PASS,
+  },
+});
+
+const sendEmailService = async (email,content) => {
+  try {
+    const mailOptions = {
+      from: "fa21bscs0017@maju.edu.pk",
+      to: email,
+      subject: "Email Verification",
+      html:` <p>
+      ${content}
+      </p>`,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    logger.info(" email sent successfully.");
+    return "Email has been sent to your email, please confirm your email."
+  } catch (error) {
+
+    logger.error("Error sending verification email:", error);
+    return "Unsuccessful to send a verification mail."
+  }
+};
+
 // const createUserAfterVerification = async (verificationToken) => {
 //   try {
 //     const tokenData = jwt.decode(verificationToken, process.env.JWT_SECRET);
@@ -324,5 +354,6 @@ module.exports = {
   passwordChange,
   profileUpdateService,
   ContactUser,
-  getOneUserService
+  getOneUserService,
+  sendEmailService
 };

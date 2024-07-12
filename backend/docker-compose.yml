@@ -14,27 +14,14 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
 
-    pgsql:
-        image: postgres:14.7
-        volumes:
-            - ./db:/var/lib/postgresql/data
-            # - ./postgres-initdb.sh:/docker-entrypoint-initdb.d/initdb.sh
-        ports:
-            - "5432:5432"
-        networks:
-            - dev-net
-        environment:
-            POSTGRES_USER: postgres
-            POSTGRES_PASSWORD: postgres
-            POSTGRES_DB: postgres
-            
-    adminer:
-        image: adminer
-        restart: always
-        networks:
-            - dev-net
-        ports:
-            - 8080:8080
+      
+  adminer:
+    image: adminer
+    restart: always
+    networks:
+      - dev-net
+    ports:
+      - 8080:8080
 
   redis:
     image: redis:latest
