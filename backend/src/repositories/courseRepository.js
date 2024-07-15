@@ -29,6 +29,18 @@ const findAllCourses = async () => {
   }
 };
 
+const findAllCoursesByInst = async (id) => {
+  logger.info("src > Repository > fetchAllCourses");
+  try {
+    const allCourses = await courseRepository.find(id);
+    return allCourses;
+  } catch (error) {
+    logger.error("Error : src > repositories > courseRepository")
+    logger.error(error.message)
+    throw new Error(error);
+  }
+};
+
 const findOneCourse = async (filter) => {
   try {
     const findOne = await courseRepository.findOne({
@@ -136,5 +148,6 @@ module.exports = {
   coursesRatingFunc,
   fetchCourseWithDetailsWithId,
   fetchAllRecentCourses,
+  findAllCoursesByInst
   // saveReview
 };

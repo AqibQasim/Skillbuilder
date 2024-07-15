@@ -9,7 +9,7 @@ const coursesRoutes = async (fastify, options) => {
   fastify.get("/course-details/:id", courseDetailsSchema, courseDetails);
   fastify.post('/buy-course',buyCourseSchema, createPurchasedCourse);
   fastify.get('/my-courses/:user_id', myCoursesSchema, getMyCourses);
-  fastify.post('/post-review', postReview)
+  fastify.post('/post-review', postReview);
   fastify.get('/get-all-reviews/:id', getReviews);
 };
 

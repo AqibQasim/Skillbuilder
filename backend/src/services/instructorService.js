@@ -1,4 +1,5 @@
 const { fetchAllInstructor, instructorCreate, findByFilter } = require("../repositories/instructorRepository");
+const {findAllCourses, findAllCoursesByInst } = require("../repositories/courseRepository");
 const { logger } = require("../../logger");
 const { findUserById } = require("./userService");
 const { skillsInstuctorCreate } = require("./instructorSkillService");
@@ -19,8 +20,6 @@ const createNewInstructor = async (instructorData) => {
       created_at: new Date(),
     };
 
-    // const video_url = await uploadSingle(video);
-    // const video_url = 'temporary video url';
     console.log("upload video:", video_url);
 
     const isInstructorExist = await findByFilter({ where: { id: id } });
@@ -28,14 +27,9 @@ const createNewInstructor = async (instructorData) => {
       throw new Error("Instructor already Exist");
     }
     await instructorCreate({...instructorPayload, video_url});
-    // const skillsJson = JSON.parse(skills);
-    // const qualificationJson = JSON.parse(qualifications);
     await skillsInstuctorCreate(skills, id);  
     await educationInstuctorCreate(qualifications, id);
-
-    // console.log("update user in instructor service > ", updateUser);
   } catch (error) {
-    // logger.error(["src > services > instructorService", error.message]);
     console.log("message:",error)
     throw Error(error);
   }
@@ -61,8 +55,24 @@ const getInstructorById = async (id) => {
   }
 };
 
+const getCoursesByInstService = async (id) => {
+  try{
+    const InstructorReceive = await findAllCoursesByInst(
+      {
+        where:{
+          instructor_id : id
+        }
+      }
+    );
+    return InstructorReceive;
+  }catch(e){
+    throw new Error(error);
+  }
+}
+
 module.exports = {
   getInstructors,
   createNewInstructor,
   getInstructorById,
+  getCoursesByInstService
 };
