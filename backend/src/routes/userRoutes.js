@@ -1,6 +1,5 @@
 const { default: passport } = require("@fastify/passport");
 const {
-
   createStudent,
 
   getAllUsers,
@@ -21,10 +20,21 @@ const {
 
   profileUpdateHandler,
 
-  getOneUser
+  getOneUser,
 } = require("../controllers/userController");
-const { ValidateUser, userSwaggerSchema, loginSchema, updateProfileSchema, changePasswordSchema, verifyEmailSchema, passwordResetSchema, otpVerificationSchema,  googleAuthCallbackSchema, getAllUsersSchema } = require("../Schema/userSchema");
-const { contactUsSchema } = require("../Schema/contactUsSchema.js")
+const {
+  ValidateUser,
+  userSwaggerSchema,
+  loginSchema,
+  updateProfileSchema,
+  changePasswordSchema,
+  verifyEmailSchema,
+  passwordResetSchema,
+  otpVerificationSchema,
+  googleAuthCallbackSchema,
+  getAllUsersSchema,
+} = require("../Schema/userSchema");
+const { contactUsSchema } = require("../Schema/contactUsSchema.js");
 // const { ValidateUser, userSwaggerSchema } = require("../Schema/userSchema");
 
 const userRoutes = async (fastify, options) => {
@@ -34,19 +44,28 @@ const userRoutes = async (fastify, options) => {
 
   //get all students
   fastify.get("/users", getAllUsersSchema, getAllUsers);
-  fastify.get("/user/:id",getOneUser)
+  fastify.get("/user/:id", getOneUser);
 
   //signin as student
   fastify.post("/login", loginSchema, login);
 
   //sign in with google
-  fastify.get("/auth/google",  passport.authenticate("google", { scope: ["profile", "email"] }));
-  fastify.get("/auth/google/callback", { preValidation: passport.authenticate("google", { failureMessage: 
+  fastify.get(
+    "/auth/google",
+    passport.authenticate("google", { scope: ["profile", "email"] })
+  );
+  fastify.get(
+    "/auth/google/callback",
     {
-      status: false,
-      message: "google authentication failed",
-    } 
-  }) }, GoggleLoginCallBAck);
+      preValidation: passport.authenticate("google", {
+        failureMessage: {
+          status: false,
+          message: "google authentication failed",
+        },
+      }),
+    },
+    GoggleLoginCallBAck
+  );
 
   //forgot password
   fastify.get("/password-reset", passwordResetSchema, passwordResetHandler);

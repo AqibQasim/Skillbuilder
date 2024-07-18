@@ -22,7 +22,7 @@ const {
   passwordChange,
   profileUpdateService,
   createGoogleUser,
-  getOneUserService
+  getOneUserService,
 } = require("../services/userService");
 
 const createStudent = async (request, reply) => {
@@ -134,19 +134,19 @@ const login = async (request, reply) => {
   }
 };
 
-const getOneUser = async (req,res) => {
-  try{
+const getOneUser = async (req, res) => {
+  try {
     const id = req?.params?.id;
     const result = await getOneUserService(id);
-    console.log("result:", result);  
+    console.log("result:", result);
     res.send({
       success: true,
-      message : result
-    })
-  } catch(err){
-    console.log("ERR:",err);
+      message: result,
+    });
+  } catch (err) {
+    console.log("ERR:", err);
   }
-}
+};
 
 const GoggleLoginCallBAck = async (request, reply) => {
   try {
@@ -156,11 +156,14 @@ const GoggleLoginCallBAck = async (request, reply) => {
     console.log("code: ", code);
     const userCreation = await createGoogleUser(user);
     console.log("userCreation: ", userCreation);
-    reply.send({
-      status: true,
-      message: "logged in successfully",
-      data: userCreation,
-    });
+
+    reply.redirect(`${process.env.HOME_PAGE_REDIRECT}/home`);
+
+    // reply.send({
+    //   status: true,
+    //   message: "logged in successfully",
+    //   data: userCreation,
+    // });
   } catch (error) {
     reply.code(500).send({
       status: false,
@@ -307,5 +310,5 @@ module.exports = {
   changePassword,
   profileUpdateHandler,
   ContactUS,
-  getOneUser
+  getOneUser,
 };
