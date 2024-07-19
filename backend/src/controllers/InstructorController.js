@@ -1,10 +1,10 @@
-const {
-  getInstructors,
-  getInstructorById,
-  createNewInstructor,
-  getCoursesByInstService
-} = require("../services/instructorService.js");
+const { getInstructors, getInstructorById, createNewInstructor, getCoursesByInstService, uploadVideoToYT } = require("../services/instructorService.js");
+const { updateInstructor } = require("../repositories/instructorRepository");
 const { logger } = require("../../logger");
+const { oauth2Client } = require('../../Infrastructure/youtubeConfig');
+const fs = require('fs');
+const path = require('path');
+const { google } = require('googleapis');
 
 const createInstructor = async (request, reply) => {
   try {
@@ -86,9 +86,60 @@ const getCoursesByInstructor = async (request, reply) => {
   }
 }
 
+async function uploadInstVideo(request, reply) {
+  const parts = await request.parts();
+  let fieldsData = {};
+  let videoFilePath = null;
+  let instructorId = null;
+
+  const uploadDir = path.join(__dirname, 'uploads');
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir);
+  }
+
+  for await (const part of parts) {
+    if (part.file) {
+      if (part.fieldname === 'video') {
+        const filename = part.filename;
+        const saveTo = path.join(uploadDir, filename);
+
+        videoFilePath = saveTo;
+        console.log(`File [${part.fieldname}] Finished: ${videoFilePath}`);
+        break;
+      }
+    }
+    else {
+      if (part.fieldname === 'instructorId') {
+        console.log("part.fieldname:", part.fieldname);
+        instructorId = part.value;
+        console.log('instructor id is :', instructorId);
+      }
+    }
+  }
+
+  try {
+    const result = await uploadVideoToYT(instructorId, videoFilePath)
+    if (result?.video_url) {
+      reply.status(200).send(result);
+    }
+  } catch (error) {
+    console.log('Error uploading video', error)
+    reply.status(200).send("internal server error:", error);
+  } finally{
+    fs.unlink(videoFilePath, (err) => {
+      if (err) {
+        console.error('Failed to delete video file:', err);
+      } else {
+        console.log(`Successfully deleted video file: ${videoFilePath}`);
+      }
+    })
+  }
+};
+
 module.exports = {
   createInstructor,
   getAllInstructor,
-  instructorDetail, 
-  getCoursesByInstructor
+  instructorDetail,
+  getCoursesByInstructor,
+  uploadInstVideo
 };

@@ -11,11 +11,16 @@ const { fastifyOptions } = require("../fastifyOpts");
 const userRoutes = require("./routes/userRoutes");
 const coursesRoutes = require("./routes/coursesRoutes");
 const instructorRoutes = require("./routes/instructorRoutes");
-const uploadOnS3Routes = require("./routes/s3Route");
+const uploadOnS3Routes = require("./routes/s3Route"); 
+const ytRoutes = require('../src/routes/youtubeAPIroutes');
+const {authUrl} = require('../Infrastructure/youtubeConfig')
 require("./Authentication/googleAuth");
+
 
 const startServer = async () => {
   const app = fastify(fastifyOptions);
+
+  console.log("authURL:", authUrl);
 
   app.register(require("@fastify/cors"), {
     // origin: "http://localhost:3001",
@@ -30,9 +35,11 @@ const startServer = async () => {
       path: "/",
     },
   });
+  // app.register(require('fastify-multipart'));
   app.register(fastifyPassport.default.initialize());
   app.register(fastifyPassport.default.secureSession());
   app.register(require("@fastify/multipart"));
+  // app.register(require('fastify-multer'))
   app.register(require("@fastify/swagger"));
   app.register(require("@fastify/swagger-ui"), {
     routePrefix: "/documentation",
@@ -70,6 +77,7 @@ const startServer = async () => {
   app.register(coursesRoutes);
   app.register(instructorRoutes);
   app.register(uploadOnS3Routes);
+  app.register(ytRoutes);
 
   try {
     await dataSource

@@ -26,6 +26,7 @@ const {
 } = require("../controllers/userController");
 const { ValidateUser, userSwaggerSchema, loginSchema, updateProfileSchema, changePasswordSchema, verifyEmailSchema, passwordResetSchema, otpVerificationSchema,  googleAuthCallbackSchema, getAllUsersSchema } = require("../Schema/userSchema");
 const { contactUsSchema, sendMailSchema } = require("../Schema/contactUsSchema.js")
+
 // const { ValidateUser, userSwaggerSchema } = require("../Schema/userSchema");
 
 const userRoutes = async (fastify, options) => {
