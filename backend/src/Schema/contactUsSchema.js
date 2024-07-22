@@ -63,4 +63,42 @@ const contactUsSchema = {
   },
 };
 
-module.exports = { ValidateContactUs, contactUsSchema };
+const sendMailSchema = {
+  schema: {
+    description: "email",
+    tags: ["email"],
+    summary: "email",
+    body: {
+      type: "object",
+      properties: {
+        email: { type: "string", format: "email" },
+        subject : { type : "string"},
+        content: { type: "string" },
+      },
+      required: [
+        "email",
+        "content",
+        "subject"
+      ],
+    },
+    // response: {
+    //   200: {
+    //     description: "Message successfully sent",
+    //     type: "object",
+    //     properties: {
+    //       success: { type: "boolean" },
+    //       message: { type: "string" }
+    //     }
+    //   },
+    //   default: {
+    //     description: "Unexpected error",
+    //     type: "object",
+    //     properties: {
+    //       message: { type: "string" }
+    //     }
+    //   }
+    // }
+  },
+};
+
+module.exports = { ValidateContactUs, contactUsSchema ,sendMailSchema};

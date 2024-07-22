@@ -2,6 +2,7 @@ const {
   getInstructors,
   getInstructorById,
   createNewInstructor,
+  getCoursesByInstService
 } = require("../services/instructorService.js");
 const { logger } = require("../../logger");
 
@@ -74,8 +75,20 @@ const instructorDetail = async (request, reply) => {
   }
 };
 
+const getCoursesByInstructor = async (request, reply) => {
+  try {
+    const id = request?.params?.id;
+    const allCoursesByInstructor = await getCoursesByInstService(id);
+    reply.status(200).send(allCoursesByInstructor);
+  } catch (e) {
+    console.log("ERR:", e);
+    reply.status(500).send("Some server side exception has occured");
+  }
+}
+
 module.exports = {
   createInstructor,
   getAllInstructor,
-  instructorDetail,
+  instructorDetail, 
+  getCoursesByInstructor
 };

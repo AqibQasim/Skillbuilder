@@ -45,7 +45,7 @@ const emailVerificationForRegister = async (userInfo) => {
   try {
     console.log("user info:", userInfo);
     const { email } = userInfo;
-    const existingUser = await findUser({ email } );
+    const existingUser = await findUser({ email });
     if (existingUser) {
       return {
         code: 400,
@@ -79,6 +79,54 @@ const emailVerificationForRegister = async (userInfo) => {
   }
 };
 
+const transporter = nodemailer.createTransport({
+  service: "Gmail",
+  auth: {
+    user: process.env.MAIL_USER,
+    pass: process.env.MAIL_PASS,
+  },
+});
+
+const sendEmailService = async (email, content, subject) => {
+  try {
+
+    const checkIfUserIsInDb = await findUser(
+      {
+        email: email
+      }
+    );
+
+    console.log("User found:",checkIfUserIsInDb);
+
+    if (checkIfUserIsInDb) {
+      const mailOptions = {
+        from: "fa21bscs0017@maju.edu.pk",
+        to: email,
+        subject: subject,
+        html: ` <p>
+        ${content}
+        </p>`,
+      };
+
+      await transporter.sendMail(mailOptions);
+
+      logger.info("Email sent successfully.");
+      return {
+        userId: checkIfUserIsInDb?.id,
+        message: "An email has been sent to the entered email. Please verify if this is your account."
+      }
+    } else {
+      return {
+        message: "User with this email doesn't exist."
+      }
+    }
+  } catch (error) {
+
+    logger.error("Error sending verification email:", error);
+    return "Unsuccessful to send a verification mail."
+  }
+};
+
 // const createUserAfterVerification = async (verificationToken) => {
 //   try {
 //     const tokenData = jwt.decode(verificationToken, process.env.JWT_SECRET);
@@ -106,7 +154,7 @@ const createUserAfterVerification = async (verificationToken) => {
   try {
     const tokenData = jwt.decode(verificationToken, process.env.JWT_SECRET);
     console.log("userdata: ", tokenData);
-    const isUserExist = await findUser({ email: tokenData?.email } );
+    const isUserExist = await findUser({ email: tokenData?.email });
     if (isUserExist) {
       logger.info(["user already exists", isUserExist]);
       throw new Error("User already exists with this email");
@@ -166,15 +214,15 @@ const UserLogin = async (loginData) => {
 };
 
 const getOneUserService = async (id) => {
-  try{
+  try {
     let user = await findOneUser(id);
-    if(user){
+    if (user) {
       console.log('User:', user);
       return user;
-    } else{
+    } else {
       return 'There is no such user.'
     }
-  } catch (e){
+  } catch (e) {
     console.log("ERR:", e);
   }
 }
@@ -219,7 +267,7 @@ const findUserByEmail = async (email) => {
 const findUserById = async (id) => {
   try {
     const filter = {
-        id: id,
+      id: id,
     };
     const result = await findUser(filter);
     return result;
@@ -324,5 +372,6 @@ module.exports = {
   passwordChange,
   profileUpdateService,
   ContactUser,
-  getOneUserService
+  getOneUserService,
+  sendEmailService
 };
