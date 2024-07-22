@@ -6,10 +6,8 @@ const instructorCreate = async (instructorPayload) => {
   logger.info("src > repositories > instructorRepositry");
   try {
     const creating = instructorRepository.create(instructorPayload);
-    
     const result = instructorRepository.save(creating);
-    // logger.info(["Instructor created: ", result]);
-    console.log('instructor created:',result);
+    console.log('instructor created:', result);
     return result;
   } catch (error) {
     logger.error("src repositories > instructorRepository");
@@ -42,21 +40,37 @@ const fetchAllInstructor = async () => {
   }
 };
 
-const findByFilter = async (filter) => {
-  try {
-    const instructorExist = await instructorRepository.findOne({
-      ...filter,
-      relations: ["skills", "reviews", "education"],
-    });
-    if (instructorExist) {
-      return instructorExist;
+  const findByFilter = async (filter) => {
+    try {
+      const instructorExist = await instructorRepository.findOne({
+        ...filter,
+        relations: ["skills", "reviews", "education"],
+      });
+      if (instructorExist) {
+        return instructorExist;
+      }
+      return null;
+    } catch (error) {
+      logger.error(["src > reposirtory > instructorRepository > findByFilter > error", error.message]);
+      throw new Error(error);
     }
-    return null;
-  } catch (error) {
-    logger.error(["src > reposirtory > instructorRepository > findByFilter > error", error.message]);
-    throw new Error(error);
-  }
-};
+  };
+
+const updateInstructor = async (instructorId, videoUrl) => {
+  const instructorExist = await instructorRepository.findOne({
+    where: { id: instructorId },
+  });
+
+  if (!instructorExist) {
+    return 'No such instructor exists!';
+  };
+
+  Object.assign(instructorExist, {video_url: videoUrl});
+
+  const updatedInstructor = await instructorRepository.save(instructorExist);
+  console.log("updated instructor:", updatedInstructor);
+  return "Instructor has been updated successfully"
+}
 
 // const fetchAllInstructorWithSkills = async (id) => {
 //   logger.info("src > instructorRepository > fetchAllInstructorWithSkills");
@@ -81,5 +95,6 @@ module.exports = {
   instructorCreate,
   fetchAllInstructor,
   findByFilter,
+  updateInstructor
   // fetchAllInstructorWithSkills,
 };
