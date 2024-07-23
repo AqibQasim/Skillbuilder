@@ -4,7 +4,8 @@ const { logger } = require("../../logger");
 const { oauth2Client } = require('../../Infrastructure/youtubeConfig');
 const fs = require('fs');
 const path = require('path');
-const { google } = require('googleapis');
+const { google } = require('googleapis'); 
+const { v4: uuidv4 } = require('uuid');
 
 const createInstructor = async (request, reply) => {
   try {
@@ -100,10 +101,24 @@ async function uploadInstVideo(request, reply) {
   for await (const part of parts) {
     if (part.file) {
       if (part.fieldname === 'video') {
-        const filename = part.filename;
-        const saveTo = path.join(uploadDir, filename);
+        let filename = part.filename;
+        let saveTo = path.join(uploadDir, filename);
+        if (fs.existsSync(saveTo)) {
+          const ext = path.extname(filename);
+          const name = path.basename(filename, ext);
+          filename = `${name}-${uuidv4()}${ext}`;
+          saveTo = path.join(uploadDir, filename);
+        }
 
         videoFilePath = saveTo;
+
+        // Write file to the disk
+        const writeStream = fs.createWriteStream(saveTo);
+        for await (const chunk of part.file) {
+          writeStream.write(chunk);
+        }
+        writeStream.end();
+
         console.log(`File [${part.fieldname}] Finished: ${videoFilePath}`);
         break;
       }
@@ -116,17 +131,17 @@ async function uploadInstVideo(request, reply) {
       }
     }
   }
-
   try {
     const result = await uploadVideoToYT(instructorId, videoFilePath)
+    console.log("result in upload inst video:",result);
     if (result?.video_url) {
       reply.status(200).send(result);
     }
   } catch (error) {
     console.log('Error uploading video', error)
-    reply.status(200).send("internal server error:", error);
   } finally{
     fs.unlink(videoFilePath, (err) => {
+      console.log("video file path in finally block:",videoFilePath);
       if (err) {
         console.error('Failed to delete video file:', err);
       } else {
