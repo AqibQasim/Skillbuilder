@@ -7,7 +7,7 @@ const {saveReview} = require("../repositories/courseReviewRepository.js");
 
 const createCourseWithDetails = async (requestedData) => {
   try {
-    const { instructor_id, title, creation_duration_hours, learning_outcomes, category, modulesCount, amount, image, modules } = requestedData;
+    const { instructor_id, title, creation_duration_hours, learning_outcomes, category, modulesCount, amount, image, modules, description } = requestedData;
     // const image_url = await uploadOnS3(image);
     const courseBasicsPayload = {
       instructor_id,
@@ -17,6 +17,7 @@ const createCourseWithDetails = async (requestedData) => {
       category,
       modulesCount,
       amount,
+      description,
       discount: requestedData?.discount,
       charges: amount * 0.03,
       image: image,
@@ -31,6 +32,14 @@ const createCourseWithDetails = async (requestedData) => {
     throw new Error(error);
   }
 };
+
+const enrollInCourse = () => {
+  try{
+
+  } catch (err){
+    console.log("Error ")
+  }
+}
 
 const getAllCourses = async () => {
   try {

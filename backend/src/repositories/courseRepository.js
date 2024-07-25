@@ -41,10 +41,13 @@ const findAllCoursesByInst = async (id) => {
   }
 };
 
-const findOneCourse = async (filter) => {
+const findOneCourse = async (filter,course_id) => {
   try {
+    const updateObject = {};
+    updateObject[filter] = course_id;
+    console.log("updated object:",updateObject)
     const findOne = await courseRepository.findOne({
-      ...filter,
+      where : updateObject,
       relations: ['instructor', 'reviews', 'modules.content'],
   });
     return findOne;

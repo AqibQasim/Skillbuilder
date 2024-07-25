@@ -16,6 +16,9 @@ module.exports = new EntitySchema({
     title: {
       type: "varchar",
     },
+    description: {
+      type: "varchar"
+    },
     creation_duration_hours: {
       type: "int",
     },
@@ -30,19 +33,13 @@ module.exports = new EntitySchema({
     },
     amount: {
       type: "decimal",
-      // precision: 7,
-      // scale: 5
     },
     discount: {
       type: "decimal",
-      // precision: 4,
-      // scale: 2,
       default: 0
     },
     charges: {
       type: "decimal",
-      // precision: 7,
-      // scale: 5
     },
     active: {
       type: "boolean",
@@ -52,6 +49,10 @@ module.exports = new EntitySchema({
       type: "enum",
       enum: ['pending', 'approved', 'declined'],
       default: 'pending'
+    },
+    enrolled_customers: {
+      type: "jsonb",
+      default: []
     },
     image: {
       type: "varchar",

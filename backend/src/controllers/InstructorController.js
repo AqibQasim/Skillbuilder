@@ -135,7 +135,7 @@ async function uploadInstVideo(request, reply) {
     const result = await uploadVideoToYT(instructorId, videoFilePath)
     console.log("result in upload inst video:",result);
     if (result?.video_url) {
-      reply.status(200).send(result);
+      reply.status(200).send(result);   
     }
   } catch (error) {
     console.log('Error uploading video', error)

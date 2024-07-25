@@ -7,7 +7,9 @@ const {
   updateUserById,
   findOneUser,
 } = require("../repositories/userRepository");
-
+const dataSource = require("../../Infrastructure/postgres");
+const courseRepository = dataSource.getRepository("Course");
+const { findAllCoursesByInst } = require('../repositories/courseRepository')
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -18,6 +20,10 @@ const {
   verifyPassword,
   sendOTPMail,
 } = require("../mediators/userMediator");
+const { findOneCourse } = require("../repositories/courseRepository");
+const { EntityRepository } = require("typeorm");
+const { forEach } = require("lodash");
+// const { ConfigurationServicePlaceholders } = require("aws-sdk/lib/config_service_placeholders");
 
 // const emailVerificationForRegister = async (userInfo) => {
 //   try {
@@ -96,7 +102,7 @@ const sendEmailService = async (email, content, subject) => {
       }
     );
 
-    console.log("User found:",checkIfUserIsInDb);
+    console.log("User found:", checkIfUserIsInDb);
 
     if (checkIfUserIsInDb) {
       const mailOptions = {
@@ -127,28 +133,34 @@ const sendEmailService = async (email, content, subject) => {
   }
 };
 
-// const createUserAfterVerification = async (verificationToken) => {
-//   try {
-//     const tokenData = jwt.decode(verificationToken, process.env.JWT_SECRET);
-//     console.log("userdata: ", tokenData);
-//     const isUserExist = await findUser({ where: { email: tokenData?.email } });
-//     if (isUserExist) {
-//       logger.info(["user already exists", isUserExist]);
-//       throw Error("User already exist with this email");
+const enrollInCourseService = async ({ student_id, course_id, filter }) => {
+  try {
+    const course = await findOneCourse(
+      filter,
+      course_id
+    );
 
-//     }
-//     const hashedPassword = await bcrypt.hash(tokenData?.password, 10);
-//     const currentTime = new Date();
-//     console.log("currentTime: ", currentTime);
-//     const userData = { ...tokenData, password: hashedPassword, created_at: currentTime };
-//     let newUser = await createUser(userData);
-//     let token = jwt.sign(newUser, process.env.JWT_SECRET);
-//     return token;
-//   } catch (err){
-//     console.log('error:',err);
-//     return;
-//   }
-// };
+    console.log("course:", course);
+    console.log("JSON.parse(course?.enrolled_customers):", course?.enrolled_customers)
+
+    if (!course) {
+      return "The requested course either doesn't exist or has been removed";
+    } else {
+      let enrolledCustomers = course.enrolled_customers ? course.enrolled_customers : [];
+      enrolledCustomers.push({student_id: student_id});
+      console.log("enrolled customers:", enrolledCustomers);
+
+      course.enrolled_customers = enrolledCustomers;
+      const result = await courseRepository.save(course); 
+      console.log("updated result:", result);
+      return result;
+    }
+  } catch (err) {
+    console.log("ERROR while enrolling:", err);
+    return "ERROR while enrolling:", err
+  }
+}
+
 
 const createUserAfterVerification = async (verificationToken) => {
   try {
@@ -360,6 +372,32 @@ const ContactUser = async (userInfo) => {
   }
 };
 
+const getStudentsByInstructorIdService = async ({instructorId}) => {
+  try{
+      const coursesByInst = await findAllCoursesByInst(instructorId);
+      console.log("courses by a particular instructor:",coursesByInst);
+
+      let studentsIdEnrolled = [];
+
+    coursesByInst.forEach(course => {
+      if (course.enrolled_customers) {
+        const enrolledCustomers = Array.isArray(course.enrolled_customers) ? course.enrolled_customers : JSON.parse(course.enrolled_customers);
+        const studentIds = enrolledCustomers.map(customer => customer.student_id);
+        studentsIdEnrolled = [...studentsIdEnrolled, ...studentIds];
+      }
+    });
+
+    const studentDetailsPromises = studentsIdEnrolled.map(student_id => findUser({ id: student_id }));
+    const studentsDetails = await Promise.all(studentDetailsPromises);
+
+    console.log("students details:", studentsDetails);
+    return studentsDetails;
+  } catch(err){
+    console.log("Error fetching students based on a particular instructor id:", err);
+    return "Error fetching students based on a particular instructor id:", err;
+  }
+}
+
 module.exports = {
   createGoogleUser,
   emailVerificationForRegister,
@@ -373,5 +411,7 @@ module.exports = {
   profileUpdateService,
   ContactUser,
   getOneUserService,
-  sendEmailService
+  sendEmailService,
+  enrollInCourseService,
+  getStudentsByInstructorIdService
 };

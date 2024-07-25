@@ -72,24 +72,24 @@ const updateInstructor = async (instructorId, videoUrl) => {
   return "Instructor has been updated successfully"
 }
 
-// const fetchAllInstructorWithSkills = async (id) => {
-//   logger.info("src > instructorRepository > fetchAllInstructorWithSkills");
-//   try {
-//     const instructor = await instructorRepository.findOne({
-//       where: { id },
-//       relations: ["skills", "reviews", "education"],
-//       // select: ["id", "name", "email"],
-//     });
-//     console.log("instructorrrrr ------------- ", instructor);
-//     if (instructor) {
-//       return instructor;
-//     } else {
-//       return "Teacher Not Found With This ID";
-//     }
-//   } catch (error) {
-//     return error;
-//   }
-// };
+  // const fetchAllInstructorWithSkills = async (id) => {
+  //   logger.info("src > instructorRepository > fetchAllInstructorWithSkills");
+  //   try {
+  //     const instructor = await instructorRepository.findOne({
+  //       where: { id },
+  //       relations: ["skills", "reviews", "education"],
+  //       // select: ["id", "name", "email"],
+  //     });
+  //     console.log("instructorrrrr ------------- ", instructor);
+  //     if (instructor) {
+  //       return instructor;
+  //     } else {
+  //       return "Teacher Not Found With This ID";
+  //     }
+  //   } catch (error) {
+  //     return error;
+  //   }
+  // };
 
 module.exports = {
   instructorCreate,

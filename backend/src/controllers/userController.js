@@ -23,7 +23,9 @@ const {
   profileUpdateService,
   createGoogleUser,
   getOneUserService,
-  sendEmailService
+  sendEmailService,
+  enrollInCourseService,
+  getStudentsByInstructorIdService
 } = require("../services/userService");
 
 const createStudent = async (request, reply) => {
@@ -158,6 +160,17 @@ const getOneUser = async (req,res) => {
     })
   } catch(err){
     console.log("ERR:",err);
+  }
+}
+
+const enrollInCourse = async (request,reply) => {
+  try{
+    const {student_id,course_id,filter} = request?.body;
+    const result = await enrollInCourseService({student_id,course_id,filter});
+    reply.status(200).send(result);
+  } catch(err){
+    console.log("Some internal server error occured",err);
+    reply.status(500).send("Some internal server error occured",err);
   }
 }
 
@@ -309,6 +322,17 @@ const ContactUS = async (request, reply) => {
   }
 };
 
+const getStudentsByInstructorId = async (request,response) => {
+  try{
+    const {instructor_id} = request?.query;
+    const result = await getStudentsByInstructorIdService({instructor_id});
+    response.status(200).send(result);
+  } catch(err){
+    console.log("Error while handling:",err);
+    response.status(500).send("Error while handling:",err);
+  }
+}
+
 module.exports = {
   createStudent,
   getAllUsers,
@@ -321,5 +345,7 @@ module.exports = {
   profileUpdateHandler,
   ContactUS,
   getOneUser,
-  sendEmail
+  sendEmail,
+  enrollInCourse,
+  getStudentsByInstructorId
 };
