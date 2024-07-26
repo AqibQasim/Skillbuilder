@@ -237,7 +237,7 @@ const getOneUserService = async (id) => {
     } else {
       return {
         status : 400,
-        message : "No such user is found"
+        message : "User not found"
       }
     }
   } catch (e) {
