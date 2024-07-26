@@ -1,9 +1,8 @@
 const { fetchAllInstructor, instructorCreate, findByFilter } = require("../repositories/instructorRepository");
-const { findAllCourses, findAllCoursesByInst } = require("../repositories/courseRepository");
+const { findAllCourses, findAllCoursesByInst, updateCourse } = require("../repositories/courseRepository");
 const { logger } = require("../../logger");
 const { findUserById } = require("./userService");
-const { skillsInstuctorCreate } = require("./instructorSkillService");
-const { educationInstuctorCreate } = require("./instructorEducationService");
+
 const { uploadSingle } = require("../mediators/s3Mediator");
 const { updateInstructor } = require('../repositories/instructorRepository');
 // const { logger } = require("../../logger");
@@ -16,17 +15,20 @@ const { google } = require('googleapis');
 
 const createNewInstructor = async (instructorData, filePath) => {
   try {
-    const { id, title, description, experience, specialization, tags, entity, qualifications, skills, video_url } = instructorData;
+    const { id, user_id, title, description, experience, specialization, tags, entity, qualifications, skills, video_url } = instructorData;
     const user = await findUserById(id);
-    
+
     if (!user) {
       throw new Error("user not exist");
     }
-    
+
     const instructorPayload = {
       id,
       experience,
       specialization,
+      user_id,
+      skills,
+      qualifications,
       created_at: new Date(),
     };
 
@@ -35,9 +37,8 @@ const createNewInstructor = async (instructorData, filePath) => {
       throw new Error("Instructor already Exist");
     }
 
-      await instructorCreate({ ...instructorPayload, video_url});
-      await skillsInstuctorCreate(skills, id);
-      await educationInstuctorCreate(qualifications, id);
+    await instructorCreate({ ...instructorPayload, video_url });
+
     // }
   } catch (error) {
     console.log("message:", error)
@@ -80,9 +81,8 @@ const getCoursesByInstService = async (id) => {
   }
 }
 
-const uploadVideoToYT = async (instructorId, videoFilePath) => {
+const uploadVideoToYT = async (instructorId, courseId, videoFilePath, user_role) => {
   try {
-
     const youtube = google.youtube({
       version: 'v3',
       auth: oauth2Client
@@ -113,18 +113,27 @@ const uploadVideoToYT = async (instructorId, videoFilePath) => {
     const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
     // fastify.log.info('Video uploaded:', response.data);
 
-    if (instructorId && videoId) {
-      const updatedInstructor = await updateInstructor(instructorId, videoUrl);
-      console.log('instructor', updatedInstructor);
+    if (user_role === 'instructor') {
+      if (instructorId && videoId) {
+        const updatedInstructor = await updateInstructor(instructorId, videoUrl);
+        console.log('instructor', updatedInstructor);
+      }
+      else if (user_role === 'course') {
+        if (courseId && videoId) {
+          const updatedCourse = await updateCourse(courseId, videoUrl);
+          console.log('instructor', updatedCourse);
+        }
+      }
     }
     return {
       message: 'The introductory video has been successfully posted.',
-      video_url : videoUrl  
-    }}
-    catch (e){
-      console.log("ERR while uploading:",e);
-      return e;
+      video_url: videoUrl
     }
+  }
+  catch (e) {
+    console.log("ERR while uploading:", e);
+    return e;
+  }
 }
 
 module.exports = {

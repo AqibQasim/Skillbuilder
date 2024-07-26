@@ -154,9 +154,9 @@ const getOneUser = async (req,res) => {
     const id = req?.params?.id;
     const result = await getOneUserService(id);
     console.log("result:", result);  
-    res.send({
-      success: true,
-      message : result
+    res.status(result?.status).send({
+      success: result?.status,
+      message : result?.message
     })
   } catch(err){
     console.log("ERR:",err);

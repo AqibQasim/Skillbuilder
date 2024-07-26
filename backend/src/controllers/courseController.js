@@ -2,6 +2,12 @@ const { logger } = require("../../logger");
 const { createCourseWithDetails, getAllCourses, coursesRatingService, coursesDetailFunc, recentCoursesFunc, courseGetById, postReviewService, getReviewsService } = require("../services/courseService");
 const { getInstructorById } = require("../services/instructorService");
 const { postPurchasedCourse, findAllPurchasedCourse } = require("../services/purchasedCourseService");
+const fs = require("fs");
+
+// const fs = require('fs');
+const path = require('path');
+const { v4: uuidv4 } = require('uuid');
+const { uploadVideoToYT } = require("../services/courseService");
 
 const postCourse = async (request, reply) => {
   try {
@@ -16,7 +22,7 @@ const postCourse = async (request, reply) => {
       await createCourseWithDetails(data);
       reply.send({
         status: true,
-        message: "course has been created succesfully", 
+        message: "course has been created succesfully",
       });
     } else {
       reply.code(400).send({
@@ -36,15 +42,15 @@ const postCourse = async (request, reply) => {
 const allCourses = async (request, reply) => {
   logger.info("src > controller > controllerALlrCourse ", request.body);
   try {
-    console.log('req body:',request?.body);
+    console.log('req body:', request?.body);
     const courses = await getAllCourses();
-    console.log('courses:',courses);
+    console.log('courses:', courses);
     // if (courses) {
-      return reply.status(200).send({
-        status: true,
-        message: "success",
-        data: courses,
-      });
+    return reply.status(200).send({
+      status: true,
+      message: "success",
+      data: courses,
+    });
     // } else {
     //   return reply.status(200).send({
     //     status: true,
@@ -172,7 +178,7 @@ const getMyCourses = async (request, reply) => {
 };
 
 const postReview = async (req, res) => {
-  try{
+  try {
     const data = req?.body;
     const result = await postReviewService(data);
     console.log("result of posting a review:", result);
@@ -182,20 +188,87 @@ const postReview = async (req, res) => {
     })
   }
 
-  catch(e){
-    console.log("ERR:",e);
+  catch (e) {
+    console.log("ERR:", e);
   }
 }
 
 const getReviews = async (req, res) => {
   const id = req?.params?.id;
   const result = await getReviewsService(id);
-    console.log("result of posting a review:", result);
-    res.code(200).send({
-      success: true,
-      message: result
-    })
+  console.log("result of posting a review:", result);
+  res.code(200).send({
+    success: true,
+    message: result
+  })
 }
+
+const uploadCourseIntroVideo = async (request, response) => {
+  const parts = await request.parts();
+  let fieldsData = {};
+  let videoFilePath = null;
+  let instructorId = null;
+
+  const uploadDir = path.join(__dirname, 'uploads');
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir);
+  }
+
+  for await (const part of parts) {
+    if (part.file) {
+      if (part.fieldname === 'video') {
+        let filename = part.filename;
+        let saveTo = path.join(uploadDir, filename);
+        if (fs.existsSync(saveTo)) {
+          const ext = path.extname(filename);
+          const name = path.basename(filename, ext);
+          filename = `${name}-${uuidv4()}${ext}`;
+          saveTo = path.join(uploadDir, filename);
+        }
+
+        videoFilePath = saveTo;
+
+        const writeStream = fs.createWriteStream(saveTo);
+        for await (const chunk of part.file) {
+          writeStream.write(chunk);
+        }
+        writeStream.end();
+
+        console.log(`File [${part.fieldname}] Finished: ${videoFilePath}`);
+        break;
+      }
+    }
+    else {
+      if (part.fieldname === 'courseId') {
+        console.log("part.fieldname:", part.fieldname);
+        courseId = part.value;
+        console.log('course id is :', courseId);
+      }
+    }
+  }
+  try {
+    const result = await uploadVideoToYT(courseId, videoFilePath)
+    console.log("result in upload course video:", result);
+    if (result?.video_url) {
+      response.status(200).send(result);
+    }
+  } catch (error) {
+    console.log('Error uploading video', error)
+  } finally {
+    fs.unlink(videoFilePath, (err) => {
+      console.log("video file path in finally block:", videoFilePath);
+      if (err) {
+        console.error('Failed to delete video file:', err);
+      } else {
+        console.log(`Successfully deleted video file: ${videoFilePath}`);
+      }
+    })
+  }
+}
+
+// async function uploadInstVideo(request, reply) {
+
+// };
 
 module.exports = {
   postCourse,
@@ -207,5 +280,6 @@ module.exports = {
   createPurchasedCourse,
   getMyCourses,
   postReview,
-  getReviews
+  getReviews,
+  uploadCourseIntroVideo
 };

@@ -1,13 +1,17 @@
 const { logger } = require("../../logger");
 const { createCourseContent } = require("../mediators/courseMediator");
 const { uploadOnS3 } = require("../mediators/instructorMediator");
-const { createCourse, findAllCourses, coursesRatingFunc, fetchCourseWithDetailsWithId, fetchAllRecentCourses, findOneCourse  } = require("../repositories/courseRepository");
+const { createCourse, findAllCourses, coursesRatingFunc, fetchCourseWithDetailsWithId, fetchAllRecentCourses, findOneCourse, updateCourse  } = require("../repositories/courseRepository");
 const {getAllReviews} =  require("../repositories/courseReviewRepository.js");
 const {saveReview} = require("../repositories/courseReviewRepository.js");
+const { google } = require('googleapis');
+const { oauth2Client } = require('../../Infrastructure/youtubeConfig');
+const fs = require("fs");
+
 
 const createCourseWithDetails = async (requestedData) => {
   try {
-    const { instructor_id, title, creation_duration_hours, learning_outcomes, category, modulesCount, amount, image, modules, description } = requestedData;
+    const { instructor_id, title, creation_duration_hours, learning_outcomes, category, modulesCount, amount, image, modules, description, video_url } = requestedData;
     // const image_url = await uploadOnS3(image);
     const courseBasicsPayload = {
       instructor_id,
@@ -18,6 +22,7 @@ const createCourseWithDetails = async (requestedData) => {
       modulesCount,
       amount,
       description,
+      video_url,
       discount: requestedData?.discount,
       charges: amount * 0.03,
       image: image,
@@ -32,6 +37,55 @@ const createCourseWithDetails = async (requestedData) => {
     throw new Error(error);
   }
 };
+
+
+const uploadVideoToYT = async (courseId, videoFilePath) => {
+  try {
+    const youtube = google.youtube({
+      version: 'v3',
+      auth: oauth2Client
+    });
+
+    const response = await youtube.videos.insert({
+      part: 'snippet,status',
+      requestBody: {
+        snippet: {
+          title: "Instructor Introduction",
+          description: "Describes about what course is all about, details about what you will learn in this course!",
+          tags: ["education"],
+          categoryId: '27'
+        },
+        status: {
+          privacyStatus: 'private'
+        }
+      },
+      media: {
+        body: fs.createReadStream(videoFilePath)
+      },
+      mediaType: 'video/*',
+    },);
+
+    console.log("youtube repsonse:", response);
+
+    const videoId = response?.data?.id;
+    const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+
+      if (courseId && videoId) {
+        const updatedCourse = await updateCourse(courseId, videoUrl);
+        console.log('course:', updatedCourse);
+      }
+
+    return {
+      message: 'The introductory video has been successfully posted.',
+      video_url: videoUrl
+    }
+  }
+  catch (e) {
+    console.log("ERR while uploading:", e);
+    return e;
+  }
+}
+
 
 const enrollInCourse = () => {
   try{
@@ -126,5 +180,6 @@ module.exports = {
   coursesDetailFunc,
   recentCoursesFunc,
   postReviewService,
-  getReviewsService
+  getReviewsService,
+  uploadVideoToYT
 };

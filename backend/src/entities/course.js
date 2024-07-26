@@ -78,6 +78,9 @@ module.exports = new EntitySchema({
       type: "varchar",
       nullable: true,
     },
+    video_url: {
+      type: "varchar"
+    },
   },
   relations: {
     instructor: {

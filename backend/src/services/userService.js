@@ -147,11 +147,11 @@ const enrollInCourseService = async ({ student_id, course_id, filter }) => {
       return "The requested course either doesn't exist or has been removed";
     } else {
       let enrolledCustomers = course.enrolled_customers ? course.enrolled_customers : [];
-      enrolledCustomers.push({student_id: student_id});
+      enrolledCustomers.push({ student_id: student_id });
       console.log("enrolled customers:", enrolledCustomers);
 
       course.enrolled_customers = enrolledCustomers;
-      const result = await courseRepository.save(course); 
+      const result = await courseRepository.save(course);
       console.log("updated result:", result);
       return result;
     }
@@ -230,9 +230,15 @@ const getOneUserService = async (id) => {
     let user = await findOneUser(id);
     if (user) {
       console.log('User:', user);
-      return user;
+      return {
+        status : 200,
+        message : user
+      }
     } else {
-      return 'There is no such user.'
+      return {
+        status : 400,
+        message : "No such user is found"
+      }
     }
   } catch (e) {
     console.log("ERR:", e);
@@ -372,12 +378,12 @@ const ContactUser = async (userInfo) => {
   }
 };
 
-const getStudentsByInstructorIdService = async ({instructorId}) => {
-  try{
-      const coursesByInst = await findAllCoursesByInst(instructorId);
-      console.log("courses by a particular instructor:",coursesByInst);
+const getStudentsByInstructorIdService = async ({ instructorId }) => {
+  try {
+    const coursesByInst = await findAllCoursesByInst(instructorId);
+    console.log("courses by a particular instructor:", coursesByInst);
 
-      let studentsIdEnrolled = [];
+    let studentsIdEnrolled = [];
 
     coursesByInst.forEach(course => {
       if (course.enrolled_customers) {
@@ -392,7 +398,7 @@ const getStudentsByInstructorIdService = async ({instructorId}) => {
 
     console.log("students details:", studentsDetails);
     return studentsDetails;
-  } catch(err){
+  } catch (err) {
     console.log("Error fetching students based on a particular instructor id:", err);
     return "Error fetching students based on a particular instructor id:", err;
   }
