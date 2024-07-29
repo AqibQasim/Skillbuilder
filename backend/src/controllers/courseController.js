@@ -266,9 +266,66 @@ const uploadCourseIntroVideo = async (request, response) => {
   }
 }
 
-// async function uploadInstVideo(request, reply) {
+const uploadCourseContent = async (request, reply) => {
+  const videoFilePaths = []; // Array to store file paths of uploaded videos
+  try {
+    const parts = await request.parts();
+    const uploadDir = path.join(__dirname, 'uploads');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir);
+    }
 
-// };
+    for await (const part of parts) {
+      if (part.file) {
+        if (part.fieldname === 'video') {
+          let filename = part.filename;
+          let saveTo = path.join(uploadDir, filename);
+          if (fs.existsSync(saveTo)) {
+            const ext = path.extname(filename);
+            const name = path.basename(filename, ext);
+            filename = `${name}-${uuidv4()}${ext}`;
+            saveTo = path.join(uploadDir, filename);
+          }
+
+          const writeStream = fs.createWriteStream(saveTo);
+          for await (const chunk of part.file) {
+            writeStream.write(chunk);
+          }
+          writeStream.end();
+
+          videoFilePaths.push(saveTo);
+          console.log(`File [${part.fieldname}] Finished: ${saveTo}`);
+        }
+      } else {
+        if (part.fieldname === 'modules') {
+          console.log("part.fieldname:", JSON.stringify(part.fieldname));
+          try {
+              const moduleInfo = JSON.parse(part.value); 
+              console.log("module check object:", moduleInfo[0]?.title); 
+              console.log('module info is:', moduleInfo); 
+          } catch (error) {
+              console.error('Failed to parse moduleInfo:', error);
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.log("Some error occurred while handling course content upload.", err);
+    reply.status(500).send("Some error occurred while handling course content upload.", err);
+  } finally {
+    for (const videoFilePath of videoFilePaths) {
+      fs.unlink(videoFilePath, (err) => {
+        if (err) {
+          console.error(`Failed to delete video file: ${videoFilePath}`, err);
+        } else {
+          console.log(`Successfully deleted video file: ${videoFilePath}`);
+        }
+      });
+    }
+  }
+};
+
+
 
 module.exports = {
   postCourse,
@@ -281,5 +338,6 @@ module.exports = {
   getMyCourses,
   postReview,
   getReviews,
-  uploadCourseIntroVideo
+  uploadCourseIntroVideo,
+  uploadCourseContent
 };

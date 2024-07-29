@@ -14,20 +14,11 @@ module.exports = new EntitySchema({
     title: {
       type: "varchar"  
     },
-    content_type: {
-      type: "varchar",
-    },
     content: {
       type: "varchar",
     },
     module_id: {
       type: "int",
-    },
-    order: {
-      type: "int",
-    },
-    duration: {
-      type: "varchar"
     },
     lock_status : {
       type: "enum",

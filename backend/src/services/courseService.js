@@ -12,7 +12,6 @@ const fs = require("fs");
 const createCourseWithDetails = async (requestedData) => {
   try {
     const { instructor_id, title, creation_duration_hours, learning_outcomes, category, modulesCount, amount, image, modules, description, video_url } = requestedData;
-    // const image_url = await uploadOnS3(image);
     const courseBasicsPayload = {
       instructor_id,
       title,
@@ -30,7 +29,7 @@ const createCourseWithDetails = async (requestedData) => {
     };
     let courseBasics = await createCourse(courseBasicsPayload);
     console.log("courseBasics: ", courseBasics);
-    await createCourseContent(modules, courseBasics.id);
+    // await createCourseContent(modules, courseBasics.id);
   } catch (error) {
     logger.error("src > services > courseService > error");
     logger.error(error);

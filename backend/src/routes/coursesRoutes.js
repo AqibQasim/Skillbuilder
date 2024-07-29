@@ -1,4 +1,4 @@
-const { postCourse, allCourses, coursesRating, courseDetails, recentCourses, getCourseById, createPurchasedCourse, getMyCourses, postReview, getReviews, uploadCourseIntroVideo } = require("../controllers/courseController");
+const { postCourse, allCourses, coursesRating, courseDetails, recentCourses, getCourseById, createPurchasedCourse, getMyCourses, postReview, getReviews, uploadCourseIntroVideo, uploadCourseContent } = require("../controllers/courseController");
 const { createCourseSchema, getCourseByIdSchema, allCoursesSchema, coursesRatingSchema, recentCoursesSchema, courseDetailsSchema, myCoursesSchema, buyCourseSchema } = require("../Schema/courseSchema")
 const coursesRoutes = async (fastify, options) => {
   fastify.post("/create-course", createCourseSchema, postCourse);
@@ -12,6 +12,7 @@ const coursesRoutes = async (fastify, options) => {
   fastify.post('/post-review', postReview);
   fastify.get('/get-all-reviews/:id', getReviews);
   fastify.post("/upload-course-intro", uploadCourseIntroVideo);
+  fastify.post("/upload-course-content", uploadCourseContent);
   // fastify.post("")
 };
 

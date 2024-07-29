@@ -23,7 +23,7 @@ const createNewInstructor = async (instructorData, filePath) => {
     }
 
     const instructorPayload = {
-      id,
+      user_id,
       experience,
       specialization,
       user_id,
@@ -32,7 +32,7 @@ const createNewInstructor = async (instructorData, filePath) => {
       created_at: new Date(),
     };
 
-    const isInstructorExist = await findByFilter({ where: { id: id } });
+    const isInstructorExist = await findByFilter({ where: { id: user_id } });
     if (isInstructorExist) {
       throw new Error("Instructor already Exist");
     }
@@ -80,8 +80,6 @@ const getCoursesByInstService = async (id) => {
     throw new Error(error);
   }
 }
-
-
 
 const uploadVideoToYT = async (instructorId, courseId, videoFilePath, user_role) => {
   try {
