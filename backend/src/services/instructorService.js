@@ -10,6 +10,8 @@ const { oauth2Client } = require('../../Infrastructure/youtubeConfig');
 const fs = require('fs');
 const path = require('path');
 const { google } = require('googleapis');
+const instructor = require("../entities/instructor");
+const { saveAccountRegId, checkIfAccounRegIdExists } = require("../repositories/stripeAccountRepository");
 
 // const { uploadVideoToYT } = require("../controllers/ytAPIControllers");
 
@@ -81,6 +83,72 @@ const getCoursesByInstService = async (id) => {
   }
 }
 
+const stripeAccRegisterService = async ({ user_id, instructor_id, account_reg_id }) => {
+  try {
+    const payload = { user_id, instructor_id, account_reg_id };
+
+    const InstructorReceive = await findByFilter({ where: { id: instructor_id } });
+    if (InstructorReceive) {
+      const checkAlreadyExists = await checkIfAccounRegIdExists(instructor_id);
+      if (checkAlreadyExists?.length === 0 ) {
+        const res = await saveAccountRegId(payload);
+        return {
+          message: res,
+          status: 200
+        }
+      }
+      else {
+        return {
+          message: "The record for this instructor already exists",
+          status: 400
+        }
+      }
+    } else {
+      return {
+        message: "Instructor not found",
+        status: 400
+      }
+    }
+  } catch (err) {
+    console.log("Error while saving the registration id in db:", err);
+    return {
+      message: "Failed saving the registration id in db",
+      status: 500
+    }
+  }
+}
+
+const checkPaymentRecordService = async ({ instructor_id }) => {
+  try {
+    const InstructorReceive = await findByFilter({ where: { id: instructor_id } });
+    if (InstructorReceive && InstructorReceive?.id) {
+      const res = await checkIfAccounRegIdExists(instructor_id);
+      if (res) {
+        return {
+          message : res,
+          status : 200
+        }
+      } else {
+        return {
+          message : "Stripe Account Registration not found.",
+          status : 400
+        }
+      }
+    } else {
+      return {
+        message : "Instructor not found.",
+        status : 400
+      }
+    }
+  } catch (err) {
+    console.log("Error while fetching the registration id in db:", err);
+    return {
+      message: "Failed fetching the registration id in db",
+      status: 500
+    }
+  }
+}
+
 const uploadVideoToYT = async (instructorId, courseId, videoFilePath, user_role) => {
   try {
     const youtube = google.youtube({
@@ -141,5 +209,7 @@ module.exports = {
   createNewInstructor,
   getInstructorById,
   getCoursesByInstService,
-  uploadVideoToYT
+  uploadVideoToYT,
+  stripeAccRegisterService,
+  checkPaymentRecordService
 };

@@ -58,6 +58,8 @@ const findByFilter = async (filter) => {
   }
 };
 
+
+
 const updateInstructor = async (instructorId, videoUrl) => {
   const instructorExist = await instructorRepository.findOne({
     where: { id: instructorId },
