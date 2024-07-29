@@ -84,7 +84,6 @@ const updateUserByEmail = async (email, newData) => {
         }
       } else {
         user.password = await bcrypt.hash(newData.new_password,10);
-        //let update = await userRepository.merge(user, {password: new_password});
         let updatedUser = await userRepository.save(user);
         return {
           status: true,
@@ -95,9 +94,6 @@ const updateUserByEmail = async (email, newData) => {
 
     }
 
-    // let update = await userRepository.merge(user, newData);
-    // let updatedUser = await userRepository.save(update);
-    // return updatedUser;
   } catch (error) {
     console.error("Error updating user:", error.message);
     throw error;
@@ -129,9 +125,6 @@ const updateUserById = async (id, payload) => {
     } else {
       throw new Error("Profile not updated");
     }
-    // let update = await userRepository.merge(user, payload);
-    // let updatedUser = await userRepository.save(update);
-    // return updatedUser;
   } catch (error) {
     console.error("Error updating user:", error.message);
     throw error;
@@ -152,11 +145,6 @@ const UserContact = async (userInfo) => {
     throw error;
   }
 };
-
-
-
-
-
 
 
 module.exports = {

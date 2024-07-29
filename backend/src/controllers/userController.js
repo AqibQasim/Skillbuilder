@@ -25,7 +25,8 @@ const {
   getOneUserService,
   sendEmailService,
   enrollInCourseService,
-  getStudentsByInstructorIdService
+  getStudentsByInstructorIdService,
+  getOneInstCourseStudentsService
 } = require("../services/userService");
 
 const createStudent = async (request, reply) => {
@@ -333,6 +334,17 @@ const getStudentsByInstructorId = async (request,response) => {
   }
 }
 
+const getOneInstCourseStudents = async (request,response) => {
+  try {
+    const {instructor_id,course_id} = request?.query;
+    const result = await getOneInstCourseStudentsService({instructor_id, course_id});
+    response.status(200).send(result);
+  } catch (err) {
+    console.log("Error while handling:",err);
+    response.status(500).send("Error while handling:",err);
+  }
+}
+
 module.exports = {
   createStudent,
   getAllUsers,
@@ -347,5 +359,6 @@ module.exports = {
   getOneUser,
   sendEmail,
   enrollInCourse,
-  getStudentsByInstructorId
+  getStudentsByInstructorId,
+  getOneInstCourseStudents
 };

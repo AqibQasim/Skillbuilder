@@ -404,6 +404,39 @@ const getStudentsByInstructorIdService = async ({ instructorId }) => {
   }
 }
 
+const getOneInstCourseStudentsService = async ({instructor_id, course_id}) => {
+  try{
+    console.log("request query: ",{instructor_id, course_id})
+    const coursesByInst = await findAllCoursesByInst(instructor_id);
+    console.log("courses by a particular instructor:", coursesByInst);
+
+    let foundCourse;
+    coursesByInst.forEach(course => {
+      console.log("condition : course_id === course?.id", course_id == course?.id)
+      if(course_id == course?.id){
+        foundCourse = course;
+        console.log("found course:", foundCourse, "\n\nand its students are:",coursesByInst?.enrolled_customers)
+      } else {
+        return {
+          status : 400,
+          message : "Course doesn't exist."
+        }
+      }
+    });
+
+    if(foundCourse && foundCourse?.enrolled_customers){
+      console.log("found course:", foundCourse, "\n\nand its students are:",coursesByInst?.enrolled_customers);
+      return {
+        status : 200,
+        message : foundCourse?.enrolled_customers
+      }
+    }
+  } catch (err){
+    console.log("Error fetching students based on a particular instructor id and a particular course:", err);
+    return "Error fetching students based on a particular instructor id and a particular course:", err;
+  }
+}
+
 module.exports = {
   createGoogleUser,
   emailVerificationForRegister,
@@ -419,5 +452,6 @@ module.exports = {
   getOneUserService,
   sendEmailService,
   enrollInCourseService,
-  getStudentsByInstructorIdService
+  getStudentsByInstructorIdService,
+  getOneInstCourseStudentsService
 };
