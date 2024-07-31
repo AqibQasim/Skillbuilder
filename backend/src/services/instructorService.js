@@ -1,9 +1,8 @@
 const { fetchAllInstructor, instructorCreate, findByFilter } = require("../repositories/instructorRepository");
-const { findAllCourses, findAllCoursesByInst } = require("../repositories/courseRepository");
+const { findAllCourses, findAllCoursesByInst, updateCourse } = require("../repositories/courseRepository");
 const { logger } = require("../../logger");
 const { findUserById } = require("./userService");
-const { skillsInstuctorCreate } = require("./instructorSkillService");
-const { educationInstuctorCreate } = require("./instructorEducationService");
+
 const { uploadSingle } = require("../mediators/s3Mediator");
 const { updateInstructor } = require('../repositories/instructorRepository');
 // const { logger } = require("../../logger");
@@ -11,33 +10,37 @@ const { oauth2Client } = require('../../Infrastructure/youtubeConfig');
 const fs = require('fs');
 const path = require('path');
 const { google } = require('googleapis');
+const instructor = require("../entities/instructor");
+const { saveAccountRegId, checkIfAccounRegIdExists } = require("../repositories/stripeAccountRepository");
 
 // const { uploadVideoToYT } = require("../controllers/ytAPIControllers");
 
 const createNewInstructor = async (instructorData, filePath) => {
   try {
-    const { id, title, description, experience, specialization, tags, entity, qualifications, skills, video_url } = instructorData;
+    const { id, user_id, title, description, experience, specialization, tags, entity, qualifications, skills, video_url } = instructorData;
     const user = await findUserById(id);
-    
+
     if (!user) {
       throw new Error("user not exist");
     }
-    
+
     const instructorPayload = {
-      id,
+      user_id,
       experience,
       specialization,
+      user_id,
+      skills,
+      qualifications,
       created_at: new Date(),
     };
 
-    const isInstructorExist = await findByFilter({ where: { id: id } });
+    const isInstructorExist = await findByFilter({ where: { id: user_id } });
     if (isInstructorExist) {
       throw new Error("Instructor already Exist");
     }
 
-      await instructorCreate({ ...instructorPayload, video_url});
-      await skillsInstuctorCreate(skills, id);
-      await educationInstuctorCreate(qualifications, id);
+    await instructorCreate({ ...instructorPayload, video_url });
+
     // }
   } catch (error) {
     console.log("message:", error)
@@ -58,7 +61,7 @@ const getInstructors = async () => {
 const getInstructorById = async (id) => {
   try {
     logger.info("src > instructorServices > getInstructorById");
-    const InstructorReceive = await findByFilter({ where: { id: id } });
+    const InstructorReceive = await findByFilter({ where: { user_id: id } });
     return InstructorReceive;
   } catch (error) {
     throw new Error(error);
@@ -80,9 +83,74 @@ const getCoursesByInstService = async (id) => {
   }
 }
 
-const uploadVideoToYT = async (instructorId, videoFilePath) => {
+const stripeAccRegisterService = async ({ user_id, instructor_id, account_reg_id }) => {
   try {
+    const payload = { user_id, instructor_id, account_reg_id };
 
+    const InstructorReceive = await findByFilter({ where: { id: instructor_id } });
+    if (InstructorReceive) {
+      const checkAlreadyExists = await checkIfAccounRegIdExists(instructor_id);
+      if (checkAlreadyExists?.length === 0 ) {
+        const res = await saveAccountRegId(payload);
+        return {
+          message: res,
+          status: 200
+        }
+      }
+      else {
+        return {
+          message: "The record for this instructor already exists",
+          status: 400
+        }
+      }
+    } else {
+      return {
+        message: "Instructor not found",
+        status: 400
+      }
+    }
+  } catch (err) {
+    console.log("Error while saving the registration id in db:", err);
+    return {
+      message: "Failed saving the registration id in db",
+      status: 500
+    }
+  }
+}
+
+const checkPaymentRecordService = async ({ instructor_id }) => {
+  try {
+    const InstructorReceive = await findByFilter({ where: { id: instructor_id } });
+    if (InstructorReceive && InstructorReceive?.id) {
+      const res = await checkIfAccounRegIdExists(instructor_id);
+      if (res) {
+        return {
+          message : res,
+          status : 200
+        }
+      } else {
+        return {
+          message : "Stripe Account Registration not found.",
+          status : 400
+        }
+      }
+    } else {
+      return {
+        message : "Instructor not found.",
+        status : 400
+      }
+    }
+  } catch (err) {
+    console.log("Error while fetching the registration id in db:", err);
+    return {
+      message: "Failed fetching the registration id in db",
+      status: 500
+    }
+  }
+}
+
+const uploadVideoToYT = async (instructorId, courseId, videoFilePath, user_role) => {
+  try {
     const youtube = google.youtube({
       version: 'v3',
       auth: oauth2Client
@@ -113,18 +181,27 @@ const uploadVideoToYT = async (instructorId, videoFilePath) => {
     const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
     // fastify.log.info('Video uploaded:', response.data);
 
-    if (instructorId && videoId) {
-      const updatedInstructor = await updateInstructor(instructorId, videoUrl);
-      console.log('instructor', updatedInstructor);
+    if (user_role === 'instructor') {
+      if (instructorId && videoId) {
+        const updatedInstructor = await updateInstructor(instructorId, videoUrl);
+        console.log('instructor', updatedInstructor);
+      }
+      else if (user_role === 'course') {
+        if (courseId && videoId) {
+          const updatedCourse = await updateCourse(courseId, videoUrl);
+          console.log('instructor', updatedCourse);
+        }
+      }
     }
     return {
       message: 'The introductory video has been successfully posted.',
-      video_url : videoUrl  
-    }}
-    catch (e){
-      console.log("ERR while uploading:",e);
-      return e;
+      video_url: videoUrl
     }
+  }
+  catch (e) {
+    console.log("ERR while uploading:", e);
+    return e;
+  }
 }
 
 module.exports = {
@@ -132,5 +209,7 @@ module.exports = {
   createNewInstructor,
   getInstructorById,
   getCoursesByInstService,
-  uploadVideoToYT
+  uploadVideoToYT,
+  stripeAccRegisterService,
+  checkPaymentRecordService
 };

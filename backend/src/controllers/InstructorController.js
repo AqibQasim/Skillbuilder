@@ -1,4 +1,4 @@
-const { getInstructors, getInstructorById, createNewInstructor, getCoursesByInstService, uploadVideoToYT } = require("../services/instructorService.js");
+const { getInstructors, getInstructorById, createNewInstructor, getCoursesByInstService, uploadVideoToYT, stripeAccRegisterService, checkPaymentRecordService } = require("../services/instructorService.js");
 const { updateInstructor } = require("../repositories/instructorRepository");
 const { logger } = require("../../logger");
 const { oauth2Client } = require('../../Infrastructure/youtubeConfig');
@@ -87,6 +87,28 @@ const getCoursesByInstructor = async (request, reply) => {
   }
 }
 
+const stripeAccRegister = async (request, reply) => {
+  try {
+    const {user_id, instructor_id, account_reg_id} = request?.body;
+    const result = await stripeAccRegisterService({user_id, instructor_id, account_reg_id});
+    reply.status(result.status).send(result);
+  } catch (e) {
+    console.log("ERR:", e);
+    reply.status(500).send("Some server side exception has occured");
+  }
+}
+
+const checkPaymentRecord = async (request, reply)  => {
+  try{
+    const { instructor_id } = request?.query;
+    const result = await checkPaymentRecordService({instructor_id});
+    reply.status(result?.status).send(result);
+  } catch (err){
+    console.log("ERR:", err);
+    reply.status(500).send("Some server side exception has occured");
+  }
+}
+
 async function uploadInstVideo(request, reply) {
   const parts = await request.parts();
   let fieldsData = {};
@@ -135,7 +157,7 @@ async function uploadInstVideo(request, reply) {
     const result = await uploadVideoToYT(instructorId, videoFilePath)
     console.log("result in upload inst video:",result);
     if (result?.video_url) {
-      reply.status(200).send(result);
+      reply.status(200).send(result);   
     }
   } catch (error) {
     console.log('Error uploading video', error)
@@ -156,5 +178,7 @@ module.exports = {
   getAllInstructor,
   instructorDetail,
   getCoursesByInstructor,
-  uploadInstVideo
+  uploadInstVideo,
+  stripeAccRegister,
+  checkPaymentRecord
 };

@@ -21,7 +21,14 @@ const {
   profileUpdateHandler,
 
   getOneUser,
-  sendEmail
+
+  sendEmail,
+
+  enrollInCourse,
+
+  getStudentsByInstructorId,
+
+  getOneInstCourseStudents
 } = require("../controllers/userController");
 const { ValidateUser, userSwaggerSchema, loginSchema, updateProfileSchema, changePasswordSchema, verifyEmailSchema, passwordResetSchema, otpVerificationSchema,  googleAuthCallbackSchema, getAllUsersSchema } = require("../Schema/userSchema");
 const { contactUsSchema, sendMailSchema } = require("../Schema/contactUsSchema.js")
@@ -70,7 +77,11 @@ const userRoutes = async (fastify, options) => {
 
   //Contact Us
   fastify.post("/contact-us", contactUsSchema, ContactUS);
-  fastify.post("/send-email", sendMailSchema ,sendEmail)
+  fastify.post("/send-email", sendMailSchema ,sendEmail);
+  fastify.put("/enroll-in-course",enrollInCourse);
+  fastify.get("/get-students-by-inst", getStudentsByInstructorId);
+  fastify.get("/get-one-course-inst-students", getOneInstCourseStudents);
 };
+
 
 module.exports = userRoutes;

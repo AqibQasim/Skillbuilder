@@ -41,10 +41,13 @@ const findAllCoursesByInst = async (id) => {
   }
 };
 
-const findOneCourse = async (filter) => {
+const findOneCourse = async (filter,course_id) => {
   try {
+    const updateObject = {};
+    updateObject[filter] = course_id;
+    console.log("updated object:",updateObject)
     const findOne = await courseRepository.findOne({
-      ...filter,
+      where : updateObject,
       relations: ['instructor', 'reviews', 'modules.content'],
   });
     return findOne;
@@ -137,8 +140,22 @@ const fetchAllRecentCourses = async () => {
     return error;
   }
 };
+4
+const updateCourse = async (courseId, videoUrl) => {
+  const courseExist = await courseRepository.findOne({
+    where: { id: courseId },
+  });
 
+  if (!courseExist) {
+    return 'No such course exists!';
+  };
 
+  Object.assign(courseExist, { video_url: videoUrl });
+
+  const updatedCourse = await courseRepository.save(courseExist);
+  console.log("updated course:", updatedCourse);
+  return "Course has been updated successfully"
+}
 
 
 module.exports = {
@@ -148,6 +165,7 @@ module.exports = {
   coursesRatingFunc,
   fetchCourseWithDetailsWithId,
   fetchAllRecentCourses,
-  findAllCoursesByInst
+  findAllCoursesByInst,
+  updateCourse
   // saveReview
 };
