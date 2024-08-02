@@ -1,13 +1,15 @@
 const { logger } = require("../../logger");
-const { createCourseWithDetails, getAllCourses, coursesRatingService, coursesDetailFunc, recentCoursesFunc, courseGetById, postReviewService, getReviewsService } = require("../services/courseService");
+const { createCourseWithDetails, getAllCourses, coursesRatingService, coursesDetailFunc, recentCoursesFunc, courseGetById, postReviewService, getReviewsService, uploadCourseVideoToYT, updateCoursePropertiesService } = require("../services/courseService");
 const { getInstructorById } = require("../services/instructorService");
 const { postPurchasedCourse, findAllPurchasedCourse } = require("../services/purchasedCourseService");
+const { updateCoursecontent } = require("../repositories/courseRepository")
 const fs = require("fs");
 
 // const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const { uploadVideoToYT } = require("../services/courseService");
+const SimpleQueue = require("../utils/SimpleQueue");
 
 const postCourse = async (request, reply) => {
   try {
@@ -203,6 +205,17 @@ const getReviews = async (req, res) => {
   })
 }
 
+const updateCourseProperties = async (request,reply) => {
+  try{
+    const {course_id,filter,value} = request?.body;
+    const result = await updateCoursePropertiesService({course_id,filter,value});
+    reply.status(result.status).send(result);
+  }catch(err){
+    console.log("ERR:",err);
+    res.status(500).send("Some exception occured while handling this route:",err);
+  }
+}
+
 const uploadCourseIntroVideo = async (request, response) => {
   const parts = await request.parts();
   let fieldsData = {};
@@ -247,7 +260,7 @@ const uploadCourseIntroVideo = async (request, response) => {
     }
   }
   try {
-    const result = await uploadVideoToYT(courseId, videoFilePath)
+    const result = await uploadCourseVideoToYT(courseId, videoFilePath)
     console.log("result in upload course video:", result);
     if (result?.video_url) {
       response.status(200).send(result);
@@ -266,8 +279,15 @@ const uploadCourseIntroVideo = async (request, response) => {
   }
 }
 
+
 const uploadCourseContent = async (request, reply) => {
-  const videoFilePaths = []; // Array to store file paths of uploaded videos
+  let videoFilePaths = [];
+  const queue = new SimpleQueue();
+  let course_id;
+  let moduleInfo = [];
+  let videoIndex = 0;
+  let videoUrls = [];
+
   try {
     const parts = await request.parts();
     const uploadDir = path.join(__dirname, 'uploads');
@@ -278,37 +298,79 @@ const uploadCourseContent = async (request, reply) => {
     for await (const part of parts) {
       if (part.file) {
         if (part.fieldname === 'video') {
-          let filename = part.filename;
+          let filename = `${uuidv4()}-${part.filename}`;
           let saveTo = path.join(uploadDir, filename);
-          if (fs.existsSync(saveTo)) {
-            const ext = path.extname(filename);
-            const name = path.basename(filename, ext);
-            filename = `${name}-${uuidv4()}${ext}`;
-            saveTo = path.join(uploadDir, filename);
-          }
-
           const writeStream = fs.createWriteStream(saveTo);
-          for await (const chunk of part.file) {
-            writeStream.write(chunk);
+          try {
+            for await (const chunk of part.file) {
+              writeStream.write(chunk);
+            }
+          } catch (error) {
+            console.error(`Failed to write file: ${saveTo}`, error);
+            throw error;
+          } finally {
+            writeStream.end();
           }
-          writeStream.end();
 
           videoFilePaths.push(saveTo);
           console.log(`File [${part.fieldname}] Finished: ${saveTo}`);
+
+          queue.enqueue(saveTo);
         }
       } else {
         if (part.fieldname === 'modules') {
-          console.log("part.fieldname:", JSON.stringify(part.fieldname));
           try {
-              const moduleInfo = JSON.parse(part.value); 
-              console.log("module check object:", moduleInfo[0]?.title); 
-              console.log('module info is:', moduleInfo); 
+            moduleInfo = JSON.parse(part.value);
+            console.log("Parsed moduleInfo:", moduleInfo?.modules);
+            if (!Array.isArray(moduleInfo?.modules)) {
+              throw new Error("Parsed moduleInfo is not an array");
+            }
           } catch (error) {
-              console.error('Failed to parse moduleInfo:', error);
+            console.error('Failed to parse moduleInfo:', error);
+            reply.status(400).send("Invalid modules JSON format");
+            return;
+          }
+        } else if (part.fieldname === 'course_id') {
+          try {
+            console.log("course id:", part.value);
+            course_id = part?.value;
+          } catch (err) {
+            console.log("ERR:", err);
           }
         }
       }
     }
+
+    if (moduleInfo?.modules?.length > 0 && videoFilePaths.length > 0) {
+      for (const path of videoFilePaths) {
+        console.log("ind file path:", path);
+        const response = await uploadVideoToYT(course_id, path);
+        const videoUrl = response.video_url;
+        videoUrls.push(videoUrl);
+        console.log("response of uploading a video to youtube:", response);
+        // console.log("response of uploading a video to youtube:", response);
+      }
+
+
+      let updated = false; ``
+      for (const module of moduleInfo?.modules) {
+        for (const contentItem of module.content) {
+          console.log("video index:", videoIndex, "video urls length:", videoUrls.length);
+          if (contentItem.content.startsWith('path/to/video') && videoIndex < videoUrls.length) {
+            console.log("videoUrls[videoIndex]:", videoUrls[videoIndex]);
+            contentItem.content = videoUrls[videoIndex];
+            console.log("contentItem.content:", contentItem.content);
+            videoIndex++;
+          }
+        }
+      }
+
+      const finalResult = await updateCoursecontent(course_id, moduleInfo);
+
+      console.log("[FINAL RESULT]:", finalResult);
+      return finalResult;
+    }
+
   } catch (err) {
     console.log("Some error occurred while handling course content upload.", err);
     reply.status(500).send("Some error occurred while handling course content upload.", err);
@@ -327,6 +389,7 @@ const uploadCourseContent = async (request, reply) => {
 
 
 
+
 module.exports = {
   postCourse,
   allCourses,
@@ -339,5 +402,6 @@ module.exports = {
   postReview,
   getReviews,
   uploadCourseIntroVideo,
-  uploadCourseContent
+  uploadCourseContent,
+  updateCourseProperties
 };
