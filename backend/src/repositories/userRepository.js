@@ -2,6 +2,7 @@ const { logger } = require("../../logger");
 const dataSource = require("../../Infrastructure/postgres");
 const userRepository = dataSource.getRepository("User");
 const bcrypt = require("bcrypt");
+const jwt = require('jsonwebtoken');
 
 
 
@@ -59,6 +60,51 @@ const findOneUser = async (id) => {
   }
 }
 
+const AddSSOUser = async (data) => {
+  console.log("data in AddSSOUser method:", data);
+  try {
+    const userRepository = dataSource.getRepository("User");
+
+    const user = userRepository.create({
+      first_name: data.fname,
+      last_name: data.lname,
+      email: data.email,
+      is_SSOUser: true,
+    });
+
+    const savedUser = await userRepository.save(user);
+    console.log(savedUser);
+    if (savedUser) {
+      // JWT payload
+      const payload = {
+        id: savedUser.id,             // Include the user's ID
+        email: savedUser.email,       // Include the user's email
+        // picture: data.picture         // Include the user's picture (if available)
+      };
+
+      // Secret key for signing the token (you should store this in an environment variable)
+      const secretKey = process.env.JWT_SECRET;
+
+      // Options for token expiration and algorithm
+      const options = {
+        expiresIn: '35h',             // Token expiration time
+        algorithm: 'HS256'           // Algorithm for signing the token
+      };
+
+      // Sign the JWT
+      const token = jwt.sign(payload, secretKey, options);
+      
+      // Return the signed token
+      return { message: token, status : 200 };
+    } else {
+      return {message: "User Not Found", status : 404};
+    }
+  } catch (err) {
+    console.log("ERR:", err);
+    return {message: "Internal Server Error", status : 500};
+  }
+};
+
 const updateUserByEmail = async (email, newData) => {
   try {
     console.log("email", email);
@@ -84,6 +130,7 @@ const updateUserByEmail = async (email, newData) => {
         }
       } else {
         user.password = await bcrypt.hash(newData.new_password,10);
+        //let update = await userRepository.merge(user, {password: new_password});
         let updatedUser = await userRepository.save(user);
         return {
           status: true,
@@ -94,6 +141,9 @@ const updateUserByEmail = async (email, newData) => {
 
     }
 
+    // let update = await userRepository.merge(user, newData);
+    // let updatedUser = await userRepository.save(update);
+    // return updatedUser;
   } catch (error) {
     console.error("Error updating user:", error.message);
     throw error;
@@ -125,6 +175,9 @@ const updateUserById = async (id, payload) => {
     } else {
       throw new Error("Profile not updated");
     }
+    // let update = await userRepository.merge(user, payload);
+    // let updatedUser = await userRepository.save(update);
+    // return updatedUser;
   } catch (error) {
     console.error("Error updating user:", error.message);
     throw error;
@@ -147,6 +200,11 @@ const UserContact = async (userInfo) => {
 };
 
 
+
+
+
+
+
 module.exports = {
   createUser,
   readAllUser,
@@ -154,5 +212,6 @@ module.exports = {
   updateUserByEmail,
   updateUserById,
   UserContact,
-  findOneUser
+  findOneUser,
+  AddSSOUser
 };

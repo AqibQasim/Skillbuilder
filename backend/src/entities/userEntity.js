@@ -69,6 +69,10 @@ module.exports = new EntitySchema({
       type: "timestamp",
       updateDate: true, 
     },
+    is_SSOUser: {
+      type: "bool",
+      default: false,
+    },
   },
   relations: {
     instructor: {

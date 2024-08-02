@@ -9,7 +9,7 @@ const ValidateContactUs = require("../Schema/contactUsSchema");
 const { redisClient } = require("../../Infrastructure/redis");
 const jwt = require("jsonwebtoken");
 const User = require("../entities/userEntity");
-const { findUser } = require("../repositories/userRepository");
+const { findUser, AddSSOUser } = require("../repositories/userRepository");
 
 const {
   emailVerificationForRegister,
@@ -25,9 +25,9 @@ const {
   getOneUserService,
   sendEmailService,
   enrollInCourseService,
-  getStudentsByInstructorIdService,
-  getOneInstCourseStudentsService
+  getStudentsByInstructorIdService
 } = require("../services/userService");
+const { SSO } = require("aws-sdk");
 
 const createStudent = async (request, reply) => {
   logger.info(["src > controllers > userController > ", request.body]);
@@ -150,14 +150,14 @@ const login = async (request, reply) => {
   }
 };
 
-const getOneUser = async (req,res) => {
+const getOneUser = async (req, res) => {
   try{
     const id = req?.params?.id;
     const result = await getOneUserService(id);
     console.log("result:", result);  
-    res.status(result?.status).send({
-      success: result?.status,
-      message : result?.message
+    res.send({
+      success: true,
+      message : result
     })
   } catch(err){
     console.log("ERR:",err);
@@ -172,6 +172,28 @@ const enrollInCourse = async (request,reply) => {
   } catch(err){
     console.log("Some internal server error occured",err);
     reply.status(500).send("Some internal server error occured",err);
+  }
+}
+
+const SignupGoogleSSO = async (req, res) => {
+  try{
+    const data = req?.body;
+    console.log("data:",data);
+    const result = await findUserByEmail(data.email);
+    console.log("findUserByEmail done");
+    if (!result) {
+      const SSOresult = await AddSSOUser(data);
+      console.log("$$$$$$$$$$$$$$$", SSOresult);
+      // return SSOresult;
+      res.status(SSOresult.status).send(SSOresult);
+     }else{
+      res.status(500).send("User Already Exists");
+     }
+    // const result = await enrollInCourseService({student_id,course_id,filter});
+    res.status(200).send(result);
+  } catch(err){
+    console.log("Some internal server error occured",err);
+    res.status(500).send("Some internal server error occured",err);
   }
 }
 
@@ -334,17 +356,6 @@ const getStudentsByInstructorId = async (request,response) => {
   }
 }
 
-const getOneInstCourseStudents = async (request,response) => {
-  try {
-    const {instructor_id,course_id} = request?.query;
-    const result = await getOneInstCourseStudentsService({instructor_id, course_id});
-    response.status(200).send(result);
-  } catch (err) {
-    console.log("Error while handling:",err);
-    response.status(500).send("Error while handling:",err);
-  }
-}
-
 module.exports = {
   createStudent,
   getAllUsers,
@@ -360,5 +371,5 @@ module.exports = {
   sendEmail,
   enrollInCourse,
   getStudentsByInstructorId,
-  getOneInstCourseStudents
+  SignupGoogleSSO
 };

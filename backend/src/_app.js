@@ -21,7 +21,6 @@ const startServer = async () => {
   const app = fastify(fastifyOptions);
 
   console.log("authURL:", authUrl);
-
   app.register(require("@fastify/cors"), {
     // origin: "http://localhost:3001",
     origin: "*",
