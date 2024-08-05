@@ -9,7 +9,7 @@ const {
 } = require("../repositories/userRepository");
 const dataSource = require("../../Infrastructure/postgres");
 const courseRepository = dataSource.getRepository("Course");
-const { findAllCoursesByInst } = require('../repositories/courseRepository')
+const { findAllCoursesByInst, findAllCourses } = require('../repositories/courseRepository')
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -404,6 +404,31 @@ const getStudentsByInstructorIdService = async ({ instructorId }) => {
   }
 }
 
+
+const getEnrolledStudentsService = async () => {
+  try {
+    const courses = await findAllCourses();
+    let studentsIdEnrolled = [];
+
+    courses.forEach(course => {
+      if (course.enrolled_customers) {
+        const enrolledCustomers = Array.isArray(course.enrolled_customers) ? course.enrolled_customers : JSON.parse(course.enrolled_customers);
+        const studentIds = enrolledCustomers.map(customer => customer.student_id);
+        studentsIdEnrolled = [...studentsIdEnrolled, ...studentIds];
+      }
+    });
+
+    const studentDetailsPromises = studentsIdEnrolled.map(student_id => findUser({ id: student_id }));
+    const studentsDetails = await Promise.all(studentDetailsPromises);
+
+    console.log("students details:", studentsDetails);
+    return studentsDetails;
+  } catch (err) {
+    console.log("Error fetching students based on a particular instructor id:", err);
+    return "Error fetching students based on a particular instructor id:", err;
+  }
+}
+
 const getOneInstCourseStudentsService = async ({instructor_id, course_id}) => {
   try{
     console.log("request query: ",{instructor_id, course_id})
@@ -453,5 +478,6 @@ module.exports = {
   sendEmailService,
   enrollInCourseService,
   getStudentsByInstructorIdService,
-  getOneInstCourseStudentsService
+  getOneInstCourseStudentsService,
+  getEnrolledStudentsService
 };

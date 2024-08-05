@@ -1,7 +1,7 @@
 const { logger } = require("../../logger");
 const { createCourseContent } = require("../mediators/courseMediator");
 const { uploadOnS3 } = require("../mediators/instructorMediator");
-const { createCourse, findAllCourses, coursesRatingFunc, fetchCourseWithDetailsWithId, fetchAllRecentCourses, findOneCourse, updateCourse, updateCourseByFilter } = require("../repositories/courseRepository");
+const { createCourse, findAllCourses, coursesRatingFunc, fetchCourseWithDetailsWithId, fetchAllRecentCourses, findOneCourse, updateCourse, updateCourseByFilter, declineCourseRep } = require("../repositories/courseRepository");
 const { getAllReviews } = require("../repositories/courseReviewRepository.js");
 const { saveReview } = require("../repositories/courseReviewRepository.js");
 const { google } = require('googleapis');
@@ -36,6 +36,32 @@ const createCourseWithDetails = async (requestedData) => {
     throw new Error(error);
   }
 };
+
+const declineCourseService = async ({ course_id, status, reason_of_decline, decline_desc }) => {
+  try {
+    const result = await findOneCourse(course_id);
+    if (result?.id) {
+      const declineResult = await declineCourseRep(course_id, status, reason_of_decline,decline_desc);
+      console.log("[RESULT OF DECLINING]:",declineResult);
+      return {
+        message : declineResult,
+        status : 200
+      }
+    } else {
+      console.log("[COURSE NOT FOUND]");
+      return {
+        message : "[COURSE NOT FOUND]",
+        status : 400
+      }
+    }
+  } catch (err) {
+    console.log("[SOME ERROR OCCURED WHILE DECLINING]:", err);
+    return {
+      message : "[SOME ERROR OCCURED WHILE DECLINING]",
+      status : 500
+    }
+  }
+}
 
 
 const uploadVideoToYT = async (courseId, videoFilePath) => {
@@ -263,5 +289,6 @@ module.exports = {
   getReviewsService,
   uploadCourseVideoToYT,
   uploadVideoToYT,
-  updateCoursePropertiesService
+  updateCoursePropertiesService,
+  declineCourseService
 };

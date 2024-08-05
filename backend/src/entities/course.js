@@ -73,7 +73,16 @@ module.exports = new EntitySchema({
     // created_by: {
     //   type: "integer",
     //   nullable: true,
-    // },
+    // }, 
+    reason_of_decline : {
+      type: "enum",
+      enum : ["Video Quality","Inappropriate Language","Discriminations","Course Curriculum"],
+      nullable: true
+    },
+    decline_desc : {
+      type: "jsonb",
+      nullable: true
+    },
     updated_by: {
       type: "varchar",
       nullable: true,

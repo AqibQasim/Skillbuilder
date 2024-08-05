@@ -159,6 +159,22 @@ const updateCourse = async (courseId, videoUrl) => {
   return "Course has been updated successfully"
 }
 
+// const updateCourseProps = async (course_id, filter, ) => {
+//   const courseExist = await courseRepository.findOne({
+//     where: { id: courseId },
+//   });
+
+//   if (!courseExist) {
+//     return 'No such course exists!';
+//   };
+
+//   Object.assign(courseExist, { video_url: videoUrl });
+
+//   const updatedCourse = await courseRepository.save(courseExist);
+//   console.log("updated course:", updatedCourse);
+//   return "Course has been updated successfully"
+// }
+
 const updateCourseByFilter = async (courseId, filter, value) => {
   const courseExist = await courseRepository.findOne({
     where: { id : courseId },
@@ -176,6 +192,23 @@ const updateCourseByFilter = async (courseId, filter, value) => {
   return "Course has been updated successfully"
 }
 
+const declineCourseRep = async (courseId, status, reason_of_decline, decline_desc) => {
+  const courseExist = await courseRepository.findOne({
+    where: { id : courseId },
+  });
+
+  if (!courseExist) {
+    return 'No such course exists!';
+  };
+
+  // console.log('{ filter: value }:',{ filter: value })
+  Object.assign(courseExist, { reason_of_decline: reason_of_decline, status: status, decline_desc : decline_desc });
+
+  const updatedCourse = await courseRepository.save(courseExist);
+  console.log("[updated course]:", updatedCourse);
+  return "Course has been updated successfully"
+}
+ 
 const updateCoursecontent = async (courseId, moduleInfo) => {
   const courseRepository = dataSource.getRepository('Course');
   const contentModuleRepository = dataSource.getRepository('content_module');
@@ -224,6 +257,7 @@ module.exports = {
   findAllCoursesByInst,
   updateCourse,
   updateCoursecontent,
-  updateCourseByFilter
+  updateCourseByFilter, 
+  declineCourseRep
   // saveReview
 };

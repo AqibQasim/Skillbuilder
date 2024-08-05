@@ -1,5 +1,5 @@
 const { logger } = require("../../logger");
-const { createCourseWithDetails, getAllCourses, coursesRatingService, coursesDetailFunc, recentCoursesFunc, courseGetById, postReviewService, getReviewsService, uploadCourseVideoToYT, updateCoursePropertiesService } = require("../services/courseService");
+const { createCourseWithDetails, getAllCourses, coursesRatingService, coursesDetailFunc, recentCoursesFunc, courseGetById, postReviewService, getReviewsService, uploadCourseVideoToYT, updateCoursePropertiesService , declineCourseService } = require("../services/courseService");
 const { getInstructorById } = require("../services/instructorService");
 const { postPurchasedCourse, findAllPurchasedCourse } = require("../services/purchasedCourseService");
 const { updateCoursecontent } = require("../repositories/courseRepository")
@@ -348,25 +348,25 @@ const uploadCourseContent = async (request, reply) => {
         const videoUrl = response.video_url;
         videoUrls.push(videoUrl);
         console.log("response of uploading a video to youtube:", response);
-        // console.log("response of uploading a video to youtube:", response);
       }
 
 
-      let updated = false; ``
       for (const module of moduleInfo?.modules) {
         for (const contentItem of module.content) {
           console.log("video index:", videoIndex, "video urls length:", videoUrls.length);
-          if (contentItem.content.startsWith('path/to/video') && videoIndex < videoUrls.length) {
+          if (contentItem.content.startsWith('path/to/video') && videoIndex <= videoUrls.length) {
             console.log("videoUrls[videoIndex]:", videoUrls[videoIndex]);
-            contentItem.content = videoUrls[videoIndex];
-            console.log("contentItem.content:", contentItem.content);
+            console.log("[module name]:", module?.title);
+            console.log("[content]:", contentItem);
+            contentItem.content = "updated url" 
+            console.log("[contentItem.content]:", contentItem.content);
             videoIndex++;
           }
         }
       }
-
+      
       const finalResult = await updateCoursecontent(course_id, moduleInfo);
-
+      
       console.log("[FINAL RESULT]:", finalResult);
       return finalResult;
     }
@@ -387,7 +387,17 @@ const uploadCourseContent = async (request, reply) => {
   }
 };
 
-
+const declineCourse = async (request,response) => {
+  try{
+    const { course_id, status, reason_of_decline, decline_desc } = request?.body;
+    const result = await declineCourseService({ course_id, status, reason_of_decline, decline_desc });
+    console.log("[DATA TO BE SENT AS RESPONSE:]",result);
+    response.status(200).send(result)
+  } catch (err) {
+    console.log("[Err]:",err);
+    response.status(500).send("Internal Server Error");
+  }
+}
 
 
 module.exports = {
@@ -403,5 +413,6 @@ module.exports = {
   getReviews,
   uploadCourseIntroVideo,
   uploadCourseContent,
-  updateCourseProperties
+  updateCourseProperties,
+  declineCourse
 };
