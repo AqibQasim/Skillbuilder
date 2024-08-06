@@ -1,7 +1,7 @@
 const { logger } = require("../../logger");
 const { createCourseContent } = require("../mediators/courseMediator");
 const { uploadOnS3 } = require("../mediators/instructorMediator");
-const { createCourse, findAllCourses, coursesRatingFunc, fetchCourseWithDetailsWithId, fetchAllRecentCourses, findOneCourse, updateCourse, updateCourseByFilter, declineCourseRep } = require("../repositories/courseRepository");
+const { createCourse, findAllCourses, coursesRatingFunc, fetchCourseWithDetailsWithId, fetchAllRecentCourses, findOneCourse, updateCourse, updateCourseByFilter, setCourseStatusRepository } = require("../repositories/courseRepository");
 const { getAllReviews } = require("../repositories/courseReviewRepository.js");
 const { saveReview } = require("../repositories/courseReviewRepository.js");
 const { google } = require('googleapis');
@@ -37,11 +37,11 @@ const createCourseWithDetails = async (requestedData) => {
   }
 };
 
-const declineCourseService = async ({ course_id, status, reason_of_decline, decline_desc }) => {
+const setCourseStatusService = async ({ course_id, status, reason , status_desc }) => {
   try {
     const result = await findOneCourse(course_id);
     if (result?.id) {
-      const declineResult = await declineCourseRep(course_id, status, reason_of_decline,decline_desc);
+      const declineResult = await setCourseStatusRepository(course_id, status, reason, status_desc);
       console.log("[RESULT OF DECLINING]:",declineResult);
       return {
         message : declineResult,
@@ -290,5 +290,5 @@ module.exports = {
   uploadCourseVideoToYT,
   uploadVideoToYT,
   updateCoursePropertiesService,
-  declineCourseService
+  setCourseStatusService
 };

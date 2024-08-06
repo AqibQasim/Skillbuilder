@@ -1,5 +1,5 @@
 const { logger } = require("../../logger");
-const { createCourseWithDetails, getAllCourses, coursesRatingService, coursesDetailFunc, recentCoursesFunc, courseGetById, postReviewService, getReviewsService, uploadCourseVideoToYT, updateCoursePropertiesService , declineCourseService } = require("../services/courseService");
+const { createCourseWithDetails, getAllCourses, coursesRatingService, coursesDetailFunc, recentCoursesFunc, courseGetById, postReviewService, getReviewsService, uploadCourseVideoToYT, updateCoursePropertiesService , setCourseStatusService } = require("../services/courseService");
 const { getInstructorById } = require("../services/instructorService");
 const { postPurchasedCourse, findAllPurchasedCourse } = require("../services/purchasedCourseService");
 const { updateCoursecontent } = require("../repositories/courseRepository")
@@ -40,6 +40,8 @@ const postCourse = async (request, reply) => {
     });
   }
 };
+
+
 
 const allCourses = async (request, reply) => {
   logger.info("src > controller > controllerALlrCourse ", request.body);
@@ -212,7 +214,7 @@ const updateCourseProperties = async (request,reply) => {
     reply.status(result.status).send(result);
   }catch(err){
     console.log("ERR:",err);
-    res.status(500).send("Some exception occured while handling this route:",err);
+    res.status(500).send("Some exception occured while handling this route:",err);  
   }
 }
 
@@ -387,10 +389,10 @@ const uploadCourseContent = async (request, reply) => {
   }
 };
 
-const declineCourse = async (request,response) => {
+const setCourseStatus = async (request,response) => {
   try{
-    const { course_id, status, reason_of_decline, decline_desc } = request?.body;
-    const result = await declineCourseService({ course_id, status, reason_of_decline, decline_desc });
+    const { course_id, status, reason, status_desc } = request?.body;
+    const result = await setCourseStatusService({ course_id, status, reason, status_desc });
     console.log("[DATA TO BE SENT AS RESPONSE:]",result);
     response.status(200).send(result)
   } catch (err) {
@@ -398,6 +400,8 @@ const declineCourse = async (request,response) => {
     response.status(500).send("Internal Server Error");
   }
 }
+
+
 
 
 module.exports = {
@@ -414,5 +418,5 @@ module.exports = {
   uploadCourseIntroVideo,
   uploadCourseContent,
   updateCourseProperties,
-  declineCourse
+  setCourseStatus
 };

@@ -5,8 +5,6 @@ const courseRepository = dataSource.getRepository("Course");
 const courseRevRep = dataSource.getRepository('courseReviews');
 const courseContentRepository = dataSource.getRepository('course_content');
 
-
-
 const createCourse = async (data) => {
   try {
     const courseCreating = courseRepository.create(data);
@@ -159,6 +157,9 @@ const updateCourse = async (courseId, videoUrl) => {
   return "Course has been updated successfully"
 }
 
+
+
+
 // const updateCourseProps = async (course_id, filter, ) => {
 //   const courseExist = await courseRepository.findOne({
 //     where: { id: courseId },
@@ -192,7 +193,7 @@ const updateCourseByFilter = async (courseId, filter, value) => {
   return "Course has been updated successfully"
 }
 
-const declineCourseRep = async (courseId, status, reason_of_decline, decline_desc) => {
+const setCourseStatusRepository = async (courseId, status, reason_of_decline, status_desc) => {
   const courseExist = await courseRepository.findOne({
     where: { id : courseId },
   });
@@ -202,7 +203,7 @@ const declineCourseRep = async (courseId, status, reason_of_decline, decline_des
   };
 
   // console.log('{ filter: value }:',{ filter: value })
-  Object.assign(courseExist, { reason_of_decline: reason_of_decline, status: status, decline_desc : decline_desc });
+  Object.assign(courseExist, { reason_of_decline: reason_of_decline, status: status, status_desc : status_desc });
 
   const updatedCourse = await courseRepository.save(courseExist);
   console.log("[updated course]:", updatedCourse);
@@ -258,6 +259,6 @@ module.exports = {
   updateCourse,
   updateCoursecontent,
   updateCourseByFilter, 
-  declineCourseRep
+  setCourseStatusRepository
   // saveReview
 };

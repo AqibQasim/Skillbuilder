@@ -6,6 +6,7 @@ const {
   updateUserByEmail,
   updateUserById,
   findOneUser,
+  setUserStatusRepository,
 } = require("../repositories/userRepository");
 const dataSource = require("../../Infrastructure/postgres");
 const courseRepository = dataSource.getRepository("Course");
@@ -23,6 +24,7 @@ const {
 const { findOneCourse } = require("../repositories/courseRepository");
 const { EntityRepository } = require("typeorm");
 const { forEach } = require("lodash");
+const { checkIfUserIsStudent } = require('../utils/checkIfUserIsStudent');
 // const { ConfigurationServicePlaceholders } = require("aws-sdk/lib/config_service_placeholders");
 
 // const emailVerificationForRegister = async (userInfo) => {
@@ -159,7 +161,7 @@ const enrollInCourseService = async ({ student_id, course_id, filter }) => {
     console.log("ERROR while enrolling:", err);
     return "ERROR while enrolling:", err
   }
-}
+};
 
 
 const createUserAfterVerification = async (verificationToken) => {
@@ -231,13 +233,13 @@ const getOneUserService = async (id) => {
     if (user) {
       console.log('User:', user);
       return {
-        status : 200,
-        message : user
+        status: 200,
+        message: user
       }
     } else {
       return {
-        status : 400,
-        message : "User not found"
+        status: 400,
+        message: "User not found"
       }
     }
   } catch (e) {
@@ -405,7 +407,7 @@ const getStudentsByInstructorIdService = async ({ instructorId }) => {
 }
 
 
-const getEnrolledStudentsService = async () => {
+async function getEnrolledStudentsService() {
   try {
     const courses = await findAllCourses();
     let studentsIdEnrolled = [];
@@ -429,38 +431,77 @@ const getEnrolledStudentsService = async () => {
   }
 }
 
-const getOneInstCourseStudentsService = async ({instructor_id, course_id}) => {
-  try{
-    console.log("request query: ",{instructor_id, course_id})
+const getOneInstCourseStudentsService = async ({ instructor_id, course_id }) => {
+  try {
+    console.log("request query: ", { instructor_id, course_id })
     const coursesByInst = await findAllCoursesByInst(instructor_id);
     console.log("courses by a particular instructor:", coursesByInst);
 
     let foundCourse;
     coursesByInst.forEach(course => {
       console.log("condition : course_id === course?.id", course_id == course?.id)
-      if(course_id == course?.id){
+      if (course_id == course?.id) {
         foundCourse = course;
-        console.log("found course:", foundCourse, "\n\nand its students are:",coursesByInst?.enrolled_customers)
+        console.log("found course:", foundCourse, "\n\nand its students are:", coursesByInst?.enrolled_customers)
       } else {
         return {
-          status : 400,
-          message : "Course doesn't exist."
+          status: 400,
+          message: "Course doesn't exist."
         }
       }
     });
 
-    if(foundCourse && foundCourse?.enrolled_customers){
-      console.log("found course:", foundCourse, "\n\nand its students are:",coursesByInst?.enrolled_customers);
+    if (foundCourse && foundCourse?.enrolled_customers) {
+      console.log("found course:", foundCourse, "\n\nand its students are:", coursesByInst?.enrolled_customers);
       return {
-        status : 200,
-        message : foundCourse?.enrolled_customers
+        status: 200,
+        message: foundCourse?.enrolled_customers
       }
     }
-  } catch (err){
+  } catch (err) {
     console.log("Error fetching students based on a particular instructor id and a particular course:", err);
     return "Error fetching students based on a particular instructor id and a particular course:", err;
   }
 }
+
+// setStudentStatusService
+
+const setStudentStatusService = async ({ id, status, status_desc }) => {
+  try {
+
+    // const enrolledStudents = await checkIfUserIsStudent({id});
+    // console.log("enrolled students:", enrolledStudents);
+
+    const enrolledStudents = await getEnrolledStudentsService();
+    console.log("enrolled students:", enrolledStudents);
+    let requestedUser;
+
+    
+
+    const result = await findOneUser(id);
+    if (result?.id) {
+      const declineResult = await setUserStatusRepository(requestedUser, enrolledStudents, id, status, status_desc);
+      console.log("[RESULT OF DECLINING]:",declineResult);
+      return {
+        message : declineResult,
+        status : 200
+      }
+    } else {
+      console.log("[STUDENT NOT FOUND]");
+      return {
+        message : "[STUDENT NOT FOUND]",
+        status : 400
+      }
+    }
+  } catch (err) {
+    console.log("[SOME ERROR OCCURED WHILE CHANGING THE STATUS]:", err);
+    return {
+      message: "[SOME ERROR OCCURED WHILE CHANGING THE STATUS]",
+      status: 500
+    }
+  }
+}
+
 
 module.exports = {
   createGoogleUser,
@@ -479,5 +520,6 @@ module.exports = {
   enrollInCourseService,
   getStudentsByInstructorIdService,
   getOneInstCourseStudentsService,
-  getEnrolledStudentsService
+  getEnrolledStudentsService,
+  setStudentStatusService
 };

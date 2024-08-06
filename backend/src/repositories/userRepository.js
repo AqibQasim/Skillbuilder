@@ -53,7 +53,7 @@ const findOneUser = async (id) => {
       }
     });
     return user ? user : null;
-  } catch(err){
+  } catch (err) {
     console.log("ERR:", err);
     return
   }
@@ -83,7 +83,7 @@ const updateUserByEmail = async (email, newData) => {
           message: "Password does not match"
         }
       } else {
-        user.password = await bcrypt.hash(newData.new_password,10);
+        user.password = await bcrypt.hash(newData.new_password, 10);
         let updatedUser = await userRepository.save(user);
         return {
           status: true,
@@ -146,6 +146,35 @@ const UserContact = async (userInfo) => {
   }
 };
 
+const setUserStatusRepository = async (requestedUser, enrolledStudents, id, status, status_desc) => {
+  const userExist = await userRepository.findOne({
+    where: { id: id },
+  });
+
+  if (!userExist) {
+    return 'No such student exists!';
+  };
+
+  enrolledStudents.forEach((stud) => {
+    console.log("[student]:", stud);
+    if (stud?.id === id) {
+      requestedUser = stud
+    }
+  }); 
+
+  if (!requestedUser) {
+    console.log("[REQUESTED USER IS NOT ENROLLED IN ANY COURSE]");
+    return "[REQUESTED USER IS NOT ENROLLED IN ANY COURSE]"
+  } else {
+    console.log("[REQUESTED USER THAT IS ENROLLED IN A COURSE]:", requestedUser);
+    Object.assign(userExist, {status: status, status_desc: status_desc });
+
+    const updatedCourse = await userRepository.save(userExist);
+    console.log("[UPDATED COURSE]:", updatedCourse);
+    return "[UPDATED COURSE]:", updatedCourse
+  }
+}
+
 
 module.exports = {
   createUser,
@@ -154,5 +183,6 @@ module.exports = {
   updateUserByEmail,
   updateUserById,
   UserContact,
-  findOneUser
+  findOneUser,
+  setUserStatusRepository
 };

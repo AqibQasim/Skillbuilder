@@ -1,4 +1,4 @@
-const { postCourse, allCourses, coursesRating, courseDetails, recentCourses, getCourseById, createPurchasedCourse, getMyCourses, postReview, getReviews, uploadCourseIntroVideo, uploadCourseContent , updateCourseProperties, declineCourse} = require("../controllers/courseController");
+const { postCourse, allCourses, coursesRating, courseDetails, recentCourses, getCourseById, createPurchasedCourse, getMyCourses, postReview, getReviews, uploadCourseIntroVideo, uploadCourseContent , updateCourseProperties, setCourseStatus} = require("../controllers/courseController");
 const { createCourseSchema, getCourseByIdSchema, allCoursesSchema, coursesRatingSchema, recentCoursesSchema, courseDetailsSchema, myCoursesSchema, buyCourseSchema } = require("../Schema/courseSchema")
 const coursesRoutes = async (fastify, options) => {
   fastify.post("/create-course", createCourseSchema, postCourse);
@@ -14,7 +14,7 @@ const coursesRoutes = async (fastify, options) => {
   fastify.post("/upload-course-intro", uploadCourseIntroVideo);
   fastify.post("/upload-course-content", uploadCourseContent);
   fastify.put("/set-course-prop",updateCourseProperties);
-  fastify.put("/decline-course",declineCourse);
+  fastify.put("/set-course-status",setCourseStatus);
   // fastify.post("")
 };
 
