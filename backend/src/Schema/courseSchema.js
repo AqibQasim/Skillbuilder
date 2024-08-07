@@ -14,8 +14,27 @@ const ValidateCourse = Joi.object({
 });
 //update course properties schema
 const updatecourseSchema = {
-
-}
+  schema: {
+    description: "Update course",
+    body: {
+      type: "object",
+      properties: {
+        course_id: { type: "integer" },
+        filter: {
+          type: "string",
+          enum: ["status"],
+          description: "Filter type which should be 'status'",
+        },
+        value: {
+          type: "string",
+          enum: ["pending", "approved", "declined", "suspended"],
+          description: "The status value to filter by",
+        },
+      },
+      required: ["course_id", "filter", "value"],
+    },
+  },
+};
 
 //get reviews via  course_id
 const getreviewSchema = {
@@ -315,4 +334,5 @@ module.exports = {
   myCoursesSchema,
   postSchema,
   getreviewSchema,
+  updatecourseSchema,
 };

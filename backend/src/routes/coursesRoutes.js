@@ -24,6 +24,7 @@ const {
   myCoursesSchema,
   buyCourseSchema,
   getreviewSchema,
+  updatecourseSchema,
   postSchema,
 } = require("../Schema/courseSchema");
 const coursesRoutes = async (fastify, options) => {
@@ -39,7 +40,7 @@ const coursesRoutes = async (fastify, options) => {
   fastify.get("/get-all-reviews/:id", getreviewSchema, getReviews);
   fastify.post("/upload-course-intro", uploadCourseIntroVideo);
   fastify.post("/upload-course-content", uploadCourseContent);
-  fastify.put("/set-course-prop", updateCourseProperties);
+  fastify.put("/set-course-prop", updatecourseSchema, updateCourseProperties);
   fastify.put("/set-course-status", setCourseStatus);
   // fastify.post("")
 };
