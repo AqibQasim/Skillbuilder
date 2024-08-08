@@ -442,4 +442,5 @@ module.exports = {
   googleAuthCallbackSchema,
   // googleAuthSchema,
   getAllUsersSchema,
+  userEnrollcourseSchema,
 };
