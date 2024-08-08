@@ -98,7 +98,20 @@ const updateProfileValidation = Joi.object({
   facebook_profile: Joi.string(),
   linkedin_profile: Joi.string(),
 });
-
+const userEnrollcourseSchema = {
+  schema: {
+    description: "Enroll in course",
+    body: {
+      type: "object",
+      properties: {
+        student_id: { type: "number" },
+        course_id: { type: "number" },
+        filter: { type: "string" },
+      },
+      required: ["student_id", "course_id", "filter"],
+    },
+  },
+};
 const userSwaggerSchema = {
   schema: {
     description: "post signup data",
