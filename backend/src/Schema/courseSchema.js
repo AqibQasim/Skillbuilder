@@ -12,6 +12,56 @@ const ValidateCourse = Joi.object({
   image: Joi.string().required(),
   rating: Joi.string().required(),
 });
+
+//Update course Status Schema
+const courseStatusSchema = {
+  schema: {
+    description: "Update Course Status",
+    body: {
+      type: "object",
+      properties: {
+        course_id: { type: "integer" },
+        status: {
+          type: "string",
+          enum: ["pending", "approved", "declined", "suspended"],
+          description: "Status should be of Enum type",
+        },
+        reason: {
+          type: "string",
+          enum: [
+            "Video Quality",
+            "Inappropriate Language",
+            "Discriminations",
+            "Course Curriculum",
+          ],
+        },
+        status_desc: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              module_id: { type: "integer" },
+              content_id: { type: "integer" },
+              desc: { type: "string" },
+            },
+            required: ["module_id", "content_id", "desc"],
+          },
+        },
+      },
+      required: ["course_id", "status"],
+      if: {
+        properties: { status: { const: "approved" } },
+      },
+      then: {
+        required: ["course_id", "status"],
+      },
+      else: {
+        required: ["course_id", "status", "reason", "status_desc"],
+      },
+    },
+  },
+};
+
 //update course properties schema
 const updatecourseSchema = {
   schema: {
@@ -335,4 +385,5 @@ module.exports = {
   postSchema,
   getreviewSchema,
   updatecourseSchema,
+  courseStatusSchema,
 };

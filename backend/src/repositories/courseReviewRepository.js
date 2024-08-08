@@ -10,9 +10,7 @@ const getAllReviews = async (id) => {
       },
     });
     console.log("Total courses:", allCourses);
-    if (allCourses) {
-      return { message: "Course not Existed" };
-    }
+
     return allCourses;
   } catch (err) {
     console.log("ERR:", err);
