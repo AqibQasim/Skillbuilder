@@ -44,6 +44,7 @@ const {
   googleAuthCallbackSchema,
   userEnrollcourseSchema,
   getAllUsersSchema,
+  setStudentStatusschema,
 } = require("../Schema/userSchema");
 const {
   contactUsSchema,
@@ -99,7 +100,7 @@ const userRoutes = async (fastify, options) => {
   fastify.get("/get-students-by-inst", getStudentsByInstructorId);
   fastify.get("/get-one-course-inst-students", getOneInstCourseStudents);
   fastify.get("/get-all-students", getEnrolledStudents);
-  fastify.put("/set-student-status", setStudentStatus);
+  fastify.put("/set-student-status", setStudentStatusschema, setStudentStatus);
 };
 
 module.exports = userRoutes;

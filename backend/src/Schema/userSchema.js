@@ -98,6 +98,34 @@ const updateProfileValidation = Joi.object({
   facebook_profile: Joi.string(),
   linkedin_profile: Joi.string(),
 });
+//student will set his status schema
+const setStudentStatusschema = {
+  schema: {
+    description: "Set Student Status",
+    body: {
+      type: "object",
+      properties: {
+        id: {
+          type: "integer",
+          description: "Unique identifier of the student",
+        },
+        status: {
+          type: "string",
+          enum: ["suspended", "active"],
+          description:
+            "The status of the student. Must be either 'suspended' or 'active'.",
+        },
+        status_desc: {
+          type: "string",
+          description: "A description or reason for the status change.",
+        },
+      },
+      required: ["id", "status", "status_desc"],
+    },
+  },
+};
+
+//student will in-roll in course schema
 const userEnrollcourseSchema = {
   schema: {
     description: "Enroll in course",
@@ -441,6 +469,7 @@ module.exports = {
   otpVerificationSchema,
   googleAuthCallbackSchema,
   // googleAuthSchema,
+  setStudentStatusschema,
   getAllUsersSchema,
   userEnrollcourseSchema,
 };
