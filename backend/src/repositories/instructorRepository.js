@@ -35,9 +35,29 @@ const instructorCreate = async (instructorPayload) => {
 const fetchAllInstructor = async () => {
   logger.info("src > instructorRepository > fetchAllInstructor");
   try {
-    const allInstructor = await instructorRepository.find({
-      relations: ["skills"],
-    });
+    const user= await dataSource.getRepository("User").find();
+    //console.log(user)
+    
+    const allInstructor=[];
+    for(let u of user){
+      console.log(u)
+
+      const instructor= await instructorRepository.find({where:{user_id:u.id}});
+      // console.log("instructor",
+      //   instructor
+      // )
+
+      if(instructor)
+        allInstructor.push({
+          id: instructor[0].id,
+          user:instructor[0]
+        });
+    }
+
+    // const allInstructor = await instructorRepository.find({
+    //   relations: ["skills"],
+    // });
+    
 
     if (allInstructor.length == 0) {
       return null;
@@ -77,6 +97,7 @@ const findByFilter = async (filter) => {
         ...user,
         ...instructorExist
       };
+      //return instructorExist;
     }
     return null;
   } catch (error) {
