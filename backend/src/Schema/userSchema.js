@@ -1,5 +1,6 @@
 const Joi = require("joi");
 const { EmailVerify } = require("../controllers/userController");
+const { query } = require("pg-monitor");
 
 const ValidateUser = Joi.object({
   first_name: Joi.string().required(),
@@ -52,7 +53,8 @@ const validateEmailAndPassword = Joi.object({
 
 const updateProfileValidation = Joi.object({
   id: Joi.number().required(),
-  name: Joi.string(),
+  first_name: Joi.string(),
+  last_name: Joi.string(),
   email: Joi.string()
     .pattern(new RegExp(/(\w+|\.+\w+){1,10}@[a-zA-Z0-9]+\.([a-zA-Z0-9]+|\.[a-zA-Z0-9]+){1,3}/))
     .messages({
@@ -189,7 +191,8 @@ const updateProfileSchema = {
       type: "object",
       properties: {
         id: { type: "number" },
-        name: { type: "string" },
+        first_name: { type: "string" },
+        last_name: { type: "string" },
         email: { type: "string" },
         password: { type: "string" },
         profession: { type: "string" },
@@ -270,7 +273,7 @@ const verifyEmailSchema = {
 // /password-reset/:email
 const passwordResetSchema = {
   schema: {
-    params: {
+    query: {
       type: "object",
       properties: {
         email: { type: "string", description: "User email for password reset" }

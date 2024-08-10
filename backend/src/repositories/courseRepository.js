@@ -1,6 +1,8 @@
 const { logger } = require("../../logger");
 const dataSource = require("../../Infrastructure/postgres");
 const courseRepository = dataSource.getRepository("Course");
+const courseRevRep = dataSource.getRepository('courseReviews');
+
 
 
 const createCourse = async (data) => {
@@ -36,7 +38,7 @@ const findOneCourse = async (filter) => {
     return findOne;
   } catch (error) {
     logger.error("Error: src > repositories > courseRepository")
-    logger.error(error.message)
+    logger.error(error.message) 
     throw new Error(error);
   }
 }
@@ -112,7 +114,7 @@ const fetchAllRecentCourses = async () => {
   logger.info("src > Repository > fetchAllRecentCourses");
   try {
     const courseRepository = dataSource.getRepository("Course");
-    const coursesWithUpdatedTime = await await courseRepository.find({
+    const coursesWithUpdatedTime = await courseRepository.find({
       order: {
         updated_at: "DESC",
       },
@@ -125,6 +127,8 @@ const fetchAllRecentCourses = async () => {
 };
 
 
+
+
 module.exports = {
   createCourse,
   findAllCourses,
@@ -132,4 +136,5 @@ module.exports = {
   coursesRatingFunc,
   fetchCourseWithDetailsWithId,
   fetchAllRecentCourses,
+  // saveReview
 };
