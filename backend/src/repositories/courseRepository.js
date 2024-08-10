@@ -42,25 +42,6 @@ const findAllCoursesByInst = async (id) => {
 };
 
 const findOneCourse = async (filter, course_id) => {
-  // try {
-  //   const updateObject = {};
-  //   console.log("#############", filter, "########", course_id);
-
-  //   // The filter key should be added directly
-  //   updateObject[filter] = course_id;
-  //   console.log("Updated object:", updateObject);
-
-  //   const findOne = await courseRepository.findOne({
-  //     where: updateObject,
-  //     relations: ["instructor", "reviews", "modules.content"],
-  //   });
-
-  //   return findOne;
-  // } catch (error) {
-  //   logger.error("Error: src > repositories > courseRepository");
-  //   logger.error(error.message);
-  //   throw new Error(error);
-  // }
   try {
     const updateObject = {};
     console.log("#############", filter, "########", course_id);
