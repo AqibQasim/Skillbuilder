@@ -7,7 +7,7 @@ services:
             - ./db:/var/lib/postgresql/data
             # - ./postgres-initdb.sh:/docker-entrypoint-initdb.d/initdb.sh
         ports:
-            - "5432:5432"
+            - "7778:5432"
         networks:
             - dev-net
         environment:
