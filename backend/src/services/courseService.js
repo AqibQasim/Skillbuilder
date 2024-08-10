@@ -210,7 +210,6 @@ const uploadCourseVideoToYT = async (courseId, videoFilePath, user_role) => {
 };
 
 const courseGetById = async (id) => {
-  
   try {
     const filter = "id"; // Assuming 'id' is the filter key
 

@@ -41,11 +41,9 @@ const findAllCoursesByInst = async (id) => {
   }
 };
 
-const findOneCourse = async (filter, course_id) => {
+const findOneCourse = async (filter,course_id) => {
   try {
     const updateObject = {};
-
-    // The filter key should be added directly
     updateObject[filter] = course_id;
     console.log("Updated object:", updateObject);
 
@@ -194,12 +192,7 @@ const updateCourseByFilter = async (courseId, filter, value) => {
   return "Course has been updated successfully";
 };
 
-const setCourseStatusRepository = async (
-  courseId,
-  status,
-  reason,
-  status_desc
-) => {
+const setCourseStatusRepository = async (courseId, status, reason_of_decline, status_desc) => {
   const courseExist = await courseRepository.findOne({
     where: { id: courseId },
   });
@@ -209,11 +202,7 @@ const setCourseStatusRepository = async (
   }
 
   // console.log('{ filter: value }:',{ filter: value })
-  Object.assign(courseExist, {
-    reason: reason,
-    status: status,
-    status_desc: status_desc,
-  });
+  Object.assign(courseExist, { reason_of_decline: reason_of_decline, status: status, status_desc : status_desc });
 
   const updatedCourse = await courseRepository.save(courseExist);
   console.log("[updated course]:", updatedCourse);
