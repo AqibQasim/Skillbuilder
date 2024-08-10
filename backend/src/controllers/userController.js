@@ -26,7 +26,7 @@ const {
   sendEmailService,
   enrollInCourseService,
   getStudentsByInstructorIdService,
-  getOneInstCourseStudentsService
+  getOneInstCourseStudentsService,
 } = require("../services/userService");
 
 const createStudent = async (request, reply) => {
@@ -154,26 +154,30 @@ const getOneUser = async (req, res) => {
   try {
     const id = req?.params?.id;
     const result = await getOneUserService(id);
-    console.log("result:", result);  
+    console.log("result:", result);
     res.status(result?.status).send({
       success: result?.status,
-      message : result?.message
-    })
-  } catch(err){
-    console.log("ERR:",err);
+      message: result?.message,
+    });
+  } catch (err) {
+    console.log("ERR:", err);
   }
 };
 
-const enrollInCourse = async (request,reply) => {
-  try{
-    const {student_id,course_id,filter} = request?.body;
-    const result = await enrollInCourseService({student_id,course_id,filter});
+const enrollInCourse = async (request, reply) => {
+  try {
+    const { student_id, course_id, filter } = request?.body;
+    const result = await enrollInCourseService({
+      student_id,
+      course_id,
+      filter,
+    });
     reply.status(200).send(result);
-  } catch(err){
-    console.log("Some internal server error occured",err);
-    reply.status(500).send("Some internal server error occured",err);
+  } catch (err) {
+    console.log("Some internal server error occured", err);
+    reply.status(500).send("Some internal server error occured", err);
   }
-}
+};
 
 const GoggleLoginCallBAck = async (request, reply) => {
   try {
@@ -303,7 +307,7 @@ const profileUpdateHandler = async (request, reply) => {
   }
 };
 
-const ContactUS = async (request, reply) => {
+const ContactUS = async (request, reply) => {s
   const userInfo = request.body;
 
   // const { error } = ValidateContactUs.validate(userInfo);
@@ -326,27 +330,30 @@ const ContactUS = async (request, reply) => {
   }
 };
 
-const getStudentsByInstructorId = async (request,response) => {
-  try{
-    const {instructor_id} = request?.query;
-    const result = await getStudentsByInstructorIdService({instructor_id});
-    response.status(200).send(result);
-  } catch(err){
-    console.log("Error while handling:",err);
-    response.status(500).send("Error while handling:",err);
-  }
-}
-
-const getOneInstCourseStudents = async (request,response) => {
+const getStudentsByInstructorId = async (request, response) => {
   try {
-    const {instructor_id,course_id} = request?.query;
-    const result = await getOneInstCourseStudentsService({instructor_id, course_id});
+    const { instructor_id } = request?.query;
+    const result = await getStudentsByInstructorIdService({ instructor_id });
     response.status(200).send(result);
   } catch (err) {
-    console.log("Error while handling:",err);
-    response.status(500).send("Error while handling:",err);
+    console.log("Error while handling:", err);
+    response.status(500).send("Error while handling:", err);
   }
-}
+};
+
+const getOneInstCourseStudents = async (request, response) => {
+  try {
+    const { instructor_id, course_id } = request?.query;
+    const result = await getOneInstCourseStudentsService({
+      instructor_id,
+      course_id,
+    });
+    response.status(200).send(result);
+  } catch (err) {
+    console.log("Error while handling:", err);
+    response.status(500).send("Error while handling:", err);
+  }
+};
 
 module.exports = {
   createStudent,
@@ -363,5 +370,5 @@ module.exports = {
   sendEmail,
   enrollInCourse,
   getStudentsByInstructorId,
-  getOneInstCourseStudents
+  getOneInstCourseStudents,
 };
