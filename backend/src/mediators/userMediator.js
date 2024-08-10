@@ -27,7 +27,10 @@ const sendVerificationEmail = async (email, verificationToken) => {
       from: "fa21bscs0017@maju.edu.pk",
       to: email,
       subject: "Email Verification",
-      html: `<a href="http://${process.env.SERVER_HOST}:${process.env.SERVER_PORT
+      html: `
+      <h1>Click on the link below to verify your email!</h1>
+      
+      <a href="http://${process.env.SERVER_HOST}:${process.env.SERVER_PORT
         }/verify-email?email=${encodeURIComponent(
           email
         )}&token=${verificationToken}">Verify your email</a>`,
@@ -43,6 +46,8 @@ const sendVerificationEmail = async (email, verificationToken) => {
     return "Unsuccessful to send a verification mail."
   }
 };
+
+
 
 const verifyPassword = async (password, existingUser) => {
   const passwordMatch = await bcrypt.compare(password, existingUser?.password);
@@ -67,7 +72,7 @@ const verifyPassword = async (password, existingUser) => {
     },
   };
 
-  return { token , userId : existingUser?.id , option };
+  return { token , user : existingUser , option };
 };
 
 const sendOTPMail = async (email) => {

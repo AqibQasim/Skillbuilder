@@ -1,4 +1,5 @@
 const Joi = require("joi");
+const course = require("../entities/course");
 
 const ValidateCourse = Joi.object({
   instructor_id: Joi.string().required(),
@@ -12,6 +13,108 @@ const ValidateCourse = Joi.object({
   rating: Joi.string().required(),
 });
 
+//Update course Status Schema
+const courseStatusSchema = {
+  schema: {
+    description: "Update Course Status",
+    body: {
+      type: "object",
+      properties: {
+        course_id: { type: "integer" },
+        status: {
+          type: "string",
+          enum: ["pending", "approved", "declined", "suspended"],
+          description: "Status should be of Enum type",
+        },
+        reason: {
+          type: "string",
+          enum: [
+            "Video Quality",
+            "Inappropriate Language",
+            "Discriminations",
+            "Course Curriculum",
+          ],
+        },
+        status_desc: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              module_id: { type: "integer" },
+              content_id: { type: "integer" },
+              desc: { type: "string" },
+            },
+            required: ["module_id", "content_id", "desc"],
+          },
+        },
+      },
+      required: ["course_id", "status"],
+      if: {
+        properties: { status: { const: "approved" } },
+      },
+      then: {
+        required: ["course_id", "status"],
+      },
+      else: {
+        required: ["course_id", "status", "reason", "status_desc"],
+      },
+    },
+  },
+};
+
+//update course properties schema
+const updatecourseSchema = {
+  schema: {
+    description: "Update course",
+    body: {
+      type: "object",
+      properties: {
+        course_id: { type: "integer" },
+        filter: {
+          type: "string",
+          enum: ["status"],
+          description: "Filter type which should be 'status'",
+        },
+        value: {
+          type: "string",
+          enum: ["pending", "approved", "declined", "suspended"],
+          description: "The status value to filter by",
+        },
+      },
+      required: ["course_id", "filter", "value"],
+    },
+  },
+};
+
+//get reviews via  course_id
+const getreviewSchema = {
+  schema: {
+    description: "Get review of course by ID",
+    params: {
+      type: "object",
+      properties: {
+        id: { type: "integer" },
+      },
+      required: ["id"],
+    },
+  },
+};
+//post reviews
+const postSchema = {
+  schema: {
+    description: "Post review",
+    body: {
+      type: "object",
+      properties: {
+        course_id: { type: "integer" },
+        user_id: { type: "integer" },
+        rating: { type: "number", minimum: 1, maximum: 10 },
+        review: { type: "string" },
+      },
+      required: ["course_id", "user_id", "rating", "review"],
+    },
+  },
+};
 
 const createCourseSchema = {
   schema: {
@@ -29,7 +132,15 @@ const createCourseSchema = {
         amount: { type: "number" },
         charges: { type: "number" },
       },
-      required: ["instructor_id", "title", "learning_outcomes", "category", "modulesCount", "amount", "charges"]
+      required: [
+        "instructor_id",
+        "title",
+        "learning_outcomes",
+        "category",
+        "modulesCount",
+        "amount",
+        "charges",
+      ],
     },
     // response: {
     //   201: {
@@ -51,10 +162,8 @@ const createCourseSchema = {
     //     }
     //   }
     // }
-  }
+  },
 };
-
-
 
 const buyCourseSchema = {
   schema: {
@@ -65,29 +174,28 @@ const buyCourseSchema = {
       type: "object",
       properties: {
         user_id: { type: "integer" },
-        course_id: { type: "integer" } 
+        course_id: { type: "integer" },
       },
-      required: ["user_id"] 
+      required: ["user_id"],
     },
     response: {
       200: {
         description: "Course purchased successfully",
         type: "object",
         properties: {
-          message: { type: "string" }
-        }
+          message: { type: "string" },
+        },
       },
       default: {
         description: "Unexpected error",
         type: "object",
         properties: {
-          message: { type: "string" }
-        }
-      }
-    }
-  }
+          message: { type: "string" },
+        },
+      },
+    },
+  },
 };
-
 
 // Schema for /get-one-course/:id:
 const getCourseByIdSchema = {
@@ -98,32 +206,30 @@ const getCourseByIdSchema = {
     params: {
       type: "object",
       properties: {
-        id: { type: "integer" }
+        id: { type: "integer" },
       },
-      required: ["id"]
+      required: ["id"],
     },
-    response: {
-      200: {
-        description: "Course found",
-        type: "object",
-        properties: {
-          id: { type: "integer" },
-          title: { type: "string" },
-          // Add more properties as needed
-        }
-      },
-      404: {
-        description: "Course not found",
-        type: "object",
-        properties: {
-          message: { type: "string" }
-        }
-      }
-    }
-  }
+    // response: {
+    //   200: {
+    //     description: "Course found",
+    //     type: "object",
+    //     properties: {
+    //       id: { type: "integer" },
+    //       title: { type: "string" },
+    //       // Add more properties as needed
+    //     }
+    //   },
+    //   404: {
+    //     description: "Course not found",
+    //     type: "object",
+    //     properties: {
+    //       message: { type: "string" }
+    //     }
+    //   }
+    // }
+  },
 };
-
-
 
 // Schema for /all-courses:
 const allCoursesSchema = {
@@ -145,7 +251,7 @@ const allCoursesSchema = {
     //     }
     //   }
     // }
-  }
+  },
 };
 
 // Schema for /courses-rating:
@@ -165,11 +271,11 @@ const coursesRatingSchema = {
             title: { type: "string" },
             rating: { type: "number" },
             // Add more properties as needed
-          }
-        }
-      }
-    }
-  }
+          },
+        },
+      },
+    },
+  },
 };
 
 // Schema for /recent-courses:
@@ -188,11 +294,11 @@ const recentCoursesSchema = {
             id: { type: "integer" },
             title: { type: "string" },
             // Add more properties as needed
-          }
-        }
-      }
-    }
-  }
+          },
+        },
+      },
+    },
+  },
 };
 
 // Schema for /course-details/:id:
@@ -204,9 +310,9 @@ const courseDetailsSchema = {
     params: {
       type: "object",
       properties: {
-        id: { type: "integer" }
+        id: { type: "integer" },
       },
-      required: ["id"]
+      required: ["id"],
     },
     response: {
       200: {
@@ -216,17 +322,17 @@ const courseDetailsSchema = {
           id: { type: "integer" },
           title: { type: "string" },
           // Add more properties as needed
-        }
+        },
       },
       404: {
         description: "Course details not found",
         type: "object",
         properties: {
-          message: { type: "string" }
-        }
-      }
-    }
-  }
+          message: { type: "string" },
+        },
+      },
+    },
+  },
 };
 
 // Schema for /my-courses/:user_id:
@@ -238,9 +344,9 @@ const myCoursesSchema = {
     params: {
       type: "object",
       properties: {
-        user_id: { type: "integer" }
+        user_id: { type: "integer" },
       },
-      required: ["user_id"]
+      required: ["user_id"],
     },
     response: {
       200: {
@@ -252,21 +358,32 @@ const myCoursesSchema = {
             id: { type: "integer" },
             title: { type: "string" },
             // Add more properties as needed
-          }
-        }
+          },
+        },
       },
       404: {
         description: "User's courses not found",
         type: "object",
         properties: {
-          message: { type: "string" }
-        }
-      }
-    }
-  }
+          message: { type: "string" },
+        },
+      },
+    },
+  },
 };
 
-
-
-
-module.exports = { ValidateCourse, createCourseSchema, buyCourseSchema, getCourseByIdSchema, allCoursesSchema, coursesRatingSchema, recentCoursesSchema, courseDetailsSchema, myCoursesSchema };
+module.exports = {
+  ValidateCourse,
+  createCourseSchema,
+  buyCourseSchema,
+  getCourseByIdSchema,
+  allCoursesSchema,
+  coursesRatingSchema,
+  recentCoursesSchema,
+  courseDetailsSchema,
+  myCoursesSchema,
+  postSchema,
+  getreviewSchema,
+  updatecourseSchema,
+  courseStatusSchema,
+};

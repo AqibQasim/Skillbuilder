@@ -22,6 +22,13 @@ const {
   passwordChange,
   profileUpdateService,
   createGoogleUser,
+  getOneUserService,
+  sendEmailService,
+  enrollInCourseService,
+  getStudentsByInstructorIdService,
+  getOneInstCourseStudentsService,
+  getEnrolledStudentsService,
+  setStudentStatusService
 } = require("../services/userService");
 
 const createStudent = async (request, reply) => {
@@ -54,6 +61,18 @@ const createStudent = async (request, reply) => {
     });
   }
 };
+
+const sendEmail = async  (req,res) => {
+  try{
+    const {email, content, subject} = req?.body;
+    console.log("body data:", email, content);
+    const result = await sendEmailService(email,content, subject);
+    res.status(200).send(result)
+  } catch(e){
+    console.log("Error while sending a mail:", e);
+    res.status(200).send("Some error occured:",e);
+  }
+}
 
 const EmailVerify = async (request, reply) => {
   try {
@@ -111,10 +130,10 @@ const login = async (request, reply) => {
       }
       const user = await UserLogin(payload);
       console.log("user:", user);
-      if (user && user?.userId && user?.token) {
+      if (user) {
         reply.status(200).send({
           token: user?.token,
-          userId: user?.userId,
+          user: user?.user,
         });
       }
     } else {
@@ -132,6 +151,31 @@ const login = async (request, reply) => {
     });
   }
 };
+
+const getOneUser = async (req,res) => {
+  try{
+    const id = req?.params?.id;
+    const result = await getOneUserService(id);
+    console.log("result:", result);  
+    res.status(result?.status).send({
+      success: result?.status,
+      message : result?.message
+    })
+  } catch(err){
+    console.log("ERR:",err);
+  }
+}
+
+const enrollInCourse = async (request,reply) => {
+  try{
+    const {student_id,course_id,filter} = request?.body;
+    const result = await enrollInCourseService({student_id,course_id,filter});
+    reply.status(200).send(result);
+  } catch(err){
+    console.log("Some internal server error occured",err);
+    reply.status(500).send("Some internal server error occured",err);
+  }
+}
 
 const GoggleLoginCallBAck = async (request, reply) => {
   try {
@@ -281,6 +325,52 @@ const ContactUS = async (request, reply) => {
   }
 };
 
+const getStudentsByInstructorId = async (request,response) => {
+  try{
+    const {instructor_id} = request?.query;
+    const result = await getStudentsByInstructorIdService({instructor_id});
+    response.status(200).send(result);
+  } catch(err){
+    console.log("Error while handling:",err);
+    response.status(500).send("Error while handling:",err);
+  }
+}
+
+const getOneInstCourseStudents = async (request,response) => {
+  try {
+    const {instructor_id,course_id} = request?.query;
+    const result = await getOneInstCourseStudentsService({instructor_id, course_id});
+    response.status(200).send(result);
+  } catch (err) {
+    console.log("Error while handling:",err);
+    response.status(500).send("Error while handling:",err);
+  }
+}
+
+const getEnrolledStudents = async (request,response) => {
+  try{
+    const result = await getEnrolledStudentsService();
+    console.log("[RESPONSE TO BE SENT]:",result);
+    response.status(200).send(result);
+  } catch (err){
+    console.log("[ERR WHILE HANDLING]:",err);
+  }
+}
+
+// setStudentStatus
+
+const setStudentStatus = async (request,response) => {
+  try{
+    const { id , status, status_desc } = request?.body;
+    const result = await setStudentStatusService({ id, status, status_desc });
+    console.log("[DATA TO BE SENT AS RESPONSE:]",result);
+    response.status(200).send(result)
+  } catch (err) {
+    console.log("[Err]:",err);
+    response.status(500).send("Internal Server Error");
+  }
+}
+
 module.exports = {
   createStudent,
   getAllUsers,
@@ -292,4 +382,11 @@ module.exports = {
   changePassword,
   profileUpdateHandler,
   ContactUS,
+  getOneUser,
+  sendEmail,
+  enrollInCourse,
+  getStudentsByInstructorId,
+  getOneInstCourseStudents,
+  getEnrolledStudents,
+  setStudentStatus
 };

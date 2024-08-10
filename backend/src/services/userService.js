@@ -1,11 +1,31 @@
-const { createUser, readAllUser, findUser, UserContact, updateUserByEmail, updateUserById } = require("../repositories/userRepository");
-
+const {
+  createUser,
+  readAllUser,
+  findUser,
+  UserContact,
+  updateUserByEmail,
+  updateUserById,
+  findOneUser,
+  setUserStatusRepository,
+} = require("../repositories/userRepository");
+const dataSource = require("../../Infrastructure/postgres");
+const courseRepository = dataSource.getRepository("Course");
+const { findAllCoursesByInst, findAllCourses } = require('../repositories/courseRepository')
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { logger } = require("../../logger");
 const { redisClient } = require("../../Infrastructure/redis");
-const { sendVerificationEmail, verifyPassword, sendOTPMail } = require("../mediators/userMediator");
+const {
+  sendVerificationEmail,
+  verifyPassword,
+  sendOTPMail,
+} = require("../mediators/userMediator");
+const { findOneCourse } = require("../repositories/courseRepository");
+const { EntityRepository } = require("typeorm");
+const { forEach } = require("lodash");
+const { checkIfUserIsStudent } = require('../utils/checkIfUserIsStudent');
+// const { ConfigurationServicePlaceholders } = require("aws-sdk/lib/config_service_placeholders");
 
 // const emailVerificationForRegister = async (userInfo) => {
 //   try {
@@ -30,253 +50,476 @@ const { sendVerificationEmail, verifyPassword, sendOTPMail } = require("../media
 // };
 
 const emailVerificationForRegister = async (userInfo) => {
-	try {
-		console.log("user info:", userInfo);
-		const { email } = userInfo;
-		const existingUser = await findUser({ where: { email } });
-		if (existingUser) {
-			return {
-				code: 400,
-				message: "User Already Exists With This Email",
-			};
-		}
+  try {
+    console.log("user info:", userInfo);
+    const { email } = userInfo;
+    const existingUser = await findUser({ email });
+    if (existingUser) {
+      return {
+        code: 400,
+        message: "User Already Exists With This Email",
+      };
+    }
 
-		const verificationToken = jwt.sign(userInfo, process.env.JWT_SECRET, {
-			expiresIn: "10h",
-		});
+    const verificationToken = jwt.sign(userInfo, process.env.JWT_SECRET, {
+      expiresIn: "10h",
+    });
 
-		logger.info(["src > repository > userRepository > verificationToken", verificationToken]);
-		await redisClient.set(email, verificationToken);
-		const resultFromEmail = await sendVerificationEmail(email, verificationToken);
-		return {
-			code: 200,
-			message: resultFromEmail,
-		};
-	} catch (err) {
-		console.log("error:", err);
-		return {
-			code: 400,
-			message: err,
-		};
-	}
+    logger.info([
+      "src > repository > userRepository > verificationToken",
+      verificationToken,
+    ]);
+    await redisClient.set(email, verificationToken);
+    const resultFromEmail = await sendVerificationEmail(
+      email,
+      verificationToken
+    );
+    return {
+      code: 200,
+      message: resultFromEmail,
+    };
+  } catch (err) {
+    console.log("error:", err);
+    return {
+      code: 400,
+      message: err,
+    };
+  }
 };
 
-// const createUserAfterVerification = async (verificationToken) => {
-//   try {
-//     const tokenData = jwt.decode(verificationToken, process.env.JWT_SECRET);
-//     console.log("userdata: ", tokenData);
-//     const isUserExist = await findUser({ where: { email: tokenData?.email } });
-//     if (isUserExist) {
-//       logger.info(["user already exists", isUserExist]);
-//       throw Error("User already exist with this email");
+const transporter = nodemailer.createTransport({
+  service: "Gmail",
+  auth: {
+    user: process.env.MAIL_USER,
+    pass: process.env.MAIL_PASS,
+  },
+});
 
-//     }
-//     const hashedPassword = await bcrypt.hash(tokenData?.password, 10);
-//     const currentTime = new Date();
-//     console.log("currentTime: ", currentTime);
-//     const userData = { ...tokenData, password: hashedPassword, created_at: currentTime };
-//     let newUser = await createUser(userData);
-//     let token = jwt.sign(newUser, process.env.JWT_SECRET);
-//     return token;
-//   } catch (err){
-//     console.log('error:',err);
-//     return;
-//   }
-// };
+const sendEmailService = async (email, content, subject) => {
+  try {
+
+    const checkIfUserIsInDb = await findUser(
+      {
+        email: email
+      }
+    );
+
+    console.log("User found:", checkIfUserIsInDb);
+
+    if (checkIfUserIsInDb) {
+      const mailOptions = {
+        from: "fa21bscs0017@maju.edu.pk",
+        to: email,
+        subject: subject,
+        html: ` <p>
+        ${content}
+        </p>`,
+      };
+
+      await transporter.sendMail(mailOptions);
+
+      logger.info("Email sent successfully.");
+      return {
+        userId: checkIfUserIsInDb?.id,
+        message: "An email has been sent to the entered email. Please verify if this is your account."
+      }
+    } else {
+      return {
+        message: "User with this email doesn't exist."
+      }
+    }
+  } catch (error) {
+
+    logger.error("Error sending verification email:", error);
+    return "Unsuccessful to send a verification mail."
+  }
+};
+
+const enrollInCourseService = async ({ student_id, course_id, filter }) => {
+  try {
+    const course = await findOneCourse(
+      filter,
+      course_id
+    );
+
+    console.log("course:", course);
+    console.log("JSON.parse(course?.enrolled_customers):", course?.enrolled_customers)
+
+    if (!course) {
+      return "The requested course either doesn't exist or has been removed";
+    } else {
+      let enrolledCustomers = course.enrolled_customers ? course.enrolled_customers : [];
+      enrolledCustomers.push({ student_id: student_id });
+      console.log("enrolled customers:", enrolledCustomers);
+
+      course.enrolled_customers = enrolledCustomers;
+      const result = await courseRepository.save(course);
+      console.log("updated result:", result);
+      return result;
+    }
+  } catch (err) {
+    console.log("ERROR while enrolling:", err);
+    return "ERROR while enrolling:", err
+  }
+};
+
 
 const createUserAfterVerification = async (verificationToken) => {
-	try {
-		const tokenData = jwt.decode(verificationToken, process.env.JWT_SECRET);
-		console.log("userdata: ", tokenData);
-		const isUserExist = await findUser({ where: { email: tokenData?.email } });
-		if (isUserExist) {
-			logger.info(["user already exists", isUserExist]);
-			throw new Error("User already exists with this email");
-		}
-		const hashedPassword = await bcrypt.hash(tokenData?.password, 10);
-		const currentTime = new Date();
-		console.log("currentTime: ", currentTime);
-		const userData = { ...tokenData, password: hashedPassword, created_at: currentTime };
-		let newUser = await createUser(userData);
-		console.log("id:", newUser?.id);
-		let token = jwt.sign({ id: newUser.id }, process.env.JWT_SECRET);
-		return {
-			token: token,
-			userId: newUser?.id,
-		};
-	} catch (err) {
-		console.log("error:", err);
-		throw err;
-	}
+  try {
+    const tokenData = jwt.decode(verificationToken, process.env.JWT_SECRET);
+    console.log("userdata: ", tokenData);
+    const isUserExist = await findUser({ email: tokenData?.email });
+    if (isUserExist) {
+      logger.info(["user already exists", isUserExist]);
+      throw new Error("User already exists with this email");
+    }
+    const hashedPassword = await bcrypt.hash(tokenData?.password, 10);
+    const currentTime = new Date();
+    console.log("currentTime: ", currentTime);
+    const userData = {
+      ...tokenData,
+      password: hashedPassword,
+      created_at: currentTime,
+    };
+    let newUser = await createUser(userData);
+    console.log("id:", newUser?.id);
+    let token = jwt.sign({ id: newUser.id }, process.env.JWT_SECRET);
+    return {
+      token: token,
+      userId: newUser?.id,
+    };
+  } catch (err) {
+    console.log("error:", err);
+    throw err;
+  }
 };
 
 const findAllUser = async () => {
-	try {
-		const data = await readAllUser();
-		return data;
-	} catch (error) {
-		logger.error(error.message);
-		throw Error(error);
-	}
+  try {
+    const data = await readAllUser();
+    return data;
+  } catch (error) {
+    logger.error(error.message);
+    throw Error(error);
+  }
 };
 
 const UserLogin = async (loginData) => {
-	try {
-		const { email, password } = loginData;
-		const isUserExist = await findUser({
-			where: { email: email },
-		});
+  try {
+    const { email, password } = loginData;
+    const isUserExist = await findUser({ email: email });
 
-		logger.info(["src > services > userService > UserLogin ? existingUser: ", isUserExist]);
-		if (!isUserExist) {
-			throw Error("User does not exist");
-		}
+    logger.info([
+      "src > services > userService > UserLogin ? existingUser: ",
+      isUserExist,
+    ]);
+    if (!isUserExist) {
+      throw Error("User does not exist");
+    }
 
-		const passwordVerification = await verifyPassword(password, isUserExist);
-		console.log("password verification: ", passwordVerification);
+    const passwordVerification = await verifyPassword(password, isUserExist);
+    console.log("password verification: ", passwordVerification);
 
-		return passwordVerification;
-	} catch (error) {
-		logger.error(error.message);
-		throw Error(error);
-	}
+    return passwordVerification;
+  } catch (error) {
+    logger.error(error.message);
+    throw Error(error);
+  }
 };
 
+const getOneUserService = async (id) => {
+  try {
+    let user = await findOneUser(id);
+    if (user) {
+      console.log('User:', user);
+      return {
+        status: 200,
+        message: user
+      }
+    } else {
+      return {
+        status: 400,
+        message: "User not found"
+      }
+    }
+  } catch (e) {
+    console.log("ERR:", e);
+  }
+}
+
 const createGoogleUser = async (userInfo) => {
-	try {
-		const { email } = userInfo;
-		let user = await findUser({ email: email });
-		if (!user) {
-			const userData = {
-				first_name: userInfo.given_name,
-				last_name: userInfo.family_name,
-				email: userInfo.email,
-				source: userInfo.provider,
-			};
-			user = await createUser(userData);
-		}
+  try {
+    const { email } = userInfo;
+    let user = await findUser({ email: email });
+    if (!user) {
+      const userData = {
+        first_name: userInfo.given_name,
+        last_name: userInfo.family_name,
+        email: userInfo.email,
+        source: userInfo.provider,
+      };
+      user = await createUser(userData);
+    }
     console.log("user in database", user);
-		let token = jwt.sign(user, process.env.JWT_SECRET);
-		return token;
-	} catch (error) {
-		logger.error(["src > services > userService > 21", error.message]);
-	}
+    let token = jwt.sign(user, process.env.JWT_SECRET);
+    return token;
+  } catch (error) {
+    logger.error(["src > services > userService > 21", error.message]);
+  }
 };
 
 const findUserByEmail = async (email) => {
-	try {
-		const filter = {
-			where: {
-				email: email,
-			},
-		};
-		const result = await findUser(filter);
-		return result;
-	} catch (error) {
-		logger.error(["error in fetching user by email in userService", error.message]);
-		throw Error(error?.message);
-	}
+  try {
+    const filter = {
+      email: email,
+    };
+    const result = await findUser(filter);
+    return result;
+  } catch (error) {
+    logger.error([
+      "error in fetching user by email in userService",
+      error.message,
+    ]);
+    throw Error(error?.message);
+  }
 };
 
 const findUserById = async (id) => {
-	try {
-		const filter = {
-			where: {
-				id: id,
-			},
-		};
-		const result = await findUser(filter);
-		return result;
-	} catch (error) {
-		logger.error(["error in fetching user by id in userService", error.message]);
-		throw Error(error?.message);
-	}
+  try {
+    const filter = {
+      id: id,
+    };
+    const result = await findUser(filter);
+    return result;
+  } catch (error) {
+    logger.error([
+      "error in fetching user by id in userService",
+      error.message,
+    ]);
+    throw Error(error?.message);
+  }
 };
 
 const sendMailToUser = async (email) => {
-	try {
-		await sendOTPMail(email);
-	} catch (error) {
-		logger.error(["error in userService > sendMailToUser ", error.message]);
-	}
+  try {
+    await sendOTPMail(email);
+  } catch (error) {
+    logger.error(["error in userService > sendMailToUser ", error.message]);
+  }
 };
 
 const passwordChange = async (userData) => {
-	try {
-		const hashedPassword = await bcrypt.hash(userData?.password, 10);
-		const updatedUser = await updateUserByEmail(userData.email, { ...userData, password: hashedPassword });
-		console.log(updatedUser);
-		return updatedUser;
-	} catch (error) {
-		logger.error(["error in userService > passwordChange > ", error.message]);
-		throw Error(error);
-	}
+  try {
+    const hashedPassword = await bcrypt.hash(userData?.password, 10);
+    const updatedUser = await updateUserByEmail(userData.email, {
+      ...userData,
+      password: hashedPassword,
+    });
+    console.log(updatedUser);
+    return updatedUser;
+  } catch (error) {
+    logger.error(["error in userService > passwordChange > ", error.message]);
+    throw Error(error);
+  }
 };
 
 const profileUpdateService = async (userData) => {
-	try {
-		const id = userData?.id;
-		if (userData?.password) {
-			const hashedPassword = await bcrypt.hash(userData.password, 10);
-			userData.password = hashedPassword;
-		}
-		const updatedUser = await updateUserById(id, userData);
-		return updatedUser;
-	} catch (error) {
-		logger.error(["error in userService > profileUpdateService > ", error.message]);
-		throw Error(error);
-	}
+  try {
+    const id = userData?.id;
+    if (userData?.password) {
+      const hashedPassword = await bcrypt.hash(userData.password, 10);
+      userData.password = hashedPassword;
+    }
+    const updatedUser = await updateUserById(id, userData);
+    return updatedUser;
+  } catch (error) {
+    logger.error([
+      "error in userService > profileUpdateService > ",
+      error.message,
+    ]);
+    throw Error(error);
+  }
 };
 
 const ContactUser = async (userInfo) => {
-	try {
-		const ContactUs = await UserContact(userInfo);
-		console.log("Contact Us in Service ", ContactUs);
-		if (ContactUs) {
-			const transporter = nodemailer.createTransport({
-				service: "Gmail",
-				auth: {
-					user: process.env.MAIL_USER,
-					pass: process.env.MAIL_PASS,
-				},
-			});
+  try {
+    const ContactUs = await UserContact(userInfo);
+    console.log("Contact Us in Service ", ContactUs);
+    if (ContactUs) {
+      const transporter = nodemailer.createTransport({
+        service: "Gmail",
+        auth: {
+          user: process.env.MAIL_USER,
+          pass: process.env.MAIL_PASS,
+        },
+      });
 
-			const UsermailOptions = {
-				from: process.env.MAIL_USER,
-				to: `${userInfo.email}`,
-				subject: `Message From SkillBuilder`,
-				html: `<h3>Hello ${userInfo.firstName} ${userInfo.lastName},</h3>
+      const UsermailOptions = {
+        from: process.env.MAIL_USER,
+        to: `${userInfo.email}`,
+        subject: `Message From SkillBuilder`,
+        html: `<h3>Hello ${userInfo.firstName} ${userInfo.lastName},</h3>
                  <p>Thank you for contacting us. We have received your email. Our team will review it shortly and contact you as soon as possible.</p>`,
-			};
-			const AdminmailOptions = {
-				from: `${userInfo.email}`,
-				to: `${process.env.MAIL_USER} }  `,
-				subject: `${userInfo.subject}`,
-				html: `<h3>New Message From ${userInfo.firstName} ${userInfo.lastName},</h3>
+      };
+      const AdminmailOptions = {
+        from: `${userInfo.email}`,
+        to: `${process.env.MAIL_USER} }  `,
+        subject: `${userInfo.subject}`,
+        html: `<h3>New Message From ${userInfo.firstName} ${userInfo.lastName},</h3>
                <p>${userInfo.text}</p>`,
-			};
+      };
 
-			await transporter.sendMail(UsermailOptions);
-			await transporter.sendMail(AdminmailOptions);
-			logger.info(`Email Successfully Send to ${userInfo.email}`);
-			return "A mail has successfully being sent to the user.";
-		}
-	} catch (error) {
-		logger.error("Error sending verification email:", error);
-		throw error;
-	}
+      await transporter.sendMail(UsermailOptions);
+      await transporter.sendMail(AdminmailOptions);
+      logger.info(`Email Successfully Send to ${userInfo.email}`);
+      return "A mail has successfully being sent to the user.";
+    }
+  } catch (error) {
+    logger.error("Error sending verification email:", error);
+    throw error;
+  }
 };
 
+const getStudentsByInstructorIdService = async ({ instructorId }) => {
+  try {
+    const coursesByInst = await findAllCoursesByInst(instructorId);
+    console.log("courses by a particular instructor:", coursesByInst);
+
+    let studentsIdEnrolled = [];
+
+    coursesByInst.forEach(course => {
+      if (course.enrolled_customers) {
+        const enrolledCustomers = Array.isArray(course.enrolled_customers) ? course.enrolled_customers : JSON.parse(course.enrolled_customers);
+        const studentIds = enrolledCustomers.map(customer => customer.student_id);
+        studentsIdEnrolled = [...studentsIdEnrolled, ...studentIds];
+      }
+    });
+
+    const studentDetailsPromises = studentsIdEnrolled.map(student_id => findUser({ id: student_id }));
+    const studentsDetails = await Promise.all(studentDetailsPromises);
+
+    console.log("students details:", studentsDetails);
+    return studentsDetails;
+  } catch (err) {
+    console.log("Error fetching students based on a particular instructor id:", err);
+    return "Error fetching students based on a particular instructor id:", err;
+  }
+}
+
+
+async function getEnrolledStudentsService() {
+  try {
+    const courses = await findAllCourses();
+    let studentsIdEnrolled = [];
+
+    courses.forEach(course => {
+      if (course.enrolled_customers) {
+        const enrolledCustomers = Array.isArray(course.enrolled_customers) ? course.enrolled_customers : JSON.parse(course.enrolled_customers);
+        const studentIds = enrolledCustomers.map(customer => customer.student_id);
+        studentsIdEnrolled = [...studentsIdEnrolled, ...studentIds];
+      }
+    });
+
+    const studentDetailsPromises = studentsIdEnrolled.map(student_id => findUser({ id: student_id }));
+    const studentsDetails = await Promise.all(studentDetailsPromises);
+
+    console.log("students details:", studentsDetails);
+    return studentsDetails;
+  } catch (err) {
+    console.log("Error fetching students based on a particular instructor id:", err);
+    return "Error fetching students based on a particular instructor id:", err;
+  }
+}
+
+const getOneInstCourseStudentsService = async ({ instructor_id, course_id }) => {
+  try {
+    console.log("request query: ", { instructor_id, course_id })
+    const coursesByInst = await findAllCoursesByInst(instructor_id);
+    console.log("courses by a particular instructor:", coursesByInst);
+
+    let foundCourse;
+    coursesByInst.forEach(course => {
+      console.log("condition : course_id === course?.id", course_id == course?.id)
+      if (course_id == course?.id) {
+        foundCourse = course;
+        console.log("found course:", foundCourse, "\n\nand its students are:", coursesByInst?.enrolled_customers)
+      } else {
+        return {
+          status: 400,
+          message: "Course doesn't exist."
+        }
+      }
+    });
+
+    if (foundCourse && foundCourse?.enrolled_customers) {
+      console.log("found course:", foundCourse, "\n\nand its students are:", coursesByInst?.enrolled_customers);
+      return {
+        status: 200,
+        message: foundCourse?.enrolled_customers
+      }
+    }
+  } catch (err) {
+    console.log("Error fetching students based on a particular instructor id and a particular course:", err);
+    return "Error fetching students based on a particular instructor id and a particular course:", err;
+  }
+}
+
+// setStudentStatusService
+
+const setStudentStatusService = async ({ id, status, status_desc }) => {
+  try {
+
+    // const enrolledStudents = await checkIfUserIsStudent({id});
+    // console.log("enrolled students:", enrolledStudents);
+
+    const enrolledStudents = await getEnrolledStudentsService();
+    console.log("enrolled students:", enrolledStudents);
+    let requestedUser;
+
+    
+
+    const result = await findOneUser(id);
+    if (result?.id) {
+      const declineResult = await setUserStatusRepository(requestedUser, enrolledStudents, id, status, status_desc);
+      console.log("[RESULT OF DECLINING]:",declineResult);
+      return {
+        message : declineResult,
+        status : 200
+      }
+    } else {
+      console.log("[STUDENT NOT FOUND]");
+      return {
+        message : "[STUDENT NOT FOUND]",
+        status : 400
+      }
+    }
+  } catch (err) {
+    console.log("[SOME ERROR OCCURED WHILE CHANGING THE STATUS]:", err);
+    return {
+      message: "[SOME ERROR OCCURED WHILE CHANGING THE STATUS]",
+      status: 500
+    }
+  }
+}
+
+
 module.exports = {
-	createGoogleUser,
-	emailVerificationForRegister,
-	createUserAfterVerification,
-	findAllUser,
-	UserLogin,
-	findUserByEmail,
-	findUserById,
-	sendMailToUser,
-	passwordChange,
-	profileUpdateService,
-	ContactUser,
+  createGoogleUser,
+  emailVerificationForRegister,
+  createUserAfterVerification,
+  findAllUser,
+  UserLogin,
+  findUserByEmail,
+  findUserById,
+  sendMailToUser,
+  passwordChange,
+  profileUpdateService,
+  ContactUser,
+  getOneUserService,
+  sendEmailService,
+  enrollInCourseService,
+  getStudentsByInstructorIdService,
+  getOneInstCourseStudentsService,
+  getEnrolledStudentsService,
+  setStudentStatusService
 };

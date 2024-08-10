@@ -25,7 +25,7 @@ const postCourseContent = async (payload) => {
         throw new Error(error.message)
     }
 }
-
+ 
 module.exports = {
     createContentModule,
     postCourseContent

@@ -6,7 +6,11 @@ const ValidateUser = Joi.object({
   first_name: Joi.string().required(),
   last_name: Joi.string().required(),
   email: Joi.string()
-    .pattern(new RegExp(/(\w+|\.+\w+){1,10}@[a-zA-Z0-9]+\.([a-zA-Z0-9]+|\.[a-zA-Z0-9]+){1,3}/))
+    .pattern(
+      new RegExp(
+        /(\w+|\.+\w+){1,10}@[a-zA-Z0-9]+\.([a-zA-Z0-9]+|\.[a-zA-Z0-9]+){1,3}/
+      )
+    )
     .required()
     .messages({
       "string.pattern.base": "Please provide a valid email address",
@@ -14,9 +18,14 @@ const ValidateUser = Joi.object({
     }),
   password: Joi.string()
     .required()
-    .pattern(new RegExp(/^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&\#])[A-Za-z\d@$!%*?&\#]{8,}$/))
+    .pattern(
+      new RegExp(
+        /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&\#])[A-Za-z\d@$!%*?&\#]{8,}$/
+      )
+    )
     .messages({
-      "string.pattern.base": "Password must contain at least one letter, one number, one special character, and be at least 8 characters long",
+      "string.pattern.base":
+        "Password must contain at least one letter, one number, one special character, and be at least 8 characters long",
       "any.required": "Password is required",
     }),
   profession: Joi.string().optional(),
@@ -25,7 +34,11 @@ const ValidateUser = Joi.object({
 
 const loginValidation = Joi.object({
   email: Joi.string()
-    .pattern(new RegExp(/(\w+|\.+\w+){1,10}@[a-zA-Z0-9]+\.([a-zA-Z0-9]+|\.[a-zA-Z0-9]+){1,3}/))
+    .pattern(
+      new RegExp(
+        /(\w+|\.+\w+){1,10}@[a-zA-Z0-9]+\.([a-zA-Z0-9]+|\.[a-zA-Z0-9]+){1,3}/
+      )
+    )
     .required()
     .messages({
       "string.pattern.base": "Please provide a valid email address",
@@ -37,13 +50,20 @@ const loginValidation = Joi.object({
 const validateEmailAndPassword = Joi.object({
   password: Joi.string()
     .required()
-    .pattern(new RegExp(/^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/))
+    .pattern(
+      new RegExp(/^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)
+    )
     .messages({
-      "string.pattern.base": "Password must contain at least one letter, one number, one special character, and be at least 8 characters long",
+      "string.pattern.base":
+        "Password must contain at least one letter, one number, one special character, and be at least 8 characters long",
       "any.required": "Password is required",
     }),
   email: Joi.string()
-    .pattern(new RegExp(/(\w+|\.+\w+){1,10}@[a-zA-Z0-9]+\.([a-zA-Z0-9]+|\.[a-zA-Z0-9]+){1,3}/))
+    .pattern(
+      new RegExp(
+        /(\w+|\.+\w+){1,10}@[a-zA-Z0-9]+\.([a-zA-Z0-9]+|\.[a-zA-Z0-9]+){1,3}/
+      )
+    )
     .required()
     .messages({
       "string.pattern.base": "Please provide a valid email address",
@@ -56,14 +76,21 @@ const updateProfileValidation = Joi.object({
   first_name: Joi.string(),
   last_name: Joi.string(),
   email: Joi.string()
-    .pattern(new RegExp(/(\w+|\.+\w+){1,10}@[a-zA-Z0-9]+\.([a-zA-Z0-9]+|\.[a-zA-Z0-9]+){1,3}/))
+    .pattern(
+      new RegExp(
+        /(\w+|\.+\w+){1,10}@[a-zA-Z0-9]+\.([a-zA-Z0-9]+|\.[a-zA-Z0-9]+){1,3}/
+      )
+    )
     .messages({
       "string.pattern.base": "Please provide a valid email address",
     }),
   password: Joi.string()
-    .pattern(new RegExp(/^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/))
+    .pattern(
+      new RegExp(/^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)
+    )
     .messages({
-      "string.pattern.base": "Password must contain at least one letter, one number, one special character, and be at least 8 characters long",
+      "string.pattern.base":
+        "Password must contain at least one letter, one number, one special character, and be at least 8 characters long",
     }),
   profession: Joi.string(),
   location: Joi.string(),
@@ -71,7 +98,48 @@ const updateProfileValidation = Joi.object({
   facebook_profile: Joi.string(),
   linkedin_profile: Joi.string(),
 });
+//student will set his status schema
+const setStudentStatusschema = {
+  schema: {
+    description: "Set Student Status",
+    body: {
+      type: "object",
+      properties: {
+        id: {
+          type: "integer",
+          description: "Unique identifier of the student",
+        },
+        status: {
+          type: "string",
+          enum: ["suspended", "active"],
+          description:
+            "The status of the student. Must be either 'suspended' or 'active'.",
+        },
+        status_desc: {
+          type: "string",
+          description: "A description or reason for the status change.",
+        },
+      },
+      required: ["id", "status", "status_desc"],
+    },
+  },
+};
 
+//student will in-roll in course schema
+const userEnrollcourseSchema = {
+  schema: {
+    description: "Enroll in course",
+    body: {
+      type: "object",
+      properties: {
+        student_id: { type: "number" },
+        course_id: { type: "number" },
+        filter: { type: "string" },
+      },
+      required: ["student_id", "course_id", "filter"],
+    },
+  },
+};
 const userSwaggerSchema = {
   schema: {
     description: "post signup data",
@@ -123,9 +191,9 @@ const loginSchema = {
       type: "object",
       properties: {
         email: { type: "string", format: "email" },
-        password: { type: "string", minLength: 8 }
+        password: { type: "string", minLength: 8 },
       },
-      required: ["email", "password"] // Make sure to include required properties as an array
+      required: ["email", "password"], // Make sure to include required properties as an array
     },
     // response: {
     //   200: {
@@ -143,9 +211,8 @@ const loginSchema = {
     //     }
     //   }
     // }
-  }
+  },
 };
-
 
 // Route: /change-password
 const changePasswordSchema = {
@@ -155,9 +222,13 @@ const changePasswordSchema = {
       properties: {
         email: { type: "string", format: "email" },
         current_password: { type: "string", required: ["current_password"] }, // Ensure required is defined as an array
-        new_password: { type: "string", required: ["new_password"], minLength: 8 }
+        new_password: {
+          type: "string",
+          required: ["new_password"],
+          minLength: 8,
+        },
       },
-      required: ["email", "current_password", "new_password"] // Define required properties as an array
+      required: ["email", "current_password", "new_password"], // Define required properties as an array
     },
     // response: {
     //   200: {
@@ -176,14 +247,12 @@ const changePasswordSchema = {
     //     }
     //   }
     // }
-  }
+  },
 };
-
 
 // Route: /update-profile
 const updateProfileSchema = {
   schema: {
-
     description: "Update user profile",
     tags: ["user"],
     summary: "Update profile",
@@ -199,9 +268,9 @@ const updateProfileSchema = {
         location: { type: "string" },
         twitter_profile: { type: "string" },
         facebook_profile: { type: "string" },
-        linkedin_profile: { type: "string" }
+        linkedin_profile: { type: "string" },
       },
-      required: ["id"]
+      required: ["id"],
     },
     // response: {
     //   200: {
@@ -239,7 +308,7 @@ const updateProfileSchema = {
     //     }
     //   }
     // }
-  }
+  },
 };
 
 // get apis schemas
@@ -262,12 +331,16 @@ const verifyEmailSchema = {
     querystring: {
       type: "object",
       properties: {
-        email: { type: "string", format: "email", description: "User email address" },
-        token: { type: "string", description: "Email verification token" }
+        email: {
+          type: "string",
+          format: "email",
+          description: "User email address",
+        },
+        token: { type: "string", description: "Email verification token" },
       },
-      required: ["email", "token"]
-    }
-  }
+      required: ["email", "token"],
+    },
+  },
 };
 
 // /password-reset/:email
@@ -276,11 +349,11 @@ const passwordResetSchema = {
     query: {
       type: "object",
       properties: {
-        email: { type: "string", description: "User email for password reset" }
+        email: { type: "string", description: "User email for password reset" },
       },
-      required: ["email"]
-    }
-  }
+      required: ["email"],
+    },
+  },
 };
 
 // /otp-verification/:phone
@@ -289,11 +362,14 @@ const otpVerificationSchema = {
     params: {
       type: "object",
       properties: {
-        phone: { type: "string", description: "User phone number for OTP verification" }
+        phone: {
+          type: "string",
+          description: "User phone number for OTP verification",
+        },
       },
-      required: ["phone"]
-    }
-  }
+      required: ["phone"],
+    },
+  },
 };
 
 // Schema for /auth/google
@@ -326,8 +402,6 @@ const otpVerificationSchema = {
 //   }
 // };
 
-
-
 // Schema for /auth/google/callback
 const googleAuthCallbackSchema = {
   schema: {
@@ -336,12 +410,13 @@ const googleAuthCallbackSchema = {
       properties: {
         code: {
           type: "string",
-          description: "The authorization code received from Google after successful login"
-        }
+          description:
+            "The authorization code received from Google after successful login",
+        },
       },
-      required: ["code"]
-    }
-  }
+      required: ["code"],
+    },
+  },
 };
 
 const getAllUsersSchema = {
@@ -364,23 +439,21 @@ const getAllUsersSchema = {
                 name: { type: "string" },
                 email: { type: "string", format: "email" },
                 // Add more properties as needed
-              }
-            }
-          }
-        }
+              },
+            },
+          },
+        },
       },
       default: {
         description: "Unexpected error",
         type: "object",
         properties: {
-          message: { type: "string" }
-        }
-      }
-    }
-  }
+          message: { type: "string" },
+        },
+      },
+    },
+  },
 };
-
-
 
 module.exports = {
   ValidateUser,
@@ -396,5 +469,7 @@ module.exports = {
   otpVerificationSchema,
   googleAuthCallbackSchema,
   // googleAuthSchema,
-  getAllUsersSchema
+  setStudentStatusschema,
+  getAllUsersSchema,
+  userEnrollcourseSchema,
 };

@@ -12,9 +12,12 @@ const createCourseContent = async (modules, course_id) => {
       };
       const moduleCreate = await createContentModule(courseModulePayload);
       console.log("created module: ", moduleCreate);
+      console.log("content:", mod.content)
       for (const content of mod.content) {
         let contentPayload = {
           module_id: moduleCreate.id,
+          lock_status: content.lock_status,
+          duration: content.duration,
           title: content.title,
           content: content.content,
           content_type: content.content_type,
