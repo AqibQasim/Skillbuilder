@@ -50,7 +50,7 @@ const fetchAllInstructor = async () => {
       if(instructor)
         allInstructor.push({
           id: instructor[0].id,
-          user:instructor[0]
+          user:{...u,...instructor[0]}
         });
     }
 
