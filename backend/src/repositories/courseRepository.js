@@ -1,9 +1,9 @@
 const { logger } = require("../../logger");
 const dataSource = require("../../Infrastructure/postgres");
+const courseContent = require("../entities/courseContent");
 const courseRepository = dataSource.getRepository("Course");
 const courseRevRep = dataSource.getRepository('courseReviews');
-
-
+const courseContentRepository = dataSource.getRepository('course_content');
 
 const createCourse = async (data) => {
   try {
@@ -158,6 +158,96 @@ const updateCourse = async (courseId, videoUrl) => {
 }
 
 
+
+
+// const updateCourseProps = async (course_id, filter, ) => {
+//   const courseExist = await courseRepository.findOne({
+//     where: { id: courseId },
+//   });
+
+//   if (!courseExist) {
+//     return 'No such course exists!';
+//   };
+
+//   Object.assign(courseExist, { video_url: videoUrl });
+
+//   const updatedCourse = await courseRepository.save(courseExist);
+//   console.log("updated course:", updatedCourse);
+//   return "Course has been updated successfully"
+// }
+
+const updateCourseByFilter = async (courseId, filter, value) => {
+  const courseExist = await courseRepository.findOne({
+    where: { id : courseId },
+  });
+
+  if (!courseExist) {
+    return 'No such course exists!';
+  };
+
+  console.log('{ filter: value }:',{ filter: value })
+  Object.assign(courseExist, { [filter]: value });
+
+  const updatedCourse = await courseRepository.save(courseExist);
+  console.log("[updated course]:", updatedCourse);
+  return "Course has been updated successfully"
+}
+
+const setCourseStatusRepository = async (courseId, status, reason_of_decline, status_desc) => {
+  const courseExist = await courseRepository.findOne({
+    where: { id : courseId },
+  });
+
+  if (!courseExist) {
+    return 'No such course exists!';
+  };
+
+  // console.log('{ filter: value }:',{ filter: value })
+  Object.assign(courseExist, { reason_of_decline: reason_of_decline, status: status, status_desc : status_desc });
+
+  const updatedCourse = await courseRepository.save(courseExist);
+  console.log("[updated course]:", updatedCourse);
+  return "Course has been updated successfully"
+}
+ 
+const updateCoursecontent = async (courseId, moduleInfo) => {
+  const courseRepository = dataSource.getRepository('Course');
+  const contentModuleRepository = dataSource.getRepository('content_module');
+  const courseContentRepository = dataSource.getRepository('course_content');
+
+  const courseExist = await courseRepository.findOne({
+    where: { id: courseId },
+  });
+
+  if (!courseExist) {
+    return 'No such course exists!';
+  }
+
+  for (const module of moduleInfo.modules) {
+    const moduleEntity = contentModuleRepository.create({
+      course_id: courseId,
+      title: module.title,
+    });
+
+    const savedModule = await contentModuleRepository.save(moduleEntity);
+    console.log("[CREATED MODULE]:", savedModule);
+
+    for (const content of module.content) {
+      console.log("[CONTENT]:",content.content);
+      const contentEntity = courseContentRepository.create({
+        title: content.title,
+        content: content.content,  
+        module_id: moduleEntity.id,
+      });
+
+      const savedContent = await courseContentRepository.save(contentEntity);
+      console.log("[CREATED CONTENT]:",savedContent);
+    }
+  }
+
+  return "Course has been updated successfully";
+};
+
 module.exports = {
   createCourse,
   findAllCourses,
@@ -166,6 +256,9 @@ module.exports = {
   fetchCourseWithDetailsWithId,
   fetchAllRecentCourses,
   findAllCoursesByInst,
-  updateCourse
+  updateCourse,
+  updateCoursecontent,
+  updateCourseByFilter, 
+  setCourseStatusRepository
   // saveReview
 };

@@ -114,6 +114,7 @@ async function uploadInstVideo(request, reply) {
   let fieldsData = {};
   let videoFilePath = null;
   let instructorId = null;
+  // console.log("video file path in controller:",videoFilePath);
 
   const uploadDir = path.join(__dirname, 'uploads');
   if (!fs.existsSync(uploadDir)) {
@@ -154,6 +155,7 @@ async function uploadInstVideo(request, reply) {
     }
   }
   try {
+    console.log("video file path in controller:",videoFilePath);
     const result = await uploadVideoToYT(instructorId, videoFilePath)
     console.log("result in upload inst video:",result);
     if (result?.video_url) {

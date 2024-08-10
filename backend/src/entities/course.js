@@ -47,7 +47,7 @@ module.exports = new EntitySchema({
     },
     status: {
       type: "enum",
-      enum: ['pending', 'approved', 'declined'],
+      enum: ['pending', 'approved', 'declined', 'suspended'],
       default: 'pending'
     },
     enrolled_customers: {
@@ -70,10 +70,15 @@ module.exports = new EntitySchema({
       type: "timestamp with time zone",
       nullable: true,
     },
-    // created_by: {
-    //   type: "integer",
-    //   nullable: true,
-    // },
+    reason : {
+      type: "enum",
+      enum : ["Video Quality","Inappropriate Language","Discriminations","Course Curriculum"],
+      nullable: true
+    },
+    status_desc : {
+      type: "jsonb",
+      nullable: true
+    },
     updated_by: {
       type: "varchar",
       nullable: true,

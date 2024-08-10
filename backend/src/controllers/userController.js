@@ -27,6 +27,8 @@ const {
   enrollInCourseService,
   getStudentsByInstructorIdService,
   getOneInstCourseStudentsService,
+  getEnrolledStudentsService,
+  setStudentStatusService
 } = require("../services/userService");
 
 const createStudent = async (request, reply) => {
@@ -355,6 +357,30 @@ const getOneInstCourseStudents = async (request, response) => {
   }
 };
 
+const getEnrolledStudents = async (request,response) => {
+  try{
+    const result = await getEnrolledStudentsService();
+    console.log("[RESPONSE TO BE SENT]:",result);
+    response.status(200).send(result);
+  } catch (err){
+    console.log("[ERR WHILE HANDLING]:",err);
+  }
+}
+
+// setStudentStatus
+
+const setStudentStatus = async (request,response) => {
+  try{
+    const { id , status, status_desc } = request?.body;
+    const result = await setStudentStatusService({ id, status, status_desc });
+    console.log("[DATA TO BE SENT AS RESPONSE:]",result);
+    response.status(200).send(result)
+  } catch (err) {
+    console.log("[Err]:",err);
+    response.status(500).send("Internal Server Error");
+  }
+}
+
 module.exports = {
   createStudent,
   getAllUsers,
@@ -371,4 +397,6 @@ module.exports = {
   enrollInCourse,
   getStudentsByInstructorId,
   getOneInstCourseStudents,
+  getEnrolledStudents,
+  setStudentStatus
 };

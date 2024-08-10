@@ -90,7 +90,7 @@ const stripeAccRegisterService = async ({ user_id, instructor_id, account_reg_id
     const InstructorReceive = await findByFilter({ where: { id: instructor_id } });
     if (InstructorReceive) {
       const checkAlreadyExists = await checkIfAccounRegIdExists(instructor_id);
-      if (checkAlreadyExists?.length === 0 ) {
+      if (checkAlreadyExists?.length === 0) {
         const res = await saveAccountRegId(payload);
         return {
           message: res,
@@ -125,19 +125,19 @@ const checkPaymentRecordService = async ({ instructor_id }) => {
       const res = await checkIfAccounRegIdExists(instructor_id);
       if (res) {
         return {
-          message : res,
-          status : 200
+          message: res,
+          status: 200
         }
       } else {
         return {
-          message : "Stripe Account Registration not found.",
-          status : 400
+          message: "Stripe Account Registration not found.",
+          status: 400
         }
       }
     } else {
       return {
-        message : "Instructor not found.",
-        status : 400
+        message: "Instructor not found.",
+        status: 400
       }
     }
   } catch (err) {
@@ -149,12 +149,14 @@ const checkPaymentRecordService = async ({ instructor_id }) => {
   }
 }
 
-const uploadVideoToYT = async (instructorId, courseId, videoFilePath, user_role) => {
+const uploadVideoToYT = async (instructorId, videoFilePath, user_role) => {
   try {
     const youtube = google.youtube({
       version: 'v3',
-      auth: oauth2Client
+      auth: oauth2Client 
     });
+
+    console.log("video file path in service:", videoFilePath);
 
     const response = await youtube.videos.insert({
       part: 'snippet,status',
@@ -181,18 +183,18 @@ const uploadVideoToYT = async (instructorId, courseId, videoFilePath, user_role)
     const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
     // fastify.log.info('Video uploaded:', response.data);
 
-    if (user_role === 'instructor') {
-      if (instructorId && videoId) {
-        const updatedInstructor = await updateInstructor(instructorId, videoUrl);
-        console.log('instructor', updatedInstructor);
-      }
-      else if (user_role === 'course') {
-        if (courseId && videoId) {
-          const updatedCourse = await updateCourse(courseId, videoUrl);
-          console.log('instructor', updatedCourse);
-        }
-      }
-    }
+    // if (user_role === 'instructor') {
+    //   if (instructorId && videoId) {
+    //     const updatedInstructor = await updateInstructor(instructorId, videoUrl);
+    //     console.log('instructor', updatedInstructor);
+    //   }
+    //   else if (user_role === 'course') {
+    //     if (courseId && videoId) {
+    const updatedInstructor  = await updateInstructor(instructorId, videoUrl);
+    console.log('instructor:', updatedInstructor);
+    //     }
+    //   }
+    // }
     return {
       message: 'The introductory video has been successfully posted.',
       video_url: videoUrl
