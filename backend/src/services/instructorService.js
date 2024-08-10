@@ -23,6 +23,29 @@ const {
   saveAccountRegId,
   checkIfAccounRegIdExists,
 } = require("../repositories/stripeAccountRepository");
+const dataSource = require("../../Infrastructure/postgres");
+
+const getinstructor = async () => {
+  try {
+    const data = await dataSource.getRepository("Instructor").find({
+      relations: ["user"],
+      select: {
+        id: true,
+        user: {
+          first_name: true,
+          last_name: true,
+          email: true,
+          location: true,
+        },
+      },
+    });
+
+    console.log(data);
+    return data;
+  } catch (error) {
+    console.log("This is the error:", error);
+  }
+};
 
 // const { uploadVideoToYT } = require("../controllers/ytAPIControllers");
 
@@ -242,4 +265,5 @@ module.exports = {
   uploadVideoToYT,
   stripeAccRegisterService,
   checkPaymentRecordService,
+  getinstructor,
 };

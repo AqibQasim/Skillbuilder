@@ -44,7 +44,6 @@ const findAllCoursesByInst = async (id) => {
 const findOneCourse = async (filter, course_id) => {
   try {
     const updateObject = {};
-    console.log("#############", filter, "########", course_id);
 
     // The filter key should be added directly
     updateObject[filter] = course_id;
