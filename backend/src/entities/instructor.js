@@ -13,7 +13,8 @@ module.exports = new EntitySchema({
       type: "int",
     },
     experience: {
-      type: "varchar",
+      type: "jsonb",
+      default:null,
     },
     specialization: {
       type: "varchar",
