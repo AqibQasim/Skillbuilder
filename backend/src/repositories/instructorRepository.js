@@ -43,11 +43,12 @@ const fetchAllInstructor = async () => {
       console.log(u)
 
       const instructor= await instructorRepository.find({where:{user_id:u.id}});
+      //console.log("////////////////////////////",instructor)
       // console.log("instructor",
       //   instructor
       // )
 
-      if(instructor)
+      if(instructor.length>0)
         allInstructor.push({
           id: instructor[0].id,
           user:{...u,...instructor[0]}
