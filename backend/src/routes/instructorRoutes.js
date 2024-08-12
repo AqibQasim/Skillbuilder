@@ -25,7 +25,7 @@ const instructorRoutes = async (fastify, options) => {
     instructorDetailSchema,
     instructorDetail
   );
-
+ 
   fastify.get("/get-courses-inst/:id", getCoursesByInstructor);
 
   fastify.post("/upload", uploadInstVideo);

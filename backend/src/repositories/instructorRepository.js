@@ -116,6 +116,7 @@ const findByFilter = async (filter) => {
       .getRepository("Instructor")  
       .createQueryBuilder("instructor")
       .innerJoinAndSelect("instructor.user","user")
+      .innerJoinAndSelect("instructor.skills","skills")
       .select([
         "user.id",
         "user.first_name",
@@ -133,7 +134,9 @@ const findByFilter = async (filter) => {
         "user.status_desc",        
         "instructor.experience",
         "instructor.specialization",
-        "instructor.video_url"
+        "instructor.video_url",
+        "skills"
+        // "instructor.skills"
       ])
       .where("instructor.id = :inst_id", { inst_id })
       .getOne();
