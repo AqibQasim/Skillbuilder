@@ -13,7 +13,8 @@ module.exports = new EntitySchema({
       type: "int",
     },
     experience: {
-      type: "varchar",
+      type: "jsonb",
+      default:null,
     },
     specialization: {
       type: "varchar",
@@ -35,7 +36,10 @@ module.exports = new EntitySchema({
       target: "User",
       type: "one-to-one",
       inverseSide: "instructor",
-      joinColumn: true,
+      joinColumn: {
+        name: "user_id",
+        referencedColumnName:"id"
+      },
     },
     skills: {
       target: "instructor_skills",
