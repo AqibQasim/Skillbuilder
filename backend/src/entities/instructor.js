@@ -1,6 +1,3 @@
-
-
-
 const { EntitySchema } = require("typeorm");
 
 module.exports = new EntitySchema({
@@ -13,59 +10,59 @@ module.exports = new EntitySchema({
       generated: true,
     },
     user_id: {
-      type: "int"
+      type: "int",
     },
     experience: {
-      type: "varchar"
+      type: "varchar",
     },
     specialization: {
-      type: "varchar" 
+      type: "varchar",
     },
     video_url: {
-      type: "varchar"
+      type: "varchar",
     },
     status: {
       type: "enum",
-      enum: ['active', 'pending'],
-      default: 'pending'
+      enum: ["active", "pending"],
+      default: "pending",
     },
     created_at: {
-      type: "timestamp"
-    }
+      type: "timestamp",
+    },
   },
   relations: {
     user: {
       target: "User",
       type: "one-to-one",
-      inverseSide: 'instructor',
-      joinColumn: true
+      inverseSide: "instructor",
+      joinColumn: true,
     },
     skills: {
       target: "instructor_skills",
       type: "one-to-many",
       inverseSide: "instructor",
       joinColumn: {
-        name: "user_id", 
-        referencedColumnName: "id" 
-      }
+        name: "user_id",
+        referencedColumnName: "id",
+      },
     },
     reviews: {
       target: "instructor_reviews",
       type: "one-to-many",
       inverseSide: "instructor",
-      joinColumn: { name: "instructor_id" }
+      joinColumn: { name: "instructor_id" },
     },
     education: {
       target: "instructor_education",
       type: "one-to-many",
       inverseSide: "instructor",
-      joinColumn: { name: "instructor_id" }
+      joinColumn: { name: "instructor_id" },
     },
     courses: {
       target: "Course",
       type: "one-to-many",
       inverseSide: "instructor",
-      joinColumn: { name: "instructor_id" }
-    }
+      joinColumn: { name: "instructor_id" },
+    },
   },
 });

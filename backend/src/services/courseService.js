@@ -210,23 +210,6 @@ const uploadCourseVideoToYT = async (courseId, videoFilePath, user_role) => {
 };
 
 const courseGetById = async (id) => {
-  // try {
-  //   let filter = {
-  //     where: {
-  //       id: id,
-  //     },
-  //   };
-  //   const result = await findOneCourse(filter, id);
-  //   if (!result) {
-  //     console.log("Course not found");
-  //     throw new Error("Course not found");
-  //   }
-  //   return result;
-  // } catch (error) {
-  //   logger.error("src > services > courseService");
-  //   logger.error(error);
-  //   throw new Error(error.message);
-  // }
   try {
     const filter = "id"; // Assuming 'id' is the filter key
 

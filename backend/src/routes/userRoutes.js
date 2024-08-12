@@ -42,7 +42,9 @@ const {
   passwordResetSchema,
   otpVerificationSchema,
   googleAuthCallbackSchema,
+  userEnrollcourseSchema,
   getAllUsersSchema,
+  setStudentStatusschema,
 } = require("../Schema/userSchema");
 const {
   contactUsSchema,
@@ -94,11 +96,11 @@ const userRoutes = async (fastify, options) => {
   //Contact Us
   fastify.post("/contact-us", contactUsSchema, ContactUS);
   fastify.post("/send-email", sendMailSchema, sendEmail);
-  fastify.put("/enroll-in-course", enrollInCourse);
+  fastify.put("/enroll-in-course", userEnrollcourseSchema, enrollInCourse);
   fastify.get("/get-students-by-inst", getStudentsByInstructorId);
   fastify.get("/get-one-course-inst-students", getOneInstCourseStudents);
   fastify.get("/get-all-students", getEnrolledStudents);
-  fastify.put("/set-student-status", setStudentStatus);
+  fastify.put("/set-student-status", setStudentStatusschema, setStudentStatus);
 };
 
 module.exports = userRoutes;
