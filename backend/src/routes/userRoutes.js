@@ -30,7 +30,7 @@ const {
 
   getOneInstCourseStudents,
   getEnrolledStudents,
-  setStudentStatus
+  setStudentStatus,
 } = require("../controllers/userController");
 const {
   ValidateUser,
@@ -98,8 +98,7 @@ const userRoutes = async (fastify, options) => {
   fastify.get("/get-students-by-inst", getStudentsByInstructorId);
   fastify.get("/get-one-course-inst-students", getOneInstCourseStudents);
   fastify.get("/get-all-students", getEnrolledStudents);
-  fastify.put("/set-student-status",setStudentStatus);
-
+  fastify.put("/set-student-status", setStudentStatus);
 };
 
 module.exports = userRoutes;
