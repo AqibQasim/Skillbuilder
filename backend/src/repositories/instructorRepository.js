@@ -64,6 +64,36 @@ const fetchAllInstructor = async () => {
       return null;
     }
     return allInstructor;
+
+    // const instructorExist = await dataSource
+    //   .getRepository("Instructor")
+    //   .createQueryBuilder("instructor")
+    //   .innerJoin("instructor.user","user")
+    //   //.where("user.id=instructor.user_id")
+    //   .select([
+    //     "user.id",
+    //     "user.first_name",
+    //     "user.profile",
+    //     "user.email",
+    //     "user.profession",
+    //     "user.facebook_profile",
+    //     "user.is_active",
+    //     "user.role",
+    //     "user.source",
+    //     "user.created_at",
+    //     "user.updated_at",
+    //     "user.status",
+    //     "user.status_desc",        
+    //     "instructor.experience",
+    //     "instructor.specialization",
+    //     "instructor.video_url"
+    //   ])
+    //   .getMany();
+
+    // if (instructorExist) {
+    //   return null;
+    // }
+    // return instructorExist;
   } catch (error) {
     logger.error(error);
     throw error;
@@ -77,26 +107,41 @@ const findByFilter = async (filter) => {
     //   relations: ["skills", "reviews", "education"],
     // });
 
-    const user= await dataSource.getRepository("User").findOne({...filter});
-    const instructorExist= await dataSource.getRepository("Instructor")
-    .findOne({where:{user_id:user.id},relations: ["skills", "reviews", "education"],})
+    // const user= await dataSource.getRepository("User").findOne({...filter});
+    // const instructorExist= await dataSource.getRepository("Instructor")
+    // .findOne({where:{user_id:user.id},relations: ["skills", "reviews", "education"],})
 
-    // const instructorExist = await dataSource
-    //   .getRepository("User")
-    //   .createQueryBuilder("user")
-    //   .innerJoinAndSelect("Instructor", "instructor", "instructor.userId = user.id")
-    //   .select([
-    //     "user.id",
-    //     "user.first_name",
-    //     "instructor.experience AS experience",
-    //     "instructor.specialization AS specialization",
-    //   ])
-    //   .getOne();
+    const instructorExist = await dataSource
+      .getRepository("Instructor")
+      .createQueryBuilder("instructor")
+      .innerJoinAndSelect("instructor.user","user")
+      .select([
+        "user.id",
+        "user.first_name",
+        "user.profile",
+        "user.email",
+        "user.profession",
+        "user.facebook_profile",
+        "user.is_active",
+        "user.role",
+        "user.source",
+        "user.created_at",
+        "user.updated_at",
+        "instructor.status",
+        "instructor.user_id",
+        "user.status_desc",        
+        "instructor.experience",
+        "instructor.specialization",
+        "instructor.video_url"
+      ])
+      .where(filter)
+      .getOne();
     if (instructorExist) {
       //console.log(instructorExist);
       return {
-        ...user,
-        ...instructorExist
+        //...user,
+        ...instructorExist,
+        // ...instructorExist['user']
       };
       //return instructorExist;
     }
