@@ -110,9 +110,10 @@ const findByFilter = async (filter) => {
     // const user= await dataSource.getRepository("User").findOne({...filter});
     // const instructorExist= await dataSource.getRepository("Instructor")
     // .findOne({where:{user_id:user.id},relations: ["skills", "reviews", "education"],})
-
+    console.log("inst id in:",filter);
+    const inst_id = filter?.id;
     const instructorExist = await dataSource
-      .getRepository("Instructor")
+      .getRepository("Instructor")  
       .createQueryBuilder("instructor")
       .innerJoinAndSelect("instructor.user","user")
       .select([
@@ -134,7 +135,7 @@ const findByFilter = async (filter) => {
         "instructor.specialization",
         "instructor.video_url"
       ])
-      .where(filter)
+      .where("instructor.id = :inst_id", { inst_id })
       .getOne();
     if (instructorExist) {
       //console.log(instructorExist);
@@ -158,7 +159,7 @@ const findByFilter = async (filter) => {
 const updateInstructor = async (instructorId, videoUrl) => {
   const instructorExist = await instructorRepository.findOne({
     where: { id: instructorId },
-  });
+  }); 
 
   if (!instructorExist) {
     return "No such instructor exists!";
