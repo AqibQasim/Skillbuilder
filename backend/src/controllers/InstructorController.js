@@ -1,11 +1,38 @@
-const { getInstructors, getInstructorById, createNewInstructor, getCoursesByInstService, uploadVideoToYT, stripeAccRegisterService, checkPaymentRecordService } = require("../services/instructorService.js");
+const {
+  getInstructors,
+  getInstructorById,
+  createNewInstructor,
+  getCoursesByInstService,
+  uploadVideoToYT,
+  stripeAccRegisterService,
+  checkPaymentRecordService,
+  getinstructor,
+} = require("../services/instructorService.js");
 const { updateInstructor } = require("../repositories/instructorRepository");
 const { logger } = require("../../logger");
-const { oauth2Client } = require('../../Infrastructure/youtubeConfig');
-const fs = require('fs');
-const path = require('path');
-const { google } = require('googleapis'); 
-const { v4: uuidv4 } = require('uuid');
+const { oauth2Client } = require("../../Infrastructure/youtubeConfig");
+const fs = require("fs");
+const path = require("path");
+const { google } = require("googleapis");
+const { v4: uuidv4 } = require("uuid");
+
+//get instructor taha
+const getInstructorsall = async (request, reply) => {
+  try {
+    const result = await getinstructor();
+    reply.send({
+      status: true,
+      message: "retrieved data successfully ",
+      data: result,
+    });
+  } catch (error) {
+    logger.error(error.message);
+    reply.code(500).send({
+      status: false,
+      message: error.message,
+    });
+  }
+};
 
 const createInstructor = async (request, reply) => {
   try {
@@ -111,29 +138,33 @@ const getCoursesByInstructor = async (request, reply) => {
     console.log("ERR:", e);
     reply.status(500).send("Some server side exception has occured");
   }
-}
+};
 
 const stripeAccRegister = async (request, reply) => {
   try {
-    const {user_id, instructor_id, account_reg_id} = request?.body;
-    const result = await stripeAccRegisterService({user_id, instructor_id, account_reg_id});
+    const { user_id, instructor_id, account_reg_id } = request?.body;
+    const result = await stripeAccRegisterService({
+      user_id,
+      instructor_id,
+      account_reg_id,
+    });
     reply.status(result.status).send(result);
   } catch (e) {
     console.log("ERR:", e);
     reply.status(500).send("Some server side exception has occured");
   }
-}
+};
 
-const checkPaymentRecord = async (request, reply)  => {
-  try{
+const checkPaymentRecord = async (request, reply) => {
+  try {
     const { instructor_id } = request?.query;
-    const result = await checkPaymentRecordService({instructor_id});
+    const result = await checkPaymentRecordService({ instructor_id });
     reply.status(result?.status).send(result);
-  } catch (err){
+  } catch (err) {
     console.log("ERR:", err);
     reply.status(500).send("Some server side exception has occured");
   }
-}
+};
 
 
 
@@ -144,14 +175,14 @@ async function uploadInstVideo(request, reply) {
   let instructorId = null;
   // console.log("video file path in controller:",videoFilePath);
 
-  const uploadDir = path.join(__dirname, 'uploads');
+  const uploadDir = path.join(__dirname, "uploads");
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir);
   }
 
   for await (const part of parts) {
     if (part.file) {
-      if (part.fieldname === 'video') {
+      if (part.fieldname === "video") {
         let filename = part.filename;
         let saveTo = path.join(uploadDir, filename);
         if (fs.existsSync(saveTo)) {
@@ -172,35 +203,34 @@ async function uploadInstVideo(request, reply) {
         console.log(`File [${part.fieldname}] Finished: ${videoFilePath}`);
         break;
       }
-    }
-    else {
-      if (part.fieldname === 'instructorId') {
+    } else {
+      if (part.fieldname === "instructorId") {
         console.log("part.fieldname:", part.fieldname);
         instructorId = part.value;
-        console.log('instructor id is :', instructorId);
+        console.log("instructor id is :", instructorId);
       }
     }
   }
   try {
-    console.log("video file path in controller:",videoFilePath);
-    const result = await uploadVideoToYT(instructorId, videoFilePath)
-    console.log("result in upload inst video:",result);
+    console.log("video file path in controller:", videoFilePath);
+    const result = await uploadVideoToYT(instructorId, videoFilePath);
+    console.log("result in upload inst video:", result);
     if (result?.video_url) {
-      reply.status(200).send(result);   
+      reply.status(200).send(result);
     }
   } catch (error) {
-    console.log('Error uploading video', error)
-  } finally{
+    console.log("Error uploading video", error);
+  } finally {
     fs.unlink(videoFilePath, (err) => {
-      console.log("video file path in finally block:",videoFilePath);
+      console.log("video file path in finally block:", videoFilePath);
       if (err) {
-        console.error('Failed to delete video file:', err);
+        console.error("Failed to delete video file:", err);
       } else {
         console.log(`Successfully deleted video file: ${videoFilePath}`);
       }
-    })
+    });
   }
-};
+}
 
 module.exports = {
   createInstructor,
@@ -210,5 +240,6 @@ module.exports = {
   uploadInstVideo,
   stripeAccRegister,
   checkPaymentRecord,
-  getOneInstByUser
+  getOneInstByUser,
+  getInstructorsall
 };

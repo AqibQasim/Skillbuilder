@@ -12,7 +12,7 @@ const dataSource = new DataSource({
   password: process.env.DB_PASSWORD,
   database: process.env.DATABASE,
   synchronize: true,
-  logging: true,  
+  logging: true,
   logger: new PinoLogger(),
   entities: [path.join(__dirname, "../src/entities/**/*.js")],
 });
