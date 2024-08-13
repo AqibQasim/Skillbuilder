@@ -107,10 +107,8 @@ module.exports = new EntitySchema({
     },
     purchased_course: {
       target: "purchased_course",
-      type: "many-to-one", 
-      joinColumn: {
-        name: "purchased_courses_id"
-      },  
+      type: "one-to-many", 
+      inverseSide: "course",
     },
   },
 });
