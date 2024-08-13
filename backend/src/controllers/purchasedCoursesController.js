@@ -1,6 +1,7 @@
 const {
   purchaseCourseDetailsRepository,
 } = require("../repositories/purchasedCourseRepository");
+const { purchasedCourseDetailsById } = require("../services/purchasedCourseService");
 const { findUserById } = require("../services/userService");
 
 const getPurchasedCoursesByUserIdController = async (req, res) => {
@@ -18,7 +19,7 @@ const getPurchasedCoursesByUserIdController = async (req, res) => {
     //     status: 200,
     //     message:"user found"
     // })
-    const purchasedCourseResult = await purchaseCourseDetailsRepository(
+    const purchasedCourseResult = await purchasedCourseDetailsById(
       user_id
     );
 

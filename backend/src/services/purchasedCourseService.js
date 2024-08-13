@@ -1,5 +1,5 @@
 const { logger } = require("../../logger");
-const { findAll, create } = require("../repositories/purchasedCourseRepository");
+const { findAll, create, purchaseCourseDetailsRepository } = require("../repositories/purchasedCourseRepository");
 const { findUserById } = require("./userService");
 
 const postPurchasedCourse = async (data) => {
@@ -36,7 +36,21 @@ const findAllPurchasedCourse = async (userId) => {
   }
 };
 
+const purchasedCourseDetailsById= async (userId)=>{
+
+  try{
+    const data= await purchaseCourseDetailsRepository(userId);
+    return data;
+  } catch (error) {
+    logger.error("src > services > purchasedCourseService");
+    logger.error(error.message);
+    throw Error(error);
+  }
+  
+}
+
 module.exports = {
   postPurchasedCourse,
   findAllPurchasedCourse,
+  purchasedCourseDetailsById,
 };
