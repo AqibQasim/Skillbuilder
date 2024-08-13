@@ -35,30 +35,31 @@ const instructorCreate = async (instructorPayload) => {
 const fetchAllInstructor = async () => {
   logger.info("src > instructorRepository > fetchAllInstructor");
   try {
-    const user= await dataSource.getRepository("User").find();
+    const user = await dataSource.getRepository("User").find();
     //console.log(user)
-    
-    const allInstructor=[];
-    for(let u of user){
-      console.log(u)
 
-      const instructor= await instructorRepository.find({where:{user_id:u.id}});
+    const allInstructor = [];
+    for (let u of user) {
+      console.log(u);
+
+      const instructor = await instructorRepository.find({
+        where: { user_id: u.id },
+      });
       //console.log("////////////////////////////",instructor)
       // console.log("instructor",
       //   instructor
       // )
 
-      if(instructor.length>0)
+      if (instructor.length > 0)
         allInstructor.push({
           id: instructor[0].id,
-          user:{...u,...instructor[0]}
+          user: { ...u, ...instructor[0] },
         });
     }
 
     // const allInstructor = await instructorRepository.find({
     //   relations: ["skills"],
     // });
-    
 
     if (allInstructor.length == 0) {
       return null;
@@ -83,7 +84,7 @@ const fetchAllInstructor = async () => {
     //     "user.created_at",
     //     "user.updated_at",
     //     "user.status",
-    //     "user.status_desc",        
+    //     "user.status_desc",
     //     "instructor.experience",
     //     "instructor.specialization",
     //     "instructor.video_url"
@@ -110,16 +111,17 @@ const findByFilter = async (filter) => {
     // const user= await dataSource.getRepository("User").findOne({...filter});
     // const instructorExist= await dataSource.getRepository("Instructor")
     // .findOne({where:{user_id:user.id},relations: ["skills", "reviews", "education"],})
-    console.log("inst id in:",filter);
+    console.log("inst id in:", filter);
     const inst_id = filter?.id;
     const instructorExist = await dataSource
-      .getRepository("Instructor")  
+      .getRepository("Instructor")
       .createQueryBuilder("instructor")
-      .innerJoinAndSelect("instructor.user","user")
-      .innerJoinAndSelect("instructor.skills","skills")
+      .innerJoinAndSelect("instructor.user", "user")
+      .innerJoinAndSelect("instructor.skills", "skills")
       .select([
         "user.id",
         "user.first_name",
+        "user.last_name",
         "user.profile",
         "user.email",
         "user.profession",
@@ -131,11 +133,11 @@ const findByFilter = async (filter) => {
         "user.updated_at",
         "instructor.status",
         "instructor.user_id",
-        "user.status_desc",        
+        "user.status_desc",
         "instructor.experience",
         "instructor.specialization",
         "instructor.video_url",
-        "skills"
+        "skills",
         // "instructor.skills"
       ])
       .where("instructor.id = :inst_id", { inst_id })
@@ -162,7 +164,7 @@ const findByFilter = async (filter) => {
 const updateInstructor = async (instructorId, videoUrl) => {
   const instructorExist = await instructorRepository.findOne({
     where: { id: instructorId },
-  }); 
+  });
 
   if (!instructorExist) {
     return "No such instructor exists!";
