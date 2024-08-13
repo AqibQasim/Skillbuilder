@@ -6,8 +6,8 @@ const {
   uploadInstVideo,
   stripeAccRegister,
   checkPaymentRecord,
-  getOneInstByUser
-  // getInstructorsall,
+  getOneInstByUser,
+  getInstructorsall,
 } = require("../controllers/InstructorController");
 
 const {
