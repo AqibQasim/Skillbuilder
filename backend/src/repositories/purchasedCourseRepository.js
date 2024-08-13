@@ -1,4 +1,5 @@
 const dataSource = require("../../Infrastructure/postgres");
+const { findByFilter } = require("./instructorRepository");
 const purchasedCourseRepo = dataSource.getRepository("purchased_course");
 
 const create = async (payload) => {
@@ -27,27 +28,30 @@ const purchaseCourseDetailsRepository = async (user_id) => {
       .createQueryBuilder("purchased_course")
       .innerJoinAndSelect("purchased_course.user", "user")
       .innerJoinAndSelect("purchased_course.course", "course")
+      
       //.innerJoinAndSelect("")
       .select([
         "purchased_course.id",
         "user.id",
-        "user.first_name",
-        "user.last_name",
-        "user.profile",
-        "user.email",
-        "user.profession",
-        "user.facebook_profile",
-        "user.is_active",
-        "user.role",
-        "user.source",
-        "user.created_at",
-        "user.updated_at",
+        // "user.first_name",
+        // "user.last_name",
+        // "user.profile",
+        // "user.email",
+        // "user.profession",
+        // "user.facebook_profile",
+        // "user.is_active",
+        // "user.role",
+        // "user.source",
+        // "user.created_at",
+        // "user.updated_at",
         "course.id",        // Course details
         //"course.name",
         "course.description",
         "course.created_at",
         "course.image",
-        "course.title"
+        "course.title",
+        "course.image",
+        "course.instructor_id"
       ])
       .where("purchased_course.purchased_by = :user_id", { user_id: user_id })
       .getMany();
