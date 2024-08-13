@@ -81,7 +81,8 @@ const getAllInstructor = async (request, reply) => {
 const instructorDetail = async (request, reply) => {
   logger.info("src > InstructorController > instructorDetail ", request.params);
   try {
-    const id = request.params.id;
+    const {id} = request.query;
+    console.log("data in request query:",id);
     const instructorData = await getInstructorById(id);
     console.log("Instructor Data:", instructorData);
     if (instructorData) {

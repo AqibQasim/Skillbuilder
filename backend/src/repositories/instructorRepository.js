@@ -161,65 +161,82 @@ const findByFilter = async (filter) => {
   }
 };
 
-const findByFilterTwo = async (filter) => {
-  try {
-    // const instructorExist = await instructorRepository.findOne({
-    //   ...filter,
-    //   relations: ["skills", "reviews", "education"],
-    // });
+// const { getRepository } = require("typeorm");
 
-    // const user= await dataSource.getRepository("User").findOne({...filter});
-    // const instructorExist= await dataSource.getRepository("Instructor")
-    // .findOne({where:{user_id:user.id},relations: ["skills", "reviews", "education"],})
-    console.log("inst id in:", filter);
-    const inst_id = filter?.id;
-    const instructorExist = await dataSource
-      .getRepository("User")
-      .createQueryBuilder("user")
-      .innerJoinAndSelect("user.instructor", "instructor")
-      // .innerJoinAndSelect("user.skills", "skills")
-      .select([
-        "user.id",
-        "user.first_name",
-        "user.last_name",
-        "user.profile",
-        "user.email",
-        "user.profession",
-        "user.facebook_profile",
-        "user.is_active",
-        "user.role",
-        "user.source",
-        "user.created_at",
-        "user.updated_at",
-        "instructor.status",
-        "instructor.user_id",
-        "user.status_desc",
-        "instructor.experience",
-        "instructor.specialization",
-        "instructor.video_url",
-        // "instructor.skills",
-        // "instructor.skills"
-      ])
-      .where("instructor.id = :inst_id", { inst_id })
-      .getOne();
-    if (instructorExist) {
-      //console.log(instructorExist);
-      return {
-        //...user,
-        ...instructorExist,
-        // ...instructorExist['user']
-      };
-      //return instructorExist;
-    }
-    return null;
-  } catch (error) {
-    logger.error([
-      "src > reposirtory > instructorRepository > findByFilter > error",
-      error.message,
-    ]);
-    throw new Error(error);
-  }
-};
+async function findByFilterTwo(userId) {
+  // const id = userId.id;
+  const instructor = await dataSource.getRepository("User")
+    .createQueryBuilder("user")
+    // .leftJoinAndSelect("instructor.skills", "skills")
+    // .leftJoinAndSelect("instructor.education", "education")
+    // .leftJoinAndSelect("instructor.reviews", "reviews")
+    // .leftJoinAndSelect("instructor.user", "user")
+    .where("user.id = :userId", {  userId: userId.id }) // Filter by user's id
+    .getOne();
+
+  return instructor;
+}
+
+
+// const findByFilterTwo = async (filter) => {
+//   try {
+//     // const instructorExist = await instructorRepository.findOne({
+//     //   ...filter,
+//     //   relations: ["skills", "reviews", "education"],
+//     // });
+
+//     // const user= await dataSource.getRepository("User").findOne({...filter});
+//     // const instructorExist= await dataSource.getRepository("Instructor")
+//     // .findOne({where:{user_id:user.id},relations: ["skills", "reviews", "education"],})
+//     console.log("inst id in:", filter);
+//     const inst_id = filter?.id;
+//     const instructorExist = await dataSource
+//       .getRepository("User")
+//       .createQueryBuilder("user")
+//       .innerJoinAndSelect("user.instructor", "instructor")  
+//       // .innerJoinAndSelect("user.skills", "skills")
+//       .select([
+//         "user.id",
+//         "user.first_name",
+//         "user.last_name",
+//         "user.profile",
+//         "user.email",
+//         "user.profession",
+//         "user.facebook_profile",
+//         "user.is_active",
+//         "user.role",
+//         "user.source",
+//         "user.created_at",
+//         "user.updated_at",
+//         "instructor.status",
+//         "instructor.user_id",
+//         "user.status_desc",
+//         "instructor.experience",
+//         "instructor.specialization",
+//         "instructor.video_url",
+//         // "instructor.skills",
+//         // "instructor.skills"
+//       ])
+//       .where("user.id = :inst_id", { inst_id })
+//       .getOne();
+//     if (instructorExist) {
+//       //console.log(instructorExist);
+//       return {
+//         //...user,
+//         ...instructorExist,
+//         // ...instructorExist['user']
+//       };
+//       //return instructorExist;
+//     }
+//     return null;
+//   } catch (error) {
+//     logger.error([
+//       "src > reposirtory > instructorRepository > findByFilter > error",
+//       error.message,
+//     ]);
+//     throw new Error(error);
+//   }
+// };
 
 const updateInstructor = async (instructorId, videoUrl) => {
   const instructorExist = await instructorRepository.findOne({
