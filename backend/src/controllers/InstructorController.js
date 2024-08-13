@@ -7,6 +7,7 @@ const {
   stripeAccRegisterService,
   checkPaymentRecordService,
   getinstructor,
+  getOneInstByUserService,
 } = require("../services/instructorService.js");
 const { updateInstructor } = require("../repositories/instructorRepository");
 const { logger } = require("../../logger");
@@ -107,7 +108,7 @@ const getOneInstByUser = async (request, reply) => {
   logger.info("src > InstructorController > instructorDetail ", request.params);
   try {
     const id = request.params.id;
-    const instructorData = await getInstructorById(id);
+    const instructorData = await getOneInstByUserService(id);
     console.log("Instructor Data:", instructorData);
     if (instructorData) {
       reply.code(200).send({
