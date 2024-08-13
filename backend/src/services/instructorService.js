@@ -68,6 +68,16 @@ const getInstructorById = async (id) => {
   }
 };
 
+const getOneInstByUserService = async (id) => {
+  try {
+    logger.info("src > instructorServices > getInstructorById");
+    const InstructorReceive = await findByFilter({ where: { user_id: id } });
+    return InstructorReceive;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
 const getCoursesByInstService = async (id) => {
   try {
     const InstructorReceive = await findAllCoursesByInst(
@@ -213,5 +223,6 @@ module.exports = {
   getCoursesByInstService,
   uploadVideoToYT,
   stripeAccRegisterService,
-  checkPaymentRecordService
+  checkPaymentRecordService,
+  getOneInstByUserService
 };

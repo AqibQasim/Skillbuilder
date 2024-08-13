@@ -76,6 +76,32 @@ const instructorDetail = async (request, reply) => {
   }
 };
 
+const getOneInstByUser = async (request, reply) => {
+  logger.info("src > InstructorController > instructorDetail ", request.params);
+  try {
+    const id = request.params.id;
+    const instructorData = await getInstructorById(id);
+    console.log("Instructor Data:", instructorData);
+    if (instructorData) {
+      reply.code(200).send({
+        status: true,
+        data: instructorData,
+      });
+    } else {
+      reply.code(404).send({
+        status: false,
+        message: "Instructor not found with the provided ID",
+      });
+    }
+  } catch (error) {
+    logger.error("Error occurred in instructor controller :", error.message);
+    reply.status(500).send({
+      status: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+
 const getCoursesByInstructor = async (request, reply) => {
   try {
     const id = request?.params?.id;
@@ -109,6 +135,8 @@ const checkPaymentRecord = async (request, reply)  => {
   }
 }
 
+
+
 async function uploadInstVideo(request, reply) {
   const parts = await request.parts();
   let fieldsData = {};
@@ -135,7 +163,6 @@ async function uploadInstVideo(request, reply) {
 
         videoFilePath = saveTo;
 
-        // Write file to the disk
         const writeStream = fs.createWriteStream(saveTo);
         for await (const chunk of part.file) {
           writeStream.write(chunk);
@@ -182,5 +209,6 @@ module.exports = {
   getCoursesByInstructor,
   uploadInstVideo,
   stripeAccRegister,
-  checkPaymentRecord
+  checkPaymentRecord,
+  getOneInstByUser
 };
