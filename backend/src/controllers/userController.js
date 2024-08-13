@@ -169,6 +169,7 @@ const getOneUser = async (req, res) => {
 const enrollInCourse = async (request, reply) => {
   try {
     const { student_id, course_id, filter } = request?.body;
+    console.log("body:",request?.body)
     const result = await enrollInCourseService({
       student_id,
       course_id,

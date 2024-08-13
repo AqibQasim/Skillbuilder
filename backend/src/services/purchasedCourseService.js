@@ -1,20 +1,24 @@
 const { logger } = require("../../logger");
 const { findAll, create, purchaseCourseDetailsRepository } = require("../repositories/purchasedCourseRepository");
 const { findUserById } = require("./userService");
+const { findUser } = require('../repositories/userRepository')
 
 const postPurchasedCourse = async (data) => {
   //   console.log("data in service: ", data);
   const { userId, courseId } = data;
-  const isUserExist = await findUserById(userId);
+  const filter = {
+    id: userId,
+  };
+  const isUserExist = await findUser(filter);
   if (isUserExist) {
-    for (const course_id of courseId) {
+    // for (const course_id of courseId) {
       const payload = {
-        course_id,
+        course_id : courseId,
         purchased_by: userId,
         created_at: new Date(),
       };
       await create(payload);
-    }
+    // }
     return "success";
   }
   else return 'user not exist'
