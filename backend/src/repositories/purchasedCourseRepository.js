@@ -24,43 +24,34 @@ const deleteOne = async (filter) => {
 };
 
 const purchaseCourseDetailsRepository = async (user_id) => {
-    const purchasedCourses = await dataSource.getRepository("purchased_course")
-      .createQueryBuilder("purchased_course")
-      .innerJoinAndSelect("purchased_course.user", "user")
-      .innerJoinAndSelect("purchased_course.course", "course")
-      
-      //.innerJoinAndSelect("")
-      .select([
-        "purchased_course.id",
-        "user.id",
-        // "user.first_name",
-        // "user.last_name",
-        // "user.profile",
-        // "user.email",
-        // "user.profession",
-        // "user.facebook_profile",
-        // "user.is_active",
-        // "user.role",
-        // "user.source",
-        // "user.created_at",
-        // "user.updated_at",
-        "course.id",        // Course details
-        //"course.name",
-        "course.description",
-        "course.created_at",
-        "course.image",
-        "course.title",
-        "course.image",
-        "course.instructor_id"
-      ])
-      .where("purchased_course.purchased_by = :user_id", { user_id: user_id })
-      .getMany();
-  
-    if (purchasedCourses.length > 0) {
-      return purchasedCourses;
-    }
-    return null;
-  };
+  const purchasedCourses = await dataSource
+    .getRepository("purchased_course")
+    .createQueryBuilder("purchased_course")
+    .innerJoinAndSelect("purchased_course.user", "user")
+    .innerJoinAndSelect("purchased_course.course", "course")
+    .innerJoinAndSelect("course.instructor", "instructor") // Join with instructor table
+    .innerJoinAndSelect("instructor.user", "instructor_user") // Join with user table for instructor details
+    .select([
+      "purchased_course.id",
+      "user.id",
+      "course.id",
+      "course.description",
+      "course.created_at",
+      "course.image",
+      "course.title",
+      "course.instructor_id",
+      "instructor.id", // Instructor's id
+      "instructor_user.first_name", // Instructor's first name
+      "instructor_user.last_name", // Instructor's last name
+    ])
+    .where("purchased_course.purchased_by = :user_id", { user_id: user_id })
+    .getMany();
+
+  if (purchasedCourses.length > 0) {
+    return purchasedCourses;
+  }
+  return null;
+};
 
 module.exports = {
   create,
