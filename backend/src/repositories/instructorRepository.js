@@ -131,12 +131,14 @@ const findByFilter = async (filter) => {
         "user.source",
         "user.created_at",
         "user.updated_at",
+        "user.location",
         "instructor.status",
+        "instructor.id",
         "instructor.user_id",
         "user.status_desc",
         "instructor.experience",
         "instructor.specialization",
-        "instructor.video_url",
+        "instructor.video_url", 
         "skills",
         // "instructor.skills"
       ])
