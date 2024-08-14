@@ -101,20 +101,67 @@ const fetchAllInstructor = async () => {
   }
 };
 
+// const findByFilter = async (filter) => {
+//   try {
+//     console.log("inst id in:", filter);
+//     const inst_id = filter?.id;
+//     console.log("inst id in inst_id:", inst_id);
+//     const instructorExist = await dataSource
+//       .getRepository("instructor")
+//       .createQueryBuilder("instructor")
+//       .innerJoinAndSelect("instructor.user", "user")
+//       .innerJoinAndSelect("instructor.skills", "skills")
+//       .select([
+//         "user.id",
+//         "user.first_name",
+//         "user.last_name",
+//         "user.profile",
+//         "user.email",
+//         "user.profession",
+//         "user.facebook_profile",
+//         "user.is_active",
+//         "user.role",
+//         "user.source",
+//         "user.created_at",
+//         "user.updated_at",
+//         "user.location",
+//         "instructor.status",
+//         "instructor.id",
+//         "instructor.user_id",
+//         "user.status_desc",
+//         "instructor.experience",
+//         "instructor.specialization",
+//         "instructor.video_url", 
+//         "skills",
+//       ])
+//       .where("instructor.id = :inst_id", { inst_id })
+//       .getOne();
+//     if (instructorExist) {
+//       //console.log(instructorExist);
+//       return {
+//         //...user,
+//         ...instructorExist,
+//         // ...instructorExist['user']
+//       };
+//       //return instructorExist;
+//     }
+//     return null;
+//   } catch (error) {
+//     logger.error([
+//       "src > reposirtory > instructorRepository > findByFilter > error",
+//       error.message,
+//     ]);
+//     throw new Error(error);
+//   }
+// };
+
 const findByFilter = async (filter) => {
   try {
-    // const instructorExist = await instructorRepository.findOne({
-    //   ...filter,
-    //   relations: ["skills", "reviews", "education"],
-    // });
-
-    // const user= await dataSource.getRepository("User").findOne({...filter});
-    // const instructorExist= await dataSource.getRepository("Instructor")
-    // .findOne({where:{user_id:user.id},relations: ["skills", "reviews", "education"],})
     console.log("inst id in:", filter);
     const inst_id = filter?.id;
+    console.log("inst id in inst_id:", inst_id);
     const instructorExist = await dataSource
-      .getRepository("Instructor")
+      .getRepository("instructor")
       .createQueryBuilder("instructor")
       .innerJoinAndSelect("instructor.user", "user")
       .innerJoinAndSelect("instructor.skills", "skills")
@@ -140,7 +187,6 @@ const findByFilter = async (filter) => {
         "instructor.specialization",
         "instructor.video_url", 
         "skills",
-        // "instructor.skills"
       ])
       .where("instructor.id = :inst_id", { inst_id })
       .getOne();
@@ -162,6 +208,8 @@ const findByFilter = async (filter) => {
     throw new Error(error);
   }
 };
+
+// async function findByFilterThree()
 
 // const { getRepository } = require("typeorm");
 

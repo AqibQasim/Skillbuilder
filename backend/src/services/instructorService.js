@@ -178,13 +178,13 @@ const stripeAccRegisterService = async ({
   }
 };
 
-const checkPaymentRecordService = async ({ instructor_id }) => {
+const checkPaymentRecordService = async ({ id }) => {
   try {
     const InstructorReceive = await findByFilter({
-      where: { id: instructor_id },
+      id
     });
     if (InstructorReceive && InstructorReceive?.id) {
-      const res = await checkIfAccounRegIdExists(instructor_id);
+      const res = await checkIfAccounRegIdExists(id);
       if (res) {
         return {
           message: res,

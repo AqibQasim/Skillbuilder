@@ -157,10 +157,10 @@ const stripeAccRegister = async (request, reply) => {
   }
 };
 
-const checkPaymentRecord = async (request, reply) => {
+const checkPaymentRecord = async (request,reply) => {
   try {
-    const { instructor_id } = request?.query;
-    const result = await checkPaymentRecordService({ instructor_id });
+    const { id } = request?.query;
+    const result = await checkPaymentRecordService({ id });
     reply.status(result?.status).send(result);
   } catch (err) {
     console.log("ERR:", err);

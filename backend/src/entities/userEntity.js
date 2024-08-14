@@ -98,9 +98,5 @@ module.exports = new EntitySchema({
     }
 
   },
-// =======
-  //     joinColumn: true
-  //   }
-  // }
-// >>>>>>> c25baf8
+
 });
