@@ -41,6 +41,23 @@ const findAllCoursesByInst = async (id) => {
   }
 };
 
+const findOneCourseWithStudentID= async(course_id)=>{
+  try{
+    const purchasedCourses= await courseRepository
+    .createQueryBuilder("course")
+    .leftJoinAndSelect("course.purchased_course","purchased_course")
+    .where("course.id= :course_id",{course_id})
+
+    .getMany()
+
+    return purchasedCourses;
+  }catch(error){
+    logger.error("Error: src > repositories > courseRepository");
+    logger.error(error.message);
+    throw new Error(error);
+  }
+}
+
 const findOneCourse = async (filter,course_id) => {
   try {
     const updateObject = {};
@@ -259,5 +276,6 @@ module.exports = {
   updateCoursecontent,
   updateCourseByFilter,
   setCourseStatusRepository,
+  findOneCourseWithStudentID
   // saveReview
 };

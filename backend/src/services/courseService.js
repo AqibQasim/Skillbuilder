@@ -11,6 +11,7 @@ const {
   updateCourse,
   updateCourseByFilter,
   setCourseStatusRepository,
+  findOneCourseWithStudentID,
 } = require("../repositories/courseRepository");
 const { getAllReviews } = require("../repositories/courseReviewRepository.js");
 const { saveReview } = require("../repositories/courseReviewRepository.js");
@@ -214,7 +215,8 @@ const courseGetById = async (id) => {
     const filter = "id"; // Assuming 'id' is the filter key
 
     // Pass both filter and id as course_id to findOneCourse
-    const result = await findOneCourse(filter, id);
+    //const result = await findOneCourse(filter, id);
+    const result= await findOneCourseWithStudentID(id);
 
     if (!result) {
       console.log("Course not found");
