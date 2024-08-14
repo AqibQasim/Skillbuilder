@@ -75,13 +75,13 @@ const instructorDetailSchema = {
         description: "Get details of a specific instructor",
         tags: ["instructor"],
         summary: "Get instructor detail",
-        params: {
-            type: "object",
-            properties: {
-                id: { type: "string", description: "Instructor ID" }
-            },
-            required: ["id"]
-        },
+        // params: {
+        //     type: "object",
+        //     properties: {
+        //         id: { type: "string", description: "Instructor ID" }
+        //     },
+        //     required: ["id"]
+        // },
     }
 };
 

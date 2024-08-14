@@ -2,6 +2,7 @@ const {
   fetchAllInstructor,
   instructorCreate,
   findByFilter,
+  findByFilterTwo,
 } = require("../repositories/instructorRepository");
 const {
   findAllCourses,
@@ -108,6 +109,16 @@ const getInstructorById = async (id) => {
   try {
     logger.info("src > instructorServices > getInstructorById");
     const InstructorReceive = await findByFilter({id: id });
+    return InstructorReceive;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+const getOneInstByUserService = async (id) => {
+  try {
+    logger.info("src > instructorServices > getInstructorById");
+    const InstructorReceive = await findByFilterTwo({ where: { user_id: id } });
     return InstructorReceive;
   } catch (error) {
     throw new Error(error);
@@ -265,5 +276,6 @@ module.exports = {
   uploadVideoToYT,
   stripeAccRegisterService,
   checkPaymentRecordService,
-  getinstructor,
+  getOneInstByUserService,
+  getinstructor
 };

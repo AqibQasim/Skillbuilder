@@ -6,6 +6,7 @@ const {
   uploadInstVideo,
   stripeAccRegister,
   checkPaymentRecord,
+  getOneInstByUser,
   getInstructorsall,
 } = require("../controllers/InstructorController");
 
@@ -21,7 +22,7 @@ const instructorRoutes = async (fastify, options) => {
   fastify.get("/get-all-instructors", getAllInstructor);
   fastify.get("/get-instructors", getInstructorsall);
   fastify.get(
-    "/instructor-detail/:id",
+    "/instructor-detail",
     instructorDetailSchema,
     instructorDetail
   );
@@ -33,6 +34,8 @@ const instructorRoutes = async (fastify, options) => {
   fastify.post("/inst-stipe-acc-reg", stripeAccRegister);
 
   fastify.get("/check-payment-rec", checkPaymentRecord);
+
+  fastify.get("/get-inst-by-user/:id", getOneInstByUser);
 };
 
 module.exports = instructorRoutes;
