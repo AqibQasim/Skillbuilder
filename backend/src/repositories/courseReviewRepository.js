@@ -3,15 +3,30 @@ const dataSource = require("../../Infrastructure/postgres");
 
 const getAllReviews = async (id) => {
   try {
-    const courseRevRep = dataSource.getRepository("courseReviews");
-    const allCourses = await courseRevRep.find({
-      where: {
-        course_id: id,
-      },
-    });
-    console.log("Total courses:", allCourses);
+    const courseRevRep = await dataSource.getRepository("courseReviews")
+    .createQueryBuilder("course_reviews")
+    .leftJoin("course_reviews.course","course")
+    .leftJoin("course_reviews.user","user")
+    .where("course_reviews.course_id= :course_id",{course_id:id})
+    .select([
+      "course_reviews.id",
+      "user.first_name",
+      "user.last_name",
+      "course_reviews.rating",
+      "course_reviews.review",
+      "course_reviews.date",
+      "user.id"
+    ])
+    .getMany();
+    // const allCourses = await courseRevRep.find({
+    //   where: {
+    //     course_id: id,
+    //   },
+    // });
+    // console.log("Total courses:", allCourses);
 
-    return allCourses;
+    // return allCourses;
+    return courseRevRep;
   } catch (err) {
     console.log("ERR:", err);
   }
