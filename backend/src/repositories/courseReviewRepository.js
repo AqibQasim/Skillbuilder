@@ -12,6 +12,7 @@ const getAllReviews = async (id) => {
       "course_reviews.id",
       "user.first_name",
       "user.last_name",
+      "user.profile",
       "course_reviews.rating",
       "course_reviews.review",
       "course_reviews.date",
