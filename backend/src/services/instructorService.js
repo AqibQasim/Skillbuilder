@@ -10,8 +10,8 @@ const {
   findAllCoursesByInst,
   updateCourse,
 } = require("../repositories/courseRepository");
+const { findUser } = require('../repositories/userRepository')
 const { logger } = require("../../logger");
-const { findUserById } = require("./userService");
 
 const { uploadSingle } = require("../mediators/s3Mediator");
 const { updateInstructor } = require("../repositories/instructorRepository");
@@ -66,10 +66,16 @@ const createNewInstructor = async (instructorData, filePath) => {
       skills,
       video_url,
     } = instructorData;
-    const user = await findUserById(id);
+    // const user = await findUserById(id);
+    const filter = {
+      id: user_id,
+    };
+    const result = await findUser(filter);
 
-    if (!user) {
-      throw new Error("user not exist");
+    if (!result) {
+      return {
+        message : "User doesn't exist"
+      }
     }
 
     const instructorPayload = {
