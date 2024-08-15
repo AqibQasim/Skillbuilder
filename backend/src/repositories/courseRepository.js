@@ -46,11 +46,16 @@ const findOneCourseWithStudentID= async(course_id)=>{
     const purchasedCourses= await courseRepository
     .createQueryBuilder("course")
     .leftJoinAndSelect("course.purchased_course","purchased_course")
-    .leftJoinAndSelect("course.modules","modules")
+    .leftJoinAndSelect("course.modules","modules.content")
     .leftJoinAndSelect('course.instructor','instructor')
     .leftJoinAndSelect('course.reviews','reviews')
     .where("course.id= :course_id",{course_id})
     .getOne()
+
+    // const findOne = await courseRepository.findOne({
+    //   where: updateObject,
+    //   relations: ["instructor", "reviews", "modules.content"],
+    // });
 
     return purchasedCourses;
   }catch(error){
