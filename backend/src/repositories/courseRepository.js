@@ -46,7 +46,8 @@ const findOneCourseWithStudentID= async(course_id)=>{
     const purchasedCourses= await courseRepository
     .createQueryBuilder("course")
     .leftJoinAndSelect("course.purchased_course","purchased_course")
-    .leftJoinAndSelect("course.modules","modules.content")
+    .leftJoinAndSelect("course.modules","modules")
+    .leftJoinAndSelect("modules.content","content")
     .leftJoinAndSelect('course.instructor','instructor')
     .leftJoinAndSelect('course.reviews','reviews')
     .where("course.id= :course_id",{course_id})
