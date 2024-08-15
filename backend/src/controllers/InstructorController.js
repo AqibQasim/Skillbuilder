@@ -40,10 +40,10 @@ const createInstructor = async (request, reply) => {
     logger.info("src > controllers > InstructorController > createInstructor");
     // const body = JSON.parse(request.body);
     logger.info(request?.body);
-    await createNewInstructor(request?.body);
+    const result= await createNewInstructor(request?.body);
     reply.send({
-      status: true,
-      message: "create instructor successfully ",
+      status: result.status,
+      message: result.message,
     });
   } catch (error) {
     logger.error(error.message);

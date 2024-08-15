@@ -209,6 +209,14 @@ const findByFilter = async (filter) => {
   }
 };
 
+const findInstructorById= async (id)=>{
+  return await instructorRepository.findOne({
+    where:{
+      user_id:id
+    }
+  })
+}
+
 // async function findByFilterThree()
 
 // const { getRepository } = require("typeorm");
@@ -328,6 +336,7 @@ module.exports = {
   fetchAllInstructor,
   findByFilter,
   updateInstructor,
-  findByFilterTwo
+  findByFilterTwo,
+  findInstructorById
   // fetchAllInstructorWithSkills,
 };

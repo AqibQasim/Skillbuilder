@@ -3,6 +3,7 @@ const {
   instructorCreate,
   findByFilter,
   findByFilterTwo,
+  findInstructorById,
 } = require("../repositories/instructorRepository");
 const {
   findAllCourses,
@@ -81,13 +82,22 @@ const createNewInstructor = async (instructorData, filePath) => {
       created_at: new Date(),
     };
 
-    const isInstructorExist = await findByFilter({ where: { id: user_id } });
+    const isInstructorExist = await findInstructorById(user_id);
+    console.log("///////////////////////////////////////////////",isInstructorExist)
     if (isInstructorExist) {
-      throw new Error("Instructor already Exist");
+      return{
+        status: 400,
+        message:"instructor already exists"
+      }
     }
 
-    await instructorCreate({ ...instructorPayload, video_url });
-
+    const isInstructorCreated= await instructorCreate({ ...instructorPayload, video_url });
+    if(isInstructorCreated){
+      return{
+        status: 200,
+        message:"instructor created successfully"
+      }
+    }
     // }
   } catch (error) {
     console.log("message:", error);
