@@ -33,6 +33,7 @@ const createCourseWithDetails = async (requestedData) => {
       modules,
       description,
       video_url,
+      skills
     } = requestedData;
     const courseBasicsPayload = {
       instructor_id,
@@ -47,6 +48,7 @@ const createCourseWithDetails = async (requestedData) => {
       discount: requestedData?.discount,
       charges: amount * 0.03,
       image: image,
+      skills,
       created_at: new Date(),
     };
     let courseBasics = await createCourse(courseBasicsPayload);

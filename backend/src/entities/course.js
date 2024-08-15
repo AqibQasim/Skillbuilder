@@ -11,48 +11,48 @@ module.exports = new EntitySchema({
       generated: true,
     },
     instructor_id: {
-      type: 'int',
+      type: "int",
     },
     title: {
       type: "varchar",
     },
     description: {
-      type: "varchar"
+      type: "varchar",
     },
     creation_duration_hours: {
       type: "int",
     },
     learning_outcomes: {
-      type: "varchar"
+      type: "varchar",
     },
     category: {
-      type: "varchar"
+      type: "varchar",
     },
     modulesCount: {
-      type: "int"
+      type: "int",
     },
     amount: {
       type: "decimal",
     },
     discount: {
       type: "decimal",
-      default: 0
+      default: 0,
     },
     charges: {
       type: "decimal",
     },
     active: {
       type: "boolean",
-      default: false
+      default: false,
     },
     status: {
       type: "enum",
-      enum: ['pending', 'approved', 'declined', 'suspended'],
-      default: 'pending'
+      enum: ["pending", "approved", "declined", "suspended"],
+      default: "pending",
     },
     enrolled_customers: {
       type: "jsonb",
-      default: []
+      default: [],
     },
     image: {
       type: "varchar",
@@ -61,7 +61,7 @@ module.exports = new EntitySchema({
       type: "decimal",
       precision: 3,
       scale: 1,
-      nullable: true
+      nullable: true,
     },
     created_at: {
       type: "timestamp with time zone",
@@ -70,34 +70,44 @@ module.exports = new EntitySchema({
       type: "timestamp with time zone",
       nullable: true,
     },
-    reason : {
+    reason: {
       type: "enum",
-      enum : ["Video Quality","Inappropriate Language","Discriminations","Course Curriculum"],
-      nullable: true
+      enum: [
+        "Video Quality",
+        "Inappropriate Language",
+        "Discriminations",
+        "Course Curriculum",
+      ],
+      nullable: true,
     },
-    status_desc : {
+    status_desc: {
       type: "jsonb",
-      nullable: true
+      nullable: true,
     },
     updated_by: {
       type: "varchar",
       nullable: true,
     },
     video_url: {
-      type: "varchar"
+      type: "varchar",
+    },
+    skills: {
+      type: "jsonb",
+      nullable: true,
+      default: null,
     },
   },
   relations: {
     instructor: {
       target: "Instructor",
-      type: "many-to-one", 
+      type: "many-to-one",
       joinColumn: {
-        name: "instructor_id"
-      },  
+        name: "instructor_id",
+      },
     },
     reviews: {
       target: "course_reviews",
-      type: "one-to-many", 
+      type: "one-to-many",
       inverseSide: "course",
     },
     modules: {
@@ -107,7 +117,7 @@ module.exports = new EntitySchema({
     },
     purchased_course: {
       target: "purchased_course",
-      type: "one-to-many", 
+      type: "one-to-many",
       inverseSide: "course",
     },
   },
