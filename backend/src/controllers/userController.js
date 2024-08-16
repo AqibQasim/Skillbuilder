@@ -310,7 +310,7 @@ const profileUpdateHandler = async (request, reply) => {
   }
 };
 
-const ContactUS = async (request, reply) => {s
+const ContactUS = async (request, reply) => {
   const userInfo = request.body;
 
   // const { error } = ValidateContactUs.validate(userInfo);
