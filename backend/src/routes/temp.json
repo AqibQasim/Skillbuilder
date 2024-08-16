@@ -1,0 +1,44 @@
+    
+    { "modules":
+    [
+        
+         {
+        "title": "Introduction to SQA",
+        "content": [
+          {
+            "title": "What is test automation?",
+            "content_type": "video",
+            "content": "path/to/video.mp4",
+            "duration":"10:00",
+            "order": 1
+          },
+          {
+            "title": "Automation Basics",
+            "content_type": "article",
+            "content": "path/to/article.pdf",
+            "duration":"10:00",
+            "order": 2
+          }
+        ]
+      },
+      {
+        "title": "Advanced Selenium",
+        "content": [
+          {
+            "title": "Selenium Features",
+            "content_type": "video",
+            "content": "path/to/advanced_js_video.mp4",
+            "duration":"10:00",
+            "order": 1
+          },
+          {
+            "title": "Selenium and Java",
+            "content_type": "article",
+            "content": "path/to/async_js_article.pdf",
+            "duration":"10:00",
+            "order": 2
+          }
+        ]
+      }
+    ]
+}
