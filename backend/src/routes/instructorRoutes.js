@@ -22,7 +22,7 @@ const instructorRoutes = async (fastify, options) => {
   fastify.get("/get-all-instructors", getAllInstructor);
   fastify.get("/get-instructors", getInstructorsall);
   fastify.get(
-    "/instructor-detail",
+    "/instructor-detail/:id",
     instructorDetailSchema,
     instructorDetail
   );
