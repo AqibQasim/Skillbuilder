@@ -144,11 +144,7 @@ const getOneInstByUserService = async (id) => {
 
 const getCoursesByInstService = async (id) => {
   try {
-    const InstructorReceive = await findAllCoursesByInst({
-      where: {
-        instructor_id: id,
-      },
-    });
+    const InstructorReceive = await findAllCoursesByInst(id);
     if(InstructorReceive==null){
       return {
         status: 404,
