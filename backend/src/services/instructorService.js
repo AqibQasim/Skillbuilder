@@ -148,7 +148,17 @@ const getCoursesByInstService = async (id) => {
         instructor_id: id,
       },
     });
-    return InstructorReceive;
+    if(InstructorReceive==null){
+      return {
+        status: 404,
+        message: "no courses uploaded yet"
+      }
+    }
+    return {
+      status: 200,
+      message:"courses fetched successfully",
+      data: InstructorReceive
+    };
   } catch (e) {
     throw new Error(error);
   }

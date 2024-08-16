@@ -33,6 +33,10 @@ const findAllCoursesByInst = async (id) => {
   logger.info("src > Repository > fetchAllCourses");
   try {
     const allCourses = await courseRepository.find(id);
+
+    if(allCourses.length==0){
+      return null;
+    }
     return allCourses;
   } catch (error) {
     logger.error("Error : src > repositories > courseRepository");

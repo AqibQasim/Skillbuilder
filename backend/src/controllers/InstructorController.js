@@ -134,8 +134,15 @@ const getOneInstByUser = async (request, reply) => {
 const getCoursesByInstructor = async (request, reply) => {
   try {
     const id = request?.params?.id;
+    const isUserAnInstructor= await getInstructorById(id);
+
+    if(!isUserAnInstructor){
+      reply.status(403).send({
+        message:"this user is not an instructor"
+      });
+    }
     const allCoursesByInstructor = await getCoursesByInstService(id);
-    reply.status(200).send(allCoursesByInstructor);
+    reply.status(allCoursesByInstructor.status).send(allCoursesByInstructor);
   } catch (e) {
     console.log("ERR:", e);
     reply.status(500).send("Some server side exception has occured");
