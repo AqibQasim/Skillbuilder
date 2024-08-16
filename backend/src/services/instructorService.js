@@ -134,7 +134,8 @@ const getInstructorById = async (id) => {
 const getOneInstByUserService = async (id) => {
   try {
     logger.info("src > instructorServices > getInstructorById");
-    const InstructorReceive = await findByFilterTwo({ where: { user_id: id } });
+    const InstructorReceive = await findInstructorById(id);
+    console.log(InstructorReceive);
     return InstructorReceive;
   } catch (error) {
     throw new Error(error);
