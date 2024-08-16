@@ -20,7 +20,14 @@ const createCourse = async (data) => {
 const findAllCourses = async () => {
   logger.info("src > Repository > fetchAllCourses");
   try {
-    const allCourses = await courseRepository.find();
+    //const allCourses = await courseRepository.find();
+
+    const allCourses= await courseRepository.createQueryBuilder('course')
+    .leftJoinAndSelect('course.instructor','instructor')
+    .leftJoinAndSelect('instructor.user','user')
+    .where('user.id=instructor.user_id')
+    .getMany();
+    
     return allCourses;
   } catch (error) {
     logger.error("Error : src > repositories > courseRepository");
@@ -32,7 +39,7 @@ const findAllCourses = async () => {
 const findAllCoursesByInst = async (id) => {
   logger.info("src > Repository > fetchAllCourses");
   try {
-    const allCourses = await courseRepository.find(id);
+    const allCourses = await courseRepository.find({where:{instructor_id:id}});
 
     if(allCourses.length==0){
       return null;

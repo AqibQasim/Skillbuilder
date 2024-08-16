@@ -335,9 +335,9 @@ const ContactUS = async (request, reply) => {
 
 const getStudentsByInstructorId = async (request, response) => {
   try {
-    const { instructor_id } = request?.query;
-    const result = await getStudentsByInstructorIdService({ instructor_id });
-    response.status(200).send(result);
+    const { id } = request?.query;
+    const result = await getStudentsByInstructorIdService({ instructorId:id });
+    response.status(result.status).send(result);
   } catch (err) {
     console.log("Error while handling:", err);
     response.status(500).send("Error while handling:", err);
