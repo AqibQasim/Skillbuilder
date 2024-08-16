@@ -28,7 +28,7 @@ const {
   getStudentsByInstructorIdService,
   getOneInstCourseStudentsService,
   getEnrolledStudentsService,
-  setStudentStatusService
+  setStudentStatusService,
 } = require("../services/userService");
 
 const createStudent = async (request, reply) => {
@@ -169,7 +169,7 @@ const getOneUser = async (req, res) => {
 const enrollInCourse = async (request, reply) => {
   try {
     const { student_id, course_id, filter } = request?.body;
-    console.log("body:",request?.body)
+    console.log("body:", request?.body);
     const result = await enrollInCourseService({
       student_id,
       course_id,
@@ -310,7 +310,7 @@ const profileUpdateHandler = async (request, reply) => {
   }
 };
 
-const ContactUS = async (request, reply) => {s
+const ContactUS = async (request, reply) => {
   const userInfo = request.body;
 
   // const { error } = ValidateContactUs.validate(userInfo);
@@ -358,29 +358,29 @@ const getOneInstCourseStudents = async (request, response) => {
   }
 };
 
-const getEnrolledStudents = async (request,response) => {
-  try{
+const getEnrolledStudents = async (request, response) => {
+  try {
     const result = await getEnrolledStudentsService();
-    console.log("[RESPONSE TO BE SENT]:",result);
+    console.log("[RESPONSE TO BE SENT]:", result);
     response.status(200).send(result);
-  } catch (err){
-    console.log("[ERR WHILE HANDLING]:",err);
+  } catch (err) {
+    console.log("[ERR WHILE HANDLING]:", err);
   }
-}
+};
 
 // setStudentStatus
 
-const setStudentStatus = async (request,response) => {
-  try{
-    const { id , status, status_desc } = request?.body;
+const setStudentStatus = async (request, response) => {
+  try {
+    const { id, status, status_desc } = request?.body;
     const result = await setStudentStatusService({ id, status, status_desc });
-    console.log("[DATA TO BE SENT AS RESPONSE:]",result);
-    response.status(200).send(result)
+    console.log("[DATA TO BE SENT AS RESPONSE:]", result);
+    response.status(200).send(result);
   } catch (err) {
-    console.log("[Err]:",err);
+    console.log("[Err]:", err);
     response.status(500).send("Internal Server Error");
   }
-}
+};
 
 module.exports = {
   createStudent,
@@ -399,5 +399,5 @@ module.exports = {
   getStudentsByInstructorId,
   getOneInstCourseStudents,
   getEnrolledStudents,
-  setStudentStatus
+  setStudentStatus,
 };
