@@ -34,7 +34,7 @@ module.exports = new EntitySchema({
   relations: {
     user: {
       target: "User",
-      type: "one-to-one", // multiple course reviews and one user
+      type: "many-to-one", // multiple course reviews and one user
       joinColumn: {
         name: "user_id",
       },
