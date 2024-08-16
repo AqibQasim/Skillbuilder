@@ -26,6 +26,9 @@ module.exports = new EntitySchema({
     },
     course_id: {
       type: "int"
+    },
+    user_id:{
+      type:"int"
     }
   },
   relations: {

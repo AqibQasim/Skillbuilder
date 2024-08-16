@@ -55,9 +55,7 @@ const saveReview = async (data) => {
       }
       console.log("--------------------", data);
       const reviewCreating = courseRevRep.create({
-        ...data,
-        course_id,
-        user_id,
+        ...data
       });
       const saved = courseRevRep.save(reviewCreating);
       return "Review has been successfully posted.";
