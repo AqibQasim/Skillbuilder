@@ -29,6 +29,7 @@ const {
   getOneInstCourseStudentsService,
   getEnrolledStudentsService,
   setStudentStatusService,
+  getStudentEnrolledCoursesOnInstructorService,
 } = require("../services/userService");
 
 const createStudent = async (request, reply) => {
@@ -382,6 +383,19 @@ const setStudentStatus = async (request, response) => {
   }
 };
 
+const getStudentEnrolledCoursesOnInstructorController= async(req,res)=>{
+  try{
+    const {instructor_id,student_id}= req?.query;
+    const result= await getStudentEnrolledCoursesOnInstructorService(instructor_id,student_id);
+    return res.status(result.status).send({
+      message: result.message,
+      data: result.data
+    })
+  }catch(err){
+    res.status(500).send(err);
+  }
+}
+
 module.exports = {
   createStudent,
   getAllUsers,
@@ -400,4 +414,5 @@ module.exports = {
   getOneInstCourseStudents,
   getEnrolledStudents,
   setStudentStatus,
+  getStudentEnrolledCoursesOnInstructorController
 };

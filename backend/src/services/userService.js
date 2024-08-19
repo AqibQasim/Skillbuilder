@@ -13,6 +13,7 @@ const courseRepository = dataSource.getRepository("Course");
 const {
   findAllCoursesByInst,
   findAllCourses,
+  studentEnrolledCoursesOnInstructorRepository,
 } = require("../repositories/courseRepository");
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
@@ -32,7 +33,7 @@ const {
   findOneByFilter,
 } = require("../repositories/purchasedCourseRepository");
 const { postPurchasedCourse } = require("./purchasedCourseService");
-const { findInstructorById } = require("../repositories/instructorRepository");
+const { findInstructorById, findInstructorByInstructorId } = require("../repositories/instructorRepository");
 // const { ConfigurationServicePlaceholders } = require("aws-sdk/lib/config_service_placeholders");
 
 // const emailVerificationForRegister = async (userInfo) => {
@@ -605,6 +606,46 @@ const setStudentStatusService = async ({ id, status, status_desc }) => {
   }
 };
 
+const getStudentEnrolledCoursesOnInstructorService= async(instructor_id,student_id)=>{
+
+  const instructor= await findInstructorByInstructorId(instructor_id);
+  const student= await findUserById(student_id);
+  if(!instructor){
+    return {
+      status: 404,
+      message:"instructor not found. Please put instructor id",
+    }
+  }
+
+  if(!student){
+    return {
+      status: 404,
+      message:"student not found. Please put user id",
+    }
+  }
+
+  if(!instructor && !student){
+    return {
+      status: 404,
+      message:"student and instructor not found. Please put user id and instructor id"
+    }
+  }
+
+  const enrolled_courses= await studentEnrolledCoursesOnInstructorRepository(instructor_id,student_id);
+  
+  if(!enrolled_courses){
+    return{
+      status: 404,
+      message: "inst has not uploaded the courses"
+    }
+  }
+  return {
+    status: enrolled_courses.status,
+    message:enrolled_courses.message,
+    data: enrolled_courses.data
+  }
+}
+
 module.exports = {
   createGoogleUser,
   emailVerificationForRegister,
@@ -624,4 +665,5 @@ module.exports = {
   getOneInstCourseStudentsService,
   getEnrolledStudentsService,
   setStudentStatusService,
+  getStudentEnrolledCoursesOnInstructorService
 };
