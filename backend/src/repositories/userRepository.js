@@ -68,7 +68,13 @@ const findOneUser = async (id) => {
           enrolledCustomers.forEach((student) => {
             console.log(student);
             if (student.student_id === parseInt(id)) {
-              enrolled_courses_by_student.push(course.title);
+              enrolled_courses_by_student.push({
+                title: course.title,
+                learning_outcomes: course.learning_outcomes,
+                image: course.image,
+                amount: course.amount,
+                rating: course.rating
+              });
             }
           });
         }
