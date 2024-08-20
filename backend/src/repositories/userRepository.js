@@ -38,26 +38,55 @@ const findUser = async (filter) => {
     });
     return user ? user : null;
   } catch (error) {
-    console.error("Error fetching users:", error);
+    console.log("Error fetching users:", error);
     throw error;
   }
 };
 
 const findOneUser = async (id) => {
-  console.log("id in find one user method:", id)
+  console.log("id in find one user method:", id);
   try {
     const userRepository = dataSource.getRepository("User");
     const user = await userRepository.findOne({
-      where: {
-        id: id
-      }
+      where: { id: id }
     });
-    return user ? user : null;
+
+    if (!user) {
+      return null;
+    }
+
+    const coursesRepository = dataSource.getRepository("Course");
+    const courses = await coursesRepository.find();
+
+    const enrolled_courses_by_student = [];
+
+    if (courses && courses.length > 0) {
+      courses.forEach((course) => {
+        const enrolledCustomers = course.enrolled_customers;
+        
+        if (enrolledCustomers && enrolledCustomers.length > 0) {
+          enrolledCustomers.forEach((student) => {
+            console.log(student);
+            if (student.student_id === parseInt(id)) {
+              enrolled_courses_by_student.push({
+                title: course.title,
+                learning_outcomes: course.learning_outcomes,
+                image: course.image,
+                amount: course.amount,
+                rating: course.rating
+              });
+            }
+          });
+        }
+      });
+    }
+
+    return { ...user, enrolled_courses_by_student };
   } catch (err) {
     console.log("ERR:", err);
-    return
+    return null;
   }
-}
+};
 
 const updateUserByEmail = async (email, newData) => {
   try {

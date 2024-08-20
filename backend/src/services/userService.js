@@ -13,6 +13,7 @@ const courseRepository = dataSource.getRepository("Course");
 const {
   findAllCoursesByInst,
   findAllCourses,
+  studentEnrolledCoursesOnInstructorRepository,
 } = require("../repositories/courseRepository");
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
@@ -32,6 +33,7 @@ const {
   findOneByFilter,
 } = require("../repositories/purchasedCourseRepository");
 const { postPurchasedCourse } = require("./purchasedCourseService");
+const { findInstructorById, findInstructorByInstructorId } = require("../repositories/instructorRepository");
 // const { ConfigurationServicePlaceholders } = require("aws-sdk/lib/config_service_placeholders");
 
 // const emailVerificationForRegister = async (userInfo) => {
@@ -414,13 +416,31 @@ const ContactUser = async (userInfo) => {
 
 const getStudentsByInstructorIdService = async ({ instructorId }) => {
   try {
+
+    const isInstructor= await dataSource.getRepository("Instructor")
+    .findOne({where:{id:instructorId}});
+
+    if(!isInstructor){
+      return {
+        status: 404,
+        message:"instructor not found"
+      }
+    }
     const coursesByInst = await findAllCoursesByInst(instructorId);
     console.log("courses by a particular instructor:", coursesByInst);
 
+    if(!coursesByInst){
+      return {
+        status: 404,
+        message:"course has not been uploaded by the instructor so no enrolled students found"
+      }
+    }
+
+    
     let studentsIdEnrolled = [];
 
     coursesByInst.forEach((course) => {
-      if (course.enrolled_customers) {
+      if (course.enrolled_customers.length>0) {
         const enrolledCustomers = Array.isArray(course.enrolled_customers)
           ? course.enrolled_customers
           : JSON.parse(course.enrolled_customers);
@@ -431,13 +451,23 @@ const getStudentsByInstructorIdService = async ({ instructorId }) => {
       }
     });
 
+    if(studentsIdEnrolled.length==0){
+      return {
+        status: 404,
+        message:"no enrolled students yet",
+      };
+    }
     const studentDetailsPromises = studentsIdEnrolled.map((student_id) =>
       findUser({ id: student_id })
     );
     const studentsDetails = await Promise.all(studentDetailsPromises);
 
     console.log("students details:", studentsDetails);
-    return studentsDetails;
+    return {
+      status: 200,
+      message:"enrolled course fetched successfully",
+      data: studentsDetails
+    };
   } catch (err) {
     console.log(
       "Error fetching students based on a particular instructor id:",
@@ -576,6 +606,46 @@ const setStudentStatusService = async ({ id, status, status_desc }) => {
   }
 };
 
+const getStudentEnrolledCoursesOnInstructorService= async(instructor_id,student_id)=>{
+
+  const instructor= await findInstructorByInstructorId(instructor_id);
+  const student= await findUserById(student_id);
+  if(!instructor){
+    return {
+      status: 404,
+      message:"instructor not found. Please put instructor id",
+    }
+  }
+
+  if(!student){
+    return {
+      status: 404,
+      message:"student not found. Please put user id",
+    }
+  }
+
+  if(!instructor && !student){
+    return {
+      status: 404,
+      message:"student and instructor not found. Please put user id and instructor id"
+    }
+  }
+
+  const enrolled_courses= await studentEnrolledCoursesOnInstructorRepository(instructor_id,student_id);
+  
+  if(!enrolled_courses){
+    return{
+      status: 404,
+      message: "inst has not uploaded the courses"
+    }
+  }
+  return {
+    status: enrolled_courses.status,
+    message:enrolled_courses.message,
+    data: enrolled_courses.data
+  }
+}
+
 module.exports = {
   createGoogleUser,
   emailVerificationForRegister,
@@ -595,4 +665,5 @@ module.exports = {
   getOneInstCourseStudentsService,
   getEnrolledStudentsService,
   setStudentStatusService,
+  getStudentEnrolledCoursesOnInstructorService
 };

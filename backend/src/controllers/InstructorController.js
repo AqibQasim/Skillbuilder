@@ -40,10 +40,10 @@ const createInstructor = async (request, reply) => {
     logger.info("src > controllers > InstructorController > createInstructor");
     // const body = JSON.parse(request.body);
     logger.info(request?.body);
-    await createNewInstructor(request?.body);
+    const result= await createNewInstructor(request?.body);
     reply.send({
-      status: true,
-      message: "create instructor successfully ",
+      status: result.status,
+      message: result.message,
     });
   } catch (error) {
     logger.error(error.message);
@@ -81,7 +81,7 @@ const getAllInstructor = async (request, reply) => {
 const instructorDetail = async (request, reply) => {
   logger.info("src > InstructorController > instructorDetail ", request.params);
   try {
-    const {id} = request.query;
+    const {id} = request.params;
     console.log("data in request query:",id);
     const instructorData = await getInstructorById(id);
     console.log("Instructor Data:", instructorData);
@@ -134,8 +134,15 @@ const getOneInstByUser = async (request, reply) => {
 const getCoursesByInstructor = async (request, reply) => {
   try {
     const id = request?.params?.id;
+    const isUserAnInstructor= await getInstructorById(id);
+
+    if(!isUserAnInstructor){
+      reply.status(403).send({
+        message:"this user is not an instructor"
+      });
+    }
     const allCoursesByInstructor = await getCoursesByInstService(id);
-    reply.status(200).send(allCoursesByInstructor);
+    reply.status(allCoursesByInstructor.status).send(allCoursesByInstructor);
   } catch (e) {
     console.log("ERR:", e);
     reply.status(500).send("Some server side exception has occured");

@@ -84,11 +84,12 @@ const allCourses = async (request, reply) => {
     });
   }
 };
-
+ 
 const getCourseById = async (request, reply) => {
   try {
     const id = request.params.id;
     const data = await courseGetById(id);
+    console.log("[data to be sent]:", data);
     reply.send({
       status: true,
       message: "success",

@@ -3,14 +3,15 @@ const {
   instructorCreate,
   findByFilter,
   findByFilterTwo,
+  findInstructorById,
 } = require("../repositories/instructorRepository");
 const {
   findAllCourses,
   findAllCoursesByInst,
   updateCourse,
 } = require("../repositories/courseRepository");
+const { findUser } = require('../repositories/userRepository')
 const { logger } = require("../../logger");
-const { findUserById } = require("./userService");
 
 const { uploadSingle } = require("../mediators/s3Mediator");
 const { updateInstructor } = require("../repositories/instructorRepository");
@@ -65,10 +66,16 @@ const createNewInstructor = async (instructorData, filePath) => {
       skills,
       video_url,
     } = instructorData;
-    const user = await findUserById(id);
+    // const user = await findUserById(id);
+    const filter = {
+      id: user_id,
+    };
+    const result = await findUser(filter);
 
-    if (!user) {
-      throw new Error("user not exist");
+    if (!result) {
+      return {
+        message : "User doesn't exist"
+      }
     }
 
     const instructorPayload = {
@@ -81,13 +88,22 @@ const createNewInstructor = async (instructorData, filePath) => {
       created_at: new Date(),
     };
 
-    const isInstructorExist = await findByFilter({ where: { id: user_id } });
+    const isInstructorExist = await findInstructorById(user_id);
+    console.log("///////////////////////////////////////////////",isInstructorExist)
     if (isInstructorExist) {
-      throw new Error("Instructor already Exist");
+      return{
+        status: 400,
+        message:"instructor already exists"
+      }
     }
 
-    await instructorCreate({ ...instructorPayload, video_url });
-
+    const isInstructorCreated= await instructorCreate({ ...instructorPayload, video_url });
+    if(isInstructorCreated){
+      return{
+        status: 200,
+        message:"instructor created successfully"
+      }
+    }
     // }
   } catch (error) {
     console.log("message:", error);
@@ -118,7 +134,8 @@ const getInstructorById = async (id) => {
 const getOneInstByUserService = async (id) => {
   try {
     logger.info("src > instructorServices > getInstructorById");
-    const InstructorReceive = await findByFilterTwo({ where: { user_id: id } });
+    const InstructorReceive = await findInstructorById(id);
+    console.log(InstructorReceive);
     return InstructorReceive;
   } catch (error) {
     throw new Error(error);
@@ -127,12 +144,18 @@ const getOneInstByUserService = async (id) => {
 
 const getCoursesByInstService = async (id) => {
   try {
-    const InstructorReceive = await findAllCoursesByInst({
-      where: {
-        instructor_id: id,
-      },
-    });
-    return InstructorReceive;
+    const InstructorReceive = await findAllCoursesByInst(id);
+    if(InstructorReceive==null){
+      return {
+        status: 404,
+        message: "no courses uploaded yet"
+      }
+    }
+    return {
+      status: 200,
+      message:"courses fetched successfully",
+      data: InstructorReceive
+    };
   } catch (e) {
     throw new Error(error);
   }
