@@ -243,7 +243,7 @@ const uploadVideoToYT = async (instructorId, videoFilePath, user_role) => {
     console.log("youtube repsonse:", response);
 
     const videoId = response?.data?.id;
-    const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+    const videoUrl = `https://www.youtube.com/embed/${videoId}`;
     // fastify.log.info('Video uploaded:', response.data);
 
     // if (user_role === 'instructor') {

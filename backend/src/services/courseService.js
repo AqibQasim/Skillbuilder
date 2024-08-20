@@ -51,6 +51,7 @@ const createCourseWithDetails = async (requestedData) => {
     };
     let courseBasics = await createCourse(courseBasicsPayload);
     console.log("courseBasics: ", courseBasics);
+    return courseBasics;
     // await createCourseContent(modules, courseBasics.id);
   } catch (error) {
     logger.error("src > services > courseService > error");
@@ -166,9 +167,9 @@ const uploadCourseVideoToYT = async (courseId, videoFilePath, user_role) => {
       part: "snippet,status",
       requestBody: {
         snippet: {
-          title: "Instructor Introduction",
+          title: "Course Introductory Video",
           description:
-            "Describes about what instructor is all about, share details about his/her years of experience with you!",
+            "Describes about what course is all about, share details about course with you!",
           tags: ["education"],
           categoryId: "27",
         },
@@ -185,7 +186,7 @@ const uploadCourseVideoToYT = async (courseId, videoFilePath, user_role) => {
     console.log("youtube repsonse:", response);
 
     const videoId = response?.data?.id;
-    const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+    const videoUrl = `https://www.youtube.com/embed/${videoId}`;
     // fastify.log.info('Video uploaded:', response.data);
 
     // if (user_role === 'instructor') {
@@ -196,7 +197,7 @@ const uploadCourseVideoToYT = async (courseId, videoFilePath, user_role) => {
     //   else if (user_role === 'course') {
     //     if (courseId && videoId) {
     const updatedCourse = await updateCourse(courseId, videoUrl);
-    console.log("instructor", updatedCourse);
+    console.log("course", updatedCourse);
     //     }
     //   }
     // }

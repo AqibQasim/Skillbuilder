@@ -180,7 +180,7 @@ async function uploadInstVideo(request, reply) {
   const uploadDir = path.join(__dirname, "uploads");
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir);
-  }
+  } 
 
   for await (const part of parts) {
     if (part.file) {

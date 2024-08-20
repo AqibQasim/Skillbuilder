@@ -34,12 +34,13 @@ const postCourse = async (request, reply) => {
       const instructor_id = data.instructor_id;
       const isInstructorExist = await getInstructorById(instructor_id);
       if (isInstructorExist == null) {
-        throw new Error("instructor not exist");
+        throw new Error("course not exist");
       }
-      await createCourseWithDetails(data);
+      const result = await createCourseWithDetails(data);
       reply.send({
         status: true,
         message: "course has been created succesfully",
+        courseId : result?.id
       });
     } else {
       reply.code(400).send({

@@ -24,7 +24,7 @@ const instructorRoutes = async (fastify, options) => {
   fastify.get(
     "/instructor-detail",
     instructorDetailSchema,
-    instructorDetail
+    instructorDetail  
   );
  
   fastify.get("/get-courses-inst/:id", getCoursesByInstructor);
