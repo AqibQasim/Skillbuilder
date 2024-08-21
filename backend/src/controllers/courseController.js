@@ -11,6 +11,7 @@ const {
   uploadCourseVideoToYT,
   updateCoursePropertiesService,
   setCourseStatusService,
+  getAllStudentCourses,
 } = require("../services/courseService");
 const { getInstructorById } = require("../services/instructorService");
 const {
@@ -62,6 +63,34 @@ const allCourses = async (request, reply) => {
   try {
     console.log("req body:", request?.body);
     const courses = await getAllCourses();
+    console.log("courses:", courses);
+    // if (courses) {
+    return reply.status(200).send({
+      status: true,
+      message: "success",
+      data: courses,
+    });
+    // } else {
+    //   return reply.status(200).send({
+    //     status: true,
+    //     message: "success",
+    //     data: null,
+    //   });
+    // }
+  } catch (error) {
+    logger.error(error);
+    reply.status(500).send({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+
+const allStudentCourses = async (request, reply) => {
+  logger.info("src > controller > controllerALlrCourse ", request.body);
+  try {
+    console.log("req body:", request?.body);
+    const courses = await getAllStudentCourses();
     console.log("courses:", courses);
     // if (courses) {
     return reply.status(200).send({
@@ -449,4 +478,5 @@ module.exports = {
   uploadCourseContent,
   updateCourseProperties,
   setCourseStatus,
+  allStudentCourses
 };

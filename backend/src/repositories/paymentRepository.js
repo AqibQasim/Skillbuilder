@@ -3,4 +3,13 @@ const Payment = require('../entities/Payment');
 
 const paymentRepository = dataSource.getRepository("Payment");
 
-module.exports = paymentRepository;
+const createPayment = async (payload) => {
+    const create = await paymentRepository.create(payload);
+    const result = await paymentRepository.save(create);
+    return result;
+  };
+
+module.exports = {
+    createPayment,
+    paymentRepository
+};

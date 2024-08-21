@@ -18,14 +18,14 @@ async function completeCheckoutSessionService(session_id, order_id) {
             await orderRepository.save(order);
 
             // Create and save the payment information
-            const payment = paymentRepository.create({
+            const payment = paymentRepository.paymentRepository.create({
                 order_id: order.id,
                 payment_intent: session.payment_intent,
                 amount: session.amount_total / 100,
                 currency: session.currency,
                 status: session.payment_status,
             });
-            await paymentRepository.save(payment);
+            await paymentRepository.paymentRepository.save(payment);
         }
     } catch (error) {
         console.error("Error completing checkout session:", error);

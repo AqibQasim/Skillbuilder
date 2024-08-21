@@ -133,10 +133,10 @@ const userEnrollcourseSchema = {
       type: "object",
       properties: {
         student_id: { type: "number" },
-        course_id: { type: "number" },
+        courses: { type: "array" },
         filter: { type: "string" },
       },
-      required: ["student_id", "course_id", "filter"],
+      required: ["student_id", "courses", "filter"],
     },
   },
 };

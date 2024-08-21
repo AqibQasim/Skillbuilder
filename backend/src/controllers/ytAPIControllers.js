@@ -40,7 +40,7 @@ async function fetchVideos(request, reply) {
 
         reply.send(response.data);
     } catch (error) {
-        fastify.log.error('Error fetching videos', error);
+        console.error('Error fetching videos', error);
         reply.status(500).send('Error fetching videos');
     }
 }

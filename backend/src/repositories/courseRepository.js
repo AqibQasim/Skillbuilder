@@ -37,6 +37,29 @@ const findAllCourses = async () => {
   }
 };
 
+const findAllStudentCourses = async () => {
+  logger.info("src > Repository > fetchAllCourses");
+  try {
+    //const allCourses = await courseRepository.find();
+
+    const allCourses = await courseRepository
+      .createQueryBuilder("course")
+      .leftJoinAndSelect("course.instructor", "instructor")
+      .leftJoinAndSelect("instructor.user", "user")
+      .where("user.id=instructor.user_id")
+      .where("course.status!='declined'")
+      .andWhere("course.status!='suspended'")
+      .andWhere("course.status!='pending'")
+      .getMany();
+
+    return allCourses;
+  } catch (error) {
+    logger.error("Error : src > repositories > courseRepository");
+    logger.error(error.message);
+    throw new Error(error);
+  }
+};
+
 const findAllCoursesByInst = async (id) => {
   logger.info("src > Repository > fetchAllCourses");
   try {
@@ -346,5 +369,6 @@ module.exports = {
   setCourseStatusRepository,
   findOneCourseWithStudentID,
   studentEnrolledCoursesOnInstructorRepository,
+  findAllStudentCourses
   // saveReview
 };
