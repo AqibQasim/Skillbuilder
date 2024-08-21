@@ -4,11 +4,9 @@ const courseRepository = require("../repositories/courseRepository"); // Assumin
 const dataSource = require("../../Infrastructure/postgres");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
-const createOrder = async (userId, course) => {
-  let totalAmount = 0;
-  const totalPrice = course.price * course.quantity; // Assuming the amount property represents the price of the course
-  totalAmount += totalPrice;
-  console.log(userId);
+const createOrder= async (userId, totalAmount) => {
+
+    console.log(userId);
   const orderCreate = {
     user_id: userId,
     status: "pending",
@@ -20,23 +18,44 @@ const createOrder = async (userId, course) => {
 
   const order = orderRepository.create(orderCreate);
   console.log("order create >>>>>>>>>>>++++++++++++");
-  await orderRepository.save(order);
+  return await orderRepository.save(order);
+
+}
+
+const createOrderItem = async (order_id,course) => {
+    console.log("###########################",course)
+//   let totalAmount = 0;
+//   const totalPrice += (course.price * course.quantity); // Assuming the amount property represents the price of the course
+  //totalAmount += totalPrice;
+//   console.log(userId);
+//   const orderCreate = {
+//     user_id: userId,
+//     status: "pending",
+//     total_amount: totalAmount,
+//     currency: "usd",
+//   };
+
+//   console.log(orderCreate);
+
+//   const order = orderRepository.create(orderCreate);
+//   console.log("order create >>>>>>>>>>>++++++++++++");
+//   await orderRepository.save(order);
 
   const c = await dataSource
     .getRepository("Course")
     .findOneBy({ id: course.course_id }); // Using findOne to find a course by ID
   if (!c) {
-    return `Course with ID ${item.courseId} not found`;
+    return `Course with ID ${course.course_id} not found`;
   }
 
   const orderItem = orderItemRepository.create({
-    order_id: order.id,
+    order_id: order_id, //order.id
     course_id: course.course_id,
     quantity: course.quantity,
-    price: totalPrice,
+    price: course.price,
   });
   console.log("Order details +++++++++", orderItem);
-  await orderItemRepository.save(orderItem);
+  return await orderItemRepository.save(orderItem);
 };
 
 async function createOrderService(userId, items) {
@@ -130,4 +149,5 @@ module.exports = {
   getOrderService,
   initiateCheckoutService,
   createOrder,
+  createOrderItem
 };

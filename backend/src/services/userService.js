@@ -38,7 +38,11 @@ const {
   findInstructorByInstructorId,
 } = require("../repositories/instructorRepository");
 const { createPayment } = require("../repositories/paymentRepository");
-const { createOrderService, createOrder } = require("./orderService");
+const {
+  createOrderService,
+  createOrder,
+  createOrderItem,
+} = require("./orderService");
 // const { ConfigurationServicePlaceholders } = require("aws-sdk/lib/config_service_placeholders");
 
 // const emailVerificationForRegister = async (userInfo) => {
@@ -148,16 +152,22 @@ const sendEmailService = async (email, content, subject) => {
 
 const enrollInCourseService = async ({ student_id, courses, filter }) => {
   //let isCourseNotFound= false;
-  console.log(courses);
+  //console.log(courses);
+
+  let mess = null;
+  let totalAmount = 0;
 
   for (let course of courses) {
+    totalAmount += course.price;
     //console.log("///////////////////////////////",filter,course.course_id);
     const c = await findOneCourse(filter, course.course_id);
     if (!c) {
-      return {
+      mess = {
         status: 404,
-        message: "The requested course either doesn't exist or has been removed"
+        message:
+          "The requested course either doesn't exist or has been removed",
       };
+      break;
     } else {
       try {
         const isUserAlreadyPurchasedCourse = await findOneByFilter({
@@ -167,13 +177,14 @@ const enrollInCourseService = async ({ student_id, courses, filter }) => {
           },
         });
 
-        console.log("/////////////////////////",isUserAlreadyPurchasedCourse);
+        //console.log("/////////////////////////", isUserAlreadyPurchasedCourse);
 
         if (isUserAlreadyPurchasedCourse) {
-          return {
+          mess = {
             status: 400,
             message: "course already purchased",
           };
+          break;
         } else {
           const result = await postPurchasedCourse({
             userId: student_id,
@@ -181,23 +192,14 @@ const enrollInCourseService = async ({ student_id, courses, filter }) => {
           });
 
           if (result === "success") {
-            let enrolledCustomers = c.enrolled_customers?.length>0
-              ? c.enrolled_customers
-              : [];
+            let enrolledCustomers =
+              c.enrolled_customers?.length > 0 ? c.enrolled_customers : [];
             enrolledCustomers.push({ student_id: student_id });
             console.log("enrolled customers:", enrolledCustomers);
 
             //update enrolled customers
             c.enrolled_customers = enrolledCustomers;
             await courseRepository.save(c);
-
-            //update orders and order items table
-            const order_result= await createOrder(student_id,course);
-            return {
-              status: 200,
-              message: "enrolled in course successfully",
-              order_result,
-            };
           }
         }
       } catch (err) {
@@ -207,7 +209,36 @@ const enrollInCourseService = async ({ student_id, courses, filter }) => {
     }
   }
 
-  const confirmOrder = await createOrderService(student_id, courses);
+  
+
+  if (!mess) {
+    const order_result= await createOrder(student_id, totalAmount);
+
+    //console.log(courses)
+
+    for (let course of courses) {
+      console.log("\\\\\\\\\\\\\\\\\\\a",course);
+      //update orders and order items table
+      const order_item_result = await createOrderItem(order_result.id,course);
+      if (order_item_result.length == 0) {
+        mess = {
+          status: 500,
+          message: "order item result not inserted",
+        };
+        break;
+      }
+    }
+  }
+
+  if(!mess){
+    return {
+      status: 200,
+      message: "enrolled course successfully"
+    }
+  }
+
+  return mess;
+  //const confirmOrder = await createOrderService(student_id, courses);
 };
 
 // const enrollInCourseService = async ({ student_id, course_id, filter, amount }) => {

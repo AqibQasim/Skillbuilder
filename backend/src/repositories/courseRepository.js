@@ -343,6 +343,8 @@ const studentEnrolledCoursesOnInstructorRepository = async (
           image: course.image,
           learning_outcomes: course.learning_outcomes,
           amount: course.amount,
+          rating: course.rating,
+          id: course.id
         });
       }
     });
