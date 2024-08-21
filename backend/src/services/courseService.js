@@ -12,6 +12,7 @@ const {
   updateCourseByFilter,
   setCourseStatusRepository,
   findOneCourseWithStudentID,
+  findAllStudentCourses,
 } = require("../repositories/courseRepository");
 const { getAllReviews } = require("../repositories/courseReviewRepository.js");
 const { saveReview } = require("../repositories/courseReviewRepository.js");
@@ -155,6 +156,17 @@ const getAllCourses = async () => {
     return error;
   }
 };
+
+const getAllStudentCourses= async()=>{
+  try {
+    logger.info("src > services > getAllCourses");
+    const CoursesReceive = await findAllStudentCourses();
+    console.log(CoursesReceive);
+    return CoursesReceive;
+  } catch (error) {
+    return error;
+  }
+}
 
 const uploadCourseVideoToYT = async (courseId, videoFilePath, user_role) => {
   try {
@@ -316,4 +328,5 @@ module.exports = {
   uploadVideoToYT,
   updateCoursePropertiesService,
   setCourseStatusService,
+  getAllStudentCourses
 };

@@ -13,7 +13,8 @@ const {
   uploadCourseContent,
   updateCourseProperties,
   setCourseStatus,
-  getUserAuthorizedByYT
+  getUserAuthorizedByYT,
+  allStudentCourses,
 } = require("../controllers/courseController");
 const {
   createCourseSchema,
@@ -33,6 +34,7 @@ const coursesRoutes = async (fastify, options) => {
   fastify.post("/create-course", createCourseSchema, postCourse);
   fastify.get("/get-one-course/:id", getCourseByIdSchema, getCourseById);
   fastify.get("/all-courses", allCoursesSchema, allCourses);
+  fastify.get("/student/all-courses", allCoursesSchema, allStudentCourses);
   fastify.get("/courses-rating", coursesRatingSchema, coursesRating);
   fastify.get("/recent-courses", recentCoursesSchema, recentCourses);
   fastify.get("/course-details/:id", courseDetailsSchema, courseDetails);

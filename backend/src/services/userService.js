@@ -33,7 +33,16 @@ const {
   findOneByFilter,
 } = require("../repositories/purchasedCourseRepository");
 const { postPurchasedCourse } = require("./purchasedCourseService");
-const { findInstructorById, findInstructorByInstructorId } = require("../repositories/instructorRepository");
+const {
+  findInstructorById,
+  findInstructorByInstructorId,
+} = require("../repositories/instructorRepository");
+const { createPayment } = require("../repositories/paymentRepository");
+const {
+  createOrderService,
+  createOrder,
+  createOrderItem,
+} = require("./orderService");
 // const { ConfigurationServicePlaceholders } = require("aws-sdk/lib/config_service_placeholders");
 
 // const emailVerificationForRegister = async (userInfo) => {
@@ -141,62 +150,153 @@ const sendEmailService = async (email, content, subject) => {
   }
 };
 
-const enrollInCourseService = async ({ student_id, course_id, filter }) => {
-  try {
-    const course = await findOneCourse(filter, course_id);
+const enrollInCourseService = async ({ student_id, courses, filter }) => {
+  //let isCourseNotFound= false;
+  //console.log(courses);
 
-    console.log("course:", course);
-    console.log(
-      "JSON.parse(course?.enrolled_customers):",
-      course?.enrolled_customers
-    );
+  let mess = null;
+  let totalAmount = 0;
 
-    if (!course) {
-      return "The requested course either doesn't exist or has been removed";
+  for (let course of courses) {
+    totalAmount += course.price;
+    //console.log("///////////////////////////////",filter,course.course_id);
+    const c = await findOneCourse(filter, course.course_id);
+    if (!c) {
+      mess = {
+        status: 404,
+        message:
+          "The requested course either doesn't exist or has been removed",
+      };
+      break;
     } else {
-      let enrolledCustomers = course.enrolled_customers
-        ? course.enrolled_customers
-        : [];
-      enrolledCustomers.push({ student_id: student_id });
-      console.log("enrolled customers:", enrolledCustomers);
-
-      const isUserAlreadyPurchasedCourse = await findOneByFilter({
-        where: {
-          purchased_by: student_id,
-          course_id,
-        },
-      });
-
-      //console.log(isUserAlreadyPurchasedCourse);
-
-      if (isUserAlreadyPurchasedCourse != null) {
-        return {
-          status: 400,
-          message: "course already purchased",
-        };
-      } else {
-        const result = await postPurchasedCourse({
-          userId: student_id,
-          courseId: course_id,
+      try {
+        const isUserAlreadyPurchasedCourse = await findOneByFilter({
+          where: {
+            purchased_by: student_id,
+            course_id: course.course_id,
+          },
         });
 
-        if (result === "success") {
-          course.enrolled_customers = enrolledCustomers;
-          const course_result = await courseRepository.save(course);
-          console.log("updated result:", result);
-          return {
-            status: 200,
-            message: "enrolled in course successfully",
-            course_result
+        //console.log("/////////////////////////", isUserAlreadyPurchasedCourse);
+
+        if (isUserAlreadyPurchasedCourse) {
+          mess = {
+            status: 400,
+            message: "course already purchased",
           };
+          break;
+        } else {
+          const result = await postPurchasedCourse({
+            userId: student_id,
+            courseId: course.course_id,
+          });
+
+          if (result === "success") {
+            let enrolledCustomers =
+              c.enrolled_customers?.length > 0 ? c.enrolled_customers : [];
+            enrolledCustomers.push({ student_id: student_id });
+            console.log("enrolled customers:", enrolledCustomers);
+
+            //update enrolled customers
+            c.enrolled_customers = enrolledCustomers;
+            await courseRepository.save(c);
+          }
         }
+      } catch (err) {
+        console.log("ERROR while enrolling:", err);
+        return "ERROR while enrolling:", err;
       }
     }
-  } catch (err) {
-    console.log("ERROR while enrolling:", err);
-    return "ERROR while enrolling:", err;
   }
+
+  
+
+  if (!mess) {
+    const order_result= await createOrder(student_id, totalAmount);
+
+    //console.log(courses)
+
+    for (let course of courses) {
+      console.log("\\\\\\\\\\\\\\\\\\\a",course);
+      //update orders and order items table
+      const order_item_result = await createOrderItem(order_result.id,course);
+      if (order_item_result.length == 0) {
+        mess = {
+          status: 500,
+          message: "order item result not inserted",
+        };
+        break;
+      }
+    }
+  }
+
+  if(!mess){
+    return {
+      status: 200,
+      message: "enrolled course successfully"
+    }
+  }
+
+  return mess;
+  //const confirmOrder = await createOrderService(student_id, courses);
 };
+
+// const enrollInCourseService = async ({ student_id, course_id, filter, amount }) => {
+//   try {
+//     const course = await findOneCourse(filter, course_id);
+
+//     console.log("course:", course);
+//     console.log(
+//       "JSON.parse(course?.enrolled_customers):",
+//       course?.enrolled_customers
+//     );
+
+//     if (!course) {
+//       return "The requested course either doesn't exist or has been removed";
+//     } else {
+//       let enrolledCustomers = course.enrolled_customers
+//         ? course.enrolled_customers
+//         : [];
+//       enrolledCustomers.push({ student_id: student_id });
+//       console.log("enrolled customers:", enrolledCustomers);
+
+//       const isUserAlreadyPurchasedCourse = await findOneByFilter({
+//         where: {
+//           purchased_by: student_id,
+//           course_id,
+//         },
+//       });
+
+//       //console.log(isUserAlreadyPurchasedCourse);
+
+//       if (isUserAlreadyPurchasedCourse != null) {
+//         return {
+//           status: 400,
+//           message: "course already purchased",
+//         };
+//       } else {
+//         const result = await postPurchasedCourse({
+//           userId: student_id,
+//           courseId: course_id,
+//         });
+
+//         if (result === "success") {
+//           course.enrolled_customers = enrolledCustomers;
+//           const course_result = await courseRepository.save(course);
+//           console.log("updated result:", result);
+//           return {
+//             status: 200,
+//             message: "enrolled in course successfully",
+//             course_result
+//           };
+//         }
+//       }
+//     }
+//   } catch (err) {
+//     console.log("ERROR while enrolling:", err);
+//     return "ERROR while enrolling:", err;
+//   }
+// };
 
 const createUserAfterVerification = async (verificationToken) => {
   try {
@@ -416,31 +516,31 @@ const ContactUser = async (userInfo) => {
 
 const getStudentsByInstructorIdService = async ({ instructorId }) => {
   try {
+    const isInstructor = await dataSource
+      .getRepository("Instructor")
+      .findOne({ where: { id: instructorId } });
 
-    const isInstructor= await dataSource.getRepository("Instructor")
-    .findOne({where:{id:instructorId}});
-
-    if(!isInstructor){
+    if (!isInstructor) {
       return {
         status: 404,
-        message:"instructor not found"
-      }
+        message: "instructor not found",
+      };
     }
     const coursesByInst = await findAllCoursesByInst(instructorId);
     console.log("courses by a particular instructor:", coursesByInst);
 
-    if(!coursesByInst){
+    if (!coursesByInst) {
       return {
         status: 404,
-        message:"course has not been uploaded by the instructor so no enrolled students found"
-      }
+        message:
+          "course has not been uploaded by the instructor so no enrolled students found",
+      };
     }
 
-    
     let studentsIdEnrolled = [];
 
     coursesByInst.forEach((course) => {
-      if (course.enrolled_customers.length>0) {
+      if (course.enrolled_customers.length > 0) {
         const enrolledCustomers = Array.isArray(course.enrolled_customers)
           ? course.enrolled_customers
           : JSON.parse(course.enrolled_customers);
@@ -451,10 +551,10 @@ const getStudentsByInstructorIdService = async ({ instructorId }) => {
       }
     });
 
-    if(studentsIdEnrolled.length==0){
+    if (studentsIdEnrolled.length == 0) {
       return {
         status: 404,
-        message:"no enrolled students yet",
+        message: "no enrolled students yet",
       };
     }
     const studentDetailsPromises = studentsIdEnrolled.map((student_id) =>
@@ -465,8 +565,8 @@ const getStudentsByInstructorIdService = async ({ instructorId }) => {
     console.log("students details:", studentsDetails);
     return {
       status: 200,
-      message:"enrolled course fetched successfully",
-      data: studentsDetails
+      message: "enrolled course fetched successfully",
+      data: studentsDetails,
     };
   } catch (err) {
     console.log(
@@ -606,45 +706,51 @@ const setStudentStatusService = async ({ id, status, status_desc }) => {
   }
 };
 
-const getStudentEnrolledCoursesOnInstructorService= async(instructor_id,student_id)=>{
-
-  const instructor= await findInstructorByInstructorId(instructor_id);
-  const student= await findUserById(student_id);
-  if(!instructor){
+const getStudentEnrolledCoursesOnInstructorService = async (
+  instructor_id,
+  student_id
+) => {
+  const instructor = await findInstructorByInstructorId(instructor_id);
+  const student = await findUserById(student_id);
+  if (!instructor) {
     return {
       status: 404,
-      message:"instructor not found. Please put instructor id",
-    }
+      message: "instructor not found. Please put instructor id",
+    };
   }
 
-  if(!student){
+  if (!student) {
     return {
       status: 404,
-      message:"student not found. Please put user id",
-    }
+      message: "student not found. Please put user id",
+    };
   }
 
-  if(!instructor && !student){
+  if (!instructor && !student) {
     return {
       status: 404,
-      message:"student and instructor not found. Please put user id and instructor id"
-    }
+      message:
+        "student and instructor not found. Please put user id and instructor id",
+    };
   }
 
-  const enrolled_courses= await studentEnrolledCoursesOnInstructorRepository(instructor_id,student_id);
-  
-  if(!enrolled_courses){
-    return{
+  const enrolled_courses = await studentEnrolledCoursesOnInstructorRepository(
+    instructor_id,
+    student_id
+  );
+
+  if (!enrolled_courses) {
+    return {
       status: 404,
-      message: "inst has not uploaded the courses"
-    }
+      message: "inst has not uploaded the courses",
+    };
   }
   return {
     status: enrolled_courses.status,
-    message:enrolled_courses.message,
-    data: enrolled_courses.data
-  }
-}
+    message: enrolled_courses.message,
+    data: enrolled_courses.data,
+  };
+};
 
 module.exports = {
   createGoogleUser,
@@ -665,5 +771,5 @@ module.exports = {
   getOneInstCourseStudentsService,
   getEnrolledStudentsService,
   setStudentStatusService,
-  getStudentEnrolledCoursesOnInstructorService
+  getStudentEnrolledCoursesOnInstructorService,
 };
