@@ -254,7 +254,7 @@ const uploadVideoToYT = async (instructorId, videoFilePath, user_role) => {
           categoryId: "27",
         },
         status: {
-          privacyStatus: "private",
+          privacyStatus: "unlisted",
         },
       },
       media: {

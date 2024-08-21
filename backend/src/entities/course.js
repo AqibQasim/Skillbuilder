@@ -53,7 +53,7 @@ module.exports = new EntitySchema({
     enrolled_customers: {
       type: "jsonb",
       default: [],
-    },
+    }, 
     image: {
       type: "varchar",
     },
@@ -62,7 +62,7 @@ module.exports = new EntitySchema({
       precision: 3,
       scale: 1,
       nullable: true,
-    },
+    }, 
     created_at: {
       type: "timestamp with time zone",
     },

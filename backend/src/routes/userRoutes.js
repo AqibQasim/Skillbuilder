@@ -89,12 +89,8 @@ const userRoutes = async (fastify, options) => {
   fastify.get("/otp-verification", otpVerificationSchema, otpVerification);
   fastify.post("/change-password", changePasswordSchema, changePassword);
 
-  //update profile
   fastify.put("/update-profile", updateProfileSchema, profileUpdateHandler);
 
-  // fastify.post("/update-profile", profileUpdateHandler);
-
-  //Contact Us
   fastify.post("/contact-us", contactUsSchema, ContactUS);
   fastify.post("/send-email", sendMailSchema, sendEmail);
   fastify.put("/enroll-in-course", userEnrollcourseSchema, enrollInCourse);

@@ -36,6 +36,8 @@ const instructorRoutes = async (fastify, options) => {
   fastify.get("/check-payment-rec", checkPaymentRecord);
 
   fastify.get("/get-inst-by-user/:id", getOneInstByUser);
+
+  // fastify.get("/")
 };
 
 module.exports = instructorRoutes;
