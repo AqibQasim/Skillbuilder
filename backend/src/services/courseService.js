@@ -189,20 +189,9 @@ const uploadCourseVideoToYT = async (courseId, videoFilePath, user_role) => {
 
     const videoId = response?.data?.id;
     const videoUrl = `https://www.youtube.com/embed/${videoId}`;
-    // fastify.log.info('Video uploaded:', response.data);
 
-    // if (user_role === 'instructor') {
-    //   if (instructorId && videoId) {
-    //     const updatedInstructor = await updateInstructor(instructorId, videoUrl);
-    //     console.log('instructor', updatedInstructor);
-    //   }
-    //   else if (user_role === 'course') {
-    //     if (courseId && videoId) {
     const updatedCourse = await updateCourse(courseId, videoUrl);
     console.log("course", updatedCourse);
-    //     }
-    //   }
-    // }
     return {
       message: "The introductory video has been successfully posted.",
       video_url: videoUrl,

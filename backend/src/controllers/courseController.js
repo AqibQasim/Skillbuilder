@@ -25,6 +25,8 @@ const path = require("path");
 const { v4: uuidv4 } = require("uuid");
 const { uploadVideoToYT } = require("../services/courseService");
 const SimpleQueue = require("../utils/SimpleQueue");
+const { serviceAccConfig } = require("../utils/serviceAccAccess");
+const { grantAccess } = require("../utils/grantAccessToYt");
 
 const postCourse = async (request, reply) => {
   try {
@@ -40,7 +42,7 @@ const postCourse = async (request, reply) => {
       reply.send({
         status: true,
         message: "course has been created succesfully",
-        courseId : result?.id
+        courseId: result?.id
       });
     } else {
       reply.code(400).send({
@@ -84,7 +86,7 @@ const allCourses = async (request, reply) => {
     });
   }
 };
- 
+
 const getCourseById = async (request, reply) => {
   try {
     const id = request.params.id;
@@ -434,6 +436,19 @@ const setCourseStatus = async (request, response) => {
   }
 };
 
+const getUserAuthorizedByYT = async (request, response) => {
+  try {
+    const { course_id, student_id } = request?.body;
+    const serviceAccConfigResult = await serviceAccConfig(course_id, student_id);
+    if (serviceAccConfigResult){
+      const result = await grantAccess(course_id);
+    }
+  } catch (err) {
+    console.log("ERROR OCCURED WHILE HANDLING THE ROUTE:", err);
+    response.status(500).send("ERROR OCCURED WHILE HANDLING THE ROUTE");
+  }
+}
+
 module.exports = {
   postCourse,
   allCourses,
@@ -449,4 +464,5 @@ module.exports = {
   uploadCourseContent,
   updateCourseProperties,
   setCourseStatus,
+  getUserAuthorizedByYT
 };

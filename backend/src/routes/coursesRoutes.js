@@ -13,6 +13,7 @@ const {
   uploadCourseContent,
   updateCourseProperties,
   setCourseStatus,
+  getUserAuthorizedByYT
 } = require("../controllers/courseController");
 const {
   createCourseSchema,
@@ -43,7 +44,7 @@ const coursesRoutes = async (fastify, options) => {
   fastify.post("/upload-course-content", uploadCourseContent);
   fastify.put("/set-course-prop", updatecourseSchema, updateCourseProperties);
   fastify.put("/set-course-status", courseStatusSchema, setCourseStatus);
-  // fastify.post("")
+  fastify.post("/authorize-user-yt", getUserAuthorizedByYT);
 };
 
 module.exports = coursesRoutes;
