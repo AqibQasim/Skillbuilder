@@ -178,6 +178,7 @@ const checkPaymentRecord = async (request,reply) => {
 
 
 async function uploadInstVideo(request, reply) {
+  console.log("API IS HITTTINGGGGGGGG");
   const parts = await request.parts();
   let fieldsData = {};
   let videoFilePath = null;
@@ -211,7 +212,7 @@ async function uploadInstVideo(request, reply) {
 
         console.log(`File [${part.fieldname}] Finished: ${videoFilePath}`);
         break;
-      }
+      } 
     } else {
       if (part.fieldname === "instructorId") {
         console.log("part.fieldname:", part.fieldname);
