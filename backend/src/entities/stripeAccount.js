@@ -18,5 +18,23 @@ module.exports = new EntitySchema({
         account_reg_id: {
             type : "varchar"
         }
+    },
+    relations:{
+        user:{
+            target:"User",
+            type:"one-to-one",
+            joinColumn:{
+                name:"user_id",
+                referencedColumnName:"id"
+            }
+        },
+        instructor:{
+            target:"Instructor",
+            type:"one-to-one",
+            joinColumn:{
+                name:"instructor_id",
+                referencedColumnName:"id"
+            }
+        }
     }
 });

@@ -169,9 +169,9 @@ const stripeAccRegisterService = async ({
   try {
     const payload = { user_id, instructor_id, account_reg_id };
 
-    const InstructorReceive = await findByFilter({
-      where: { id: instructor_id },
-    });
+    const InstructorReceive = await findByFilter(
+     { id: instructor_id },
+    );
     if (InstructorReceive) {
       const checkAlreadyExists = await checkIfAccounRegIdExists(instructor_id);
       if (checkAlreadyExists?.length === 0) {
