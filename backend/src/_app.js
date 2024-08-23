@@ -13,7 +13,8 @@ const coursesRoutes = require("./routes/coursesRoutes");
 const instructorRoutes = require("./routes/instructorRoutes");
 const uploadOnS3Routes = require("./routes/s3Route"); 
 const ytRoutes = require('../src/routes/youtubeAPIroutes');
-const {authUrl} = require('../Infrastructure/youtubeConfig')
+const {authUrl} = require('../Infrastructure/youtubeConfig');
+const purchsedCoursesRoutes = require("./routes/purchasedCourseRoutes");
 require("./Authentication/googleAuth");
 
 
@@ -22,8 +23,8 @@ const startServer = async () => {
 
   console.log("authURL:", authUrl);
   app.register(require("@fastify/cors"), {
-    // origin: "http://localhost:3001",
-    origin: "*",
+    origin: "http://localhost:3000",
+    // origin: "*",
     methods: ["GET", "POST", "DELETE", "PUT"],
   });
 
@@ -77,6 +78,7 @@ const startServer = async () => {
   app.register(instructorRoutes);
   app.register(uploadOnS3Routes);
   app.register(ytRoutes);
+  app.register(purchsedCoursesRoutes);
 
   try {
     await dataSource

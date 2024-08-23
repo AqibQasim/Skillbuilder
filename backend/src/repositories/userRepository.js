@@ -39,26 +39,55 @@ const findUser = async (filter) => {
     });
     return user ? user : null;
   } catch (error) {
-    console.error("Error fetching users:", error);
+    console.log("Error fetching users:", error);
     throw error;
   }
 };
 
 const findOneUser = async (id) => {
-  console.log("id in find one user method:", id)
+  console.log("id in find one user method:", id);
   try {
     const userRepository = dataSource.getRepository("User");
     const user = await userRepository.findOne({
-      where: {
-        id: id
-      }
+      where: { id: id }
     });
-    return user ? user : null;
-  } catch(err){
+
+    if (!user) {
+      return null;
+    }
+
+    const coursesRepository = dataSource.getRepository("Course");
+    const courses = await coursesRepository.find();
+
+    const enrolled_courses_by_student = [];
+
+    if (courses && courses.length > 0) {
+      courses.forEach((course) => {
+        const enrolledCustomers = course.enrolled_customers;
+        
+        if (enrolledCustomers && enrolledCustomers.length > 0) {
+          enrolledCustomers.forEach((student) => {
+            console.log(student);
+            if (student.student_id === parseInt(id)) {
+              enrolled_courses_by_student.push({
+                title: course.title,
+                learning_outcomes: course.learning_outcomes,
+                image: course.image,
+                amount: course.amount,
+                rating: course.rating
+              });
+            }
+          });
+        }
+      });
+    }
+
+    return { ...user, enrolled_courses_by_student };
+  } catch (err) {
     console.log("ERR:", err);
-    return
+    return null;
   }
-}
+};
 
 const AddSSOUser = async (data) => {
   console.log("data in AddSSOUser method:", data);
@@ -105,6 +134,7 @@ const AddSSOUser = async (data) => {
   }
 };
 
+
 const updateUserByEmail = async (email, newData) => {
   try {
     console.log("email", email);
@@ -129,7 +159,7 @@ const updateUserByEmail = async (email, newData) => {
           message: "Password does not match"
         }
       } else {
-        user.password = await bcrypt.hash(newData.new_password,10);
+        user.password = await bcrypt.hash(newData.new_password, 10);
         //let update = await userRepository.merge(user, {password: new_password});
         let updatedUser = await userRepository.save(user);
         return {
@@ -199,10 +229,34 @@ const UserContact = async (userInfo) => {
   }
 };
 
+const setUserStatusRepository = async (requestedUser, enrolledStudents, id, status, status_desc) => {
+  const userExist = await userRepository.findOne({
+    where: { id: id },
+  });
 
+  if (!userExist) {
+    return 'No such student exists!';
+  };
 
+  enrolledStudents.forEach((stud) => {
+    console.log("[student]:", stud);
+    if (stud?.id === id) {
+      requestedUser = stud
+    }
+  }); 
 
+  if (!requestedUser) {
+    console.log("[REQUESTED USER IS NOT ENROLLED IN ANY COURSE]");
+    return "[REQUESTED USER IS NOT ENROLLED IN ANY COURSE]"
+  } else {
+    console.log("[REQUESTED USER THAT IS ENROLLED IN A COURSE]:", requestedUser);
+    Object.assign(userExist, {status: status, status_desc: status_desc });
 
+    const updatedCourse = await userRepository.save(userExist);
+    console.log("[UPDATED COURSE]:", updatedCourse);
+    return "[UPDATED COURSE]:", updatedCourse
+  }
+}
 
 
 module.exports = {
@@ -213,5 +267,6 @@ module.exports = {
   updateUserById,
   UserContact,
   findOneUser,
-  AddSSOUser
+  AddSSOUser,
+  setUserStatusRepository
 };

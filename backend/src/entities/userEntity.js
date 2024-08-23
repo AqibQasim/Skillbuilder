@@ -10,6 +10,15 @@ module.exports = new EntitySchema({
       type: "int",
       generated: true,
     },
+    status: {
+      type: "enum",
+      enum: ["suspended","active"],
+      nullable: true
+    },
+    status_desc: {
+      type: "varchar",
+      nullable: true
+    },
     profile: {
       type: "varchar",
       nullable: true,
@@ -93,9 +102,5 @@ module.exports = new EntitySchema({
     }
 
   },
-// =======
-  //     joinColumn: true
-  //   }
-  // }
-// >>>>>>> c25baf8
+
 });

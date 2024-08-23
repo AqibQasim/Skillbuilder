@@ -7,10 +7,15 @@ const {
   updateUserById,
   findOneUser,
   findOneUserByEmail,
+  setUserStatusRepository,
 } = require("../repositories/userRepository");
 const dataSource = require("../../Infrastructure/postgres");
 const courseRepository = dataSource.getRepository("Course");
-const { findAllCoursesByInst } = require('../repositories/courseRepository')
+const {
+  findAllCoursesByInst,
+  findAllCourses,
+  studentEnrolledCoursesOnInstructorRepository,
+} = require("../repositories/courseRepository");
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -24,6 +29,21 @@ const {
 const { findOneCourse } = require("../repositories/courseRepository");
 const { EntityRepository } = require("typeorm");
 const { forEach } = require("lodash");
+const { checkIfUserIsStudent } = require("../utils/checkIfUserIsStudent");
+const {
+  findOneByFilter,
+} = require("../repositories/purchasedCourseRepository");
+const { postPurchasedCourse } = require("./purchasedCourseService");
+const {
+  findInstructorById,
+  findInstructorByInstructorId,
+} = require("../repositories/instructorRepository");
+const { createPayment } = require("../repositories/paymentRepository");
+const {
+  createOrderService,
+  createOrder,
+  createOrderItem,
+} = require("./orderService");
 // const { ConfigurationServicePlaceholders } = require("aws-sdk/lib/config_service_placeholders");
 
 // const emailVerificationForRegister = async (userInfo) => {
@@ -96,12 +116,9 @@ const transporter = nodemailer.createTransport({
 
 const sendEmailService = async (email, content, subject) => {
   try {
-
-    const checkIfUserIsInDb = await findUser(
-      {
-        email: email
-      }
-    );
+    const checkIfUserIsInDb = await findUser({
+      email: email,
+    });
 
     console.log("User found:", checkIfUserIsInDb);
 
@@ -120,48 +137,167 @@ const sendEmailService = async (email, content, subject) => {
       logger.info("Email sent successfully.");
       return {
         userId: checkIfUserIsInDb?.id,
-        message: "An email has been sent to the entered email. Please verify if this is your account."
-      }
+        message:
+          "An email has been sent to the entered email. Please verify if this is your account.",
+      };
     } else {
       return {
-        message: "User with this email doesn't exist."
-      }
+        message: "User with this email doesn't exist.",
+      };
     }
   } catch (error) {
-
     logger.error("Error sending verification email:", error);
-    return "Unsuccessful to send a verification mail."
+    return "Unsuccessful to send a verification mail.";
   }
 };
 
-const enrollInCourseService = async ({ student_id, course_id, filter }) => {
-  try {
-    const course = await findOneCourse(
-      filter,
-      course_id
-    );
+const enrollInCourseService = async ({ student_id, courses, filter }) => {
+  //let isCourseNotFound= false;
+  //console.log(courses);
 
-    console.log("course:", course);
-    console.log("JSON.parse(course?.enrolled_customers):", course?.enrolled_customers)
+  let mess = null;
+  let totalAmount = 0;
 
-    if (!course) {
-      return "The requested course either doesn't exist or has been removed";
+  for (let course of courses) {
+    totalAmount += course.price;
+    //console.log("///////////////////////////////",filter,course.course_id);
+    const c = await findOneCourse(filter, course.course_id);
+    if (!c) {
+      mess = {
+        status: 404,
+        message:
+          "The requested course either doesn't exist or has been removed",
+      };
+      break;
     } else {
-      let enrolledCustomers = course.enrolled_customers ? course.enrolled_customers : [];
-      enrolledCustomers.push({student_id: student_id});
-      console.log("enrolled customers:", enrolledCustomers);
+      try {
+        const isUserAlreadyPurchasedCourse = await findOneByFilter({
+          where: {
+            purchased_by: student_id,
+            course_id: course.course_id,
+          },
+        });
 
-      course.enrolled_customers = enrolledCustomers;
-      const result = await courseRepository.save(course); 
-      console.log("updated result:", result);
-      return result;
+        //console.log("/////////////////////////", isUserAlreadyPurchasedCourse);
+
+        if (isUserAlreadyPurchasedCourse) {
+          mess = {
+            status: 400,
+            message: "course already purchased",
+          };
+          break;
+        } else {
+          const result = await postPurchasedCourse({
+            userId: student_id,
+            courseId: course.course_id,
+          });
+
+          if (result === "success") {
+            let enrolledCustomers =
+              c.enrolled_customers?.length > 0 ? c.enrolled_customers : [];
+            enrolledCustomers.push({ student_id: student_id });
+            console.log("enrolled customers:", enrolledCustomers);
+
+            //update enrolled customers
+            c.enrolled_customers = enrolledCustomers;
+            await courseRepository.save(c);
+          }
+        }
+      } catch (err) {
+        console.log("ERROR while enrolling:", err);
+        return "ERROR while enrolling:", err;
+      }
     }
-  } catch (err) {
-    console.log("ERROR while enrolling:", err);
-    return "ERROR while enrolling:", err
   }
-}
 
+  
+
+  if (!mess) {
+    const order_result= await createOrder(student_id, totalAmount);
+
+    //console.log(courses)
+
+    for (let course of courses) {
+      console.log("\\\\\\\\\\\\\\\\\\\a",course);
+      //update orders and order items table
+      const order_item_result = await createOrderItem(order_result.id,course);
+      if (order_item_result.length == 0) {
+        mess = {
+          status: 500,
+          message: "order item result not inserted",
+        };
+        break;
+      }
+    }
+  }
+
+  if(!mess){
+    return {
+      status: 200,
+      message: "enrolled course successfully"
+    }
+  }
+
+  return mess;
+  //const confirmOrder = await createOrderService(student_id, courses);
+};
+
+// const enrollInCourseService = async ({ student_id, course_id, filter, amount }) => {
+//   try {
+//     const course = await findOneCourse(filter, course_id);
+
+//     console.log("course:", course);
+//     console.log(
+//       "JSON.parse(course?.enrolled_customers):",
+//       course?.enrolled_customers
+//     );
+
+//     if (!course) {
+//       return "The requested course either doesn't exist or has been removed";
+//     } else {
+//       let enrolledCustomers = course.enrolled_customers
+//         ? course.enrolled_customers
+//         : [];
+//       enrolledCustomers.push({ student_id: student_id });
+//       console.log("enrolled customers:", enrolledCustomers);
+
+//       const isUserAlreadyPurchasedCourse = await findOneByFilter({
+//         where: {
+//           purchased_by: student_id,
+//           course_id,
+//         },
+//       });
+
+//       //console.log(isUserAlreadyPurchasedCourse);
+
+//       if (isUserAlreadyPurchasedCourse != null) {
+//         return {
+//           status: 400,
+//           message: "course already purchased",
+//         };
+//       } else {
+//         const result = await postPurchasedCourse({
+//           userId: student_id,
+//           courseId: course_id,
+//         });
+
+//         if (result === "success") {
+//           course.enrolled_customers = enrolledCustomers;
+//           const course_result = await courseRepository.save(course);
+//           console.log("updated result:", result);
+//           return {
+//             status: 200,
+//             message: "enrolled in course successfully",
+//             course_result
+//           };
+//         }
+//       }
+//     }
+//   } catch (err) {
+//     console.log("ERROR while enrolling:", err);
+//     return "ERROR while enrolling:", err;
+//   }
+// };
 
 const createUserAfterVerification = async (verificationToken) => {
   try {
@@ -230,15 +366,21 @@ const getOneUserService = async (id) => {
   try {
     let user = await findOneUser(id);
     if (user) {
-      console.log('User:', user);
-      return user;
+      console.log("User:", user);
+      return {
+        status: 200,
+        message: user,
+      };
     } else {
-      return 'There is no such user.'
+      return {
+        status: 400,
+        message: "User not found",
+      };
     }
   } catch (e) {
     console.log("ERR:", e);
   }
-}
+};
 
 // const getOneUserByEmailService = async (email) => {
 //   try {
@@ -387,31 +529,243 @@ const ContactUser = async (userInfo) => {
   }
 };
 
-const getStudentsByInstructorIdService = async ({instructorId}) => {
-  try{
-      const coursesByInst = await findAllCoursesByInst(instructorId);
-      console.log("courses by a particular instructor:",coursesByInst);
+const getStudentsByInstructorIdService = async ({ instructorId }) => {
+  try {
+    const isInstructor = await dataSource
+      .getRepository("Instructor")
+      .findOne({ where: { id: instructorId } });
 
-      let studentsIdEnrolled = [];
+    if (!isInstructor) {
+      return {
+        status: 404,
+        message: "instructor not found",
+      };
+    }
+    const coursesByInst = await findAllCoursesByInst(instructorId);
+    console.log("courses by a particular instructor:", coursesByInst);
 
-    coursesByInst.forEach(course => {
-      if (course.enrolled_customers) {
-        const enrolledCustomers = Array.isArray(course.enrolled_customers) ? course.enrolled_customers : JSON.parse(course.enrolled_customers);
-        const studentIds = enrolledCustomers.map(customer => customer.student_id);
+    if (!coursesByInst) {
+      return {
+        status: 404,
+        message:
+          "course has not been uploaded by the instructor so no enrolled students found",
+      };
+    }
+
+    let studentsIdEnrolled = [];
+
+    coursesByInst.forEach((course) => {
+      if (course.enrolled_customers.length > 0) {
+        const enrolledCustomers = Array.isArray(course.enrolled_customers)
+          ? course.enrolled_customers
+          : JSON.parse(course.enrolled_customers);
+        const studentIds = enrolledCustomers.map(
+          (customer) => customer.student_id
+        );
         studentsIdEnrolled = [...studentsIdEnrolled, ...studentIds];
       }
     });
 
-    const studentDetailsPromises = studentsIdEnrolled.map(student_id => findUser({ id: student_id }));
+    if (studentsIdEnrolled.length == 0) {
+      return {
+        status: 404,
+        message: "no enrolled students yet",
+      };
+    }
+    const studentDetailsPromises = studentsIdEnrolled.map((student_id) =>
+      findUser({ id: student_id })
+    );
+    const studentsDetails = await Promise.all(studentDetailsPromises);
+
+    console.log("students details:", studentsDetails);
+    return {
+      status: 200,
+      message: "enrolled course fetched successfully",
+      data: studentsDetails,
+    };
+  } catch (err) {
+    console.log(
+      "Error fetching students based on a particular instructor id:",
+      err
+    );
+    return "Error fetching students based on a particular instructor id:", err;
+  }
+};
+
+async function getEnrolledStudentsService() {
+  try {
+    const courses = await findAllCourses();
+    let studentsIdEnrolled = [];
+
+    courses.forEach((course) => {
+      if (course.enrolled_customers) {
+        const enrolledCustomers = Array.isArray(course.enrolled_customers)
+          ? course.enrolled_customers
+          : JSON.parse(course.enrolled_customers);
+        const studentIds = enrolledCustomers.map(
+          (customer) => customer.student_id
+        );
+        studentsIdEnrolled = [...studentsIdEnrolled, ...studentIds];
+      }
+    });
+
+    const studentDetailsPromises = studentsIdEnrolled.map((student_id) =>
+      findUser({ id: student_id })
+    );
     const studentsDetails = await Promise.all(studentDetailsPromises);
 
     console.log("students details:", studentsDetails);
     return studentsDetails;
-  } catch(err){
-    console.log("Error fetching students based on a particular instructor id:", err);
+  } catch (err) {
+    console.log(
+      "Error fetching students based on a particular instructor id:",
+      err
+    );
     return "Error fetching students based on a particular instructor id:", err;
   }
 }
+
+const getOneInstCourseStudentsService = async ({
+  instructor_id,
+  course_id,
+}) => {
+  try {
+    console.log("request query: ", { instructor_id, course_id });
+    const coursesByInst = await findAllCoursesByInst(instructor_id);
+    console.log("courses by a particular instructor:", coursesByInst);
+
+    let foundCourse;
+    coursesByInst.forEach((course) => {
+      console.log(
+        "condition : course_id === course?.id",
+        course_id == course?.id
+      );
+      if (course_id == course?.id) {
+        foundCourse = course;
+        console.log(
+          "found course:",
+          foundCourse,
+          "\n\nand its students are:",
+          coursesByInst?.enrolled_customers
+        );
+      } else {
+        return {
+          status: 400,
+          message: "Course doesn't exist.",
+        };
+      }
+    });
+
+    if (foundCourse && foundCourse?.enrolled_customers) {
+      console.log(
+        "found course:",
+        foundCourse,
+        "\n\nand its students are:",
+        coursesByInst?.enrolled_customers
+      );
+      return {
+        status: 200,
+        message: foundCourse?.enrolled_customers,
+      };
+    }
+  } catch (err) {
+    console.log(
+      "Error fetching students based on a particular instructor id and a particular course:",
+      err
+    );
+    return (
+      "Error fetching students based on a particular instructor id and a particular course:",
+      err
+    );
+  }
+};
+
+// setStudentStatusService
+
+const setStudentStatusService = async ({ id, status, status_desc }) => {
+  try {
+    // const enrolledStudents = await checkIfUserIsStudent({id});
+    // console.log("enrolled students:", enrolledStudents);
+
+    const enrolledStudents = await getEnrolledStudentsService();
+    console.log("enrolled students:", enrolledStudents);
+    let requestedUser;
+
+    const result = await findOneUser(id);
+    if (result?.id) {
+      const declineResult = await setUserStatusRepository(
+        requestedUser,
+        enrolledStudents,
+        id,
+        status,
+        status_desc
+      );
+      console.log("[RESULT OF DECLINING]:", declineResult);
+      return {
+        message: declineResult,
+        status: 200,
+      };
+    } else {
+      console.log("[STUDENT NOT FOUND]");
+      return {
+        message: "[STUDENT NOT FOUND]",
+        status: 400,
+      };
+    }
+  } catch (err) {
+    console.log("[SOME ERROR OCCURED WHILE CHANGING THE STATUS]:", err);
+    return {
+      message: "[SOME ERROR OCCURED WHILE CHANGING THE STATUS]",
+      status: 500,
+    };
+  }
+};
+
+const getStudentEnrolledCoursesOnInstructorService = async (
+  instructor_id,
+  student_id
+) => {
+  const instructor = await findInstructorByInstructorId(instructor_id);
+  const student = await findUserById(student_id);
+  if (!instructor) {
+    return {
+      status: 404,
+      message: "instructor not found. Please put instructor id",
+    };
+  }
+
+  if (!student) {
+    return {
+      status: 404,
+      message: "student not found. Please put user id",
+    };
+  }
+
+  if (!instructor && !student) {
+    return {
+      status: 404,
+      message:
+        "student and instructor not found. Please put user id and instructor id",
+    };
+  }
+
+  const enrolled_courses = await studentEnrolledCoursesOnInstructorRepository(
+    instructor_id,
+    student_id
+  );
+
+  if (!enrolled_courses) {
+    return {
+      status: 404,
+      message: "inst has not uploaded the courses",
+    };
+  }
+  return {
+    status: enrolled_courses.status,
+    message: enrolled_courses.message,
+    data: enrolled_courses.data,
+  };
+};
 
 module.exports = {
   createGoogleUser,
@@ -428,5 +782,9 @@ module.exports = {
   getOneUserService,
   sendEmailService,
   enrollInCourseService,
-  getStudentsByInstructorIdService
+  getStudentsByInstructorIdService,
+  getOneInstCourseStudentsService,
+  getEnrolledStudentsService,
+  setStudentStatusService,
+  getStudentEnrolledCoursesOnInstructorService,
 };

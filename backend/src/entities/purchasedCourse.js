@@ -25,13 +25,18 @@ module.exports = new EntitySchema({
       target: "User",
       type: "many-to-one", 
       joinColumn: {
-        name: "user_id"
+        name: "purchased_by",
+        referencedColumnName: "id"
       },
     },
-    purchased_courses: {
+    course: {
       target: "Course",
-      type: "one-to-many",
-      inverseSide: "purchased_courses",
+      type: "many-to-one",
+      // inverseSide: "courses",
+      joinColumn: {
+        name: "course_id",
+        referencedColumnName: "id"
+      },
     },
   },
 });

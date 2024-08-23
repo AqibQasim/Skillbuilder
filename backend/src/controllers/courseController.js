@@ -1,13 +1,29 @@
 const { logger } = require("../../logger");
-const { createCourseWithDetails, getAllCourses, coursesRatingService, coursesDetailFunc, recentCoursesFunc, courseGetById, postReviewService, getReviewsService, uploadCourseVideoToYT, updateCoursePropertiesService } = require("../services/courseService");
+const {
+  createCourseWithDetails,
+  getAllCourses,
+  coursesRatingService,
+  coursesDetailFunc,
+  recentCoursesFunc,
+  courseGetById,
+  postReviewService,
+  getReviewsService,
+  uploadCourseVideoToYT,
+  updateCoursePropertiesService,
+  setCourseStatusService,
+  getAllStudentCourses,
+} = require("../services/courseService");
 const { getInstructorById } = require("../services/instructorService");
-const { postPurchasedCourse, findAllPurchasedCourse } = require("../services/purchasedCourseService");
-const { updateCoursecontent } = require("../repositories/courseRepository")
+const {
+  postPurchasedCourse,
+  findAllPurchasedCourse,
+} = require("../services/purchasedCourseService");
+const { updateCoursecontent } = require("../repositories/courseRepository");
 const fs = require("fs");
 
 // const fs = require('fs');
-const path = require('path');
-const { v4: uuidv4 } = require('uuid');
+const path = require("path");
+const { v4: uuidv4 } = require("uuid");
 const { uploadVideoToYT } = require("../services/courseService");
 const SimpleQueue = require("../utils/SimpleQueue");
 
@@ -19,12 +35,13 @@ const postCourse = async (request, reply) => {
       const instructor_id = data.instructor_id;
       const isInstructorExist = await getInstructorById(instructor_id);
       if (isInstructorExist == null) {
-        throw new Error("instructor not exist");
+        throw new Error("course not exist");
       }
-      await createCourseWithDetails(data);
+      const result = await createCourseWithDetails(data);
       reply.send({
         status: true,
         message: "course has been created succesfully",
+        courseId : result?.id
       });
     } else {
       reply.code(400).send({
@@ -44,9 +61,9 @@ const postCourse = async (request, reply) => {
 const allCourses = async (request, reply) => {
   logger.info("src > controller > controllerALlrCourse ", request.body);
   try {
-    console.log('req body:', request?.body);
+    console.log("req body:", request?.body);
     const courses = await getAllCourses();
-    console.log('courses:', courses);
+    console.log("courses:", courses);
     // if (courses) {
     return reply.status(200).send({
       status: true,
@@ -69,10 +86,39 @@ const allCourses = async (request, reply) => {
   }
 };
 
+const allStudentCourses = async (request, reply) => {
+  logger.info("src > controller > controllerALlrCourse ", request.body);
+  try {
+    console.log("req body:", request?.body);
+    const courses = await getAllStudentCourses();
+    console.log("courses:", courses);
+    // if (courses) {
+    return reply.status(200).send({
+      status: true,
+      message: "success",
+      data: courses,
+    });
+    // } else {
+    //   return reply.status(200).send({
+    //     status: true,
+    //     message: "success",
+    //     data: null,
+    //   });
+    // }
+  } catch (error) {
+    logger.error(error);
+    reply.status(500).send({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+ 
 const getCourseById = async (request, reply) => {
   try {
     const id = request.params.id;
     const data = await courseGetById(id);
+    console.log("[data to be sent]:", data);
     reply.send({
       status: true,
       message: "success",
@@ -186,35 +232,39 @@ const postReview = async (req, res) => {
     console.log("result of posting a review:", result);
     res.code(200).send({
       success: true,
-      message: result
-    })
-  }
-
-  catch (e) {
+      message: result,
+    });
+  } catch (e) {
     console.log("ERR:", e);
   }
-}
-
+};
+//get reviews of course
 const getReviews = async (req, res) => {
   const id = req?.params?.id;
   const result = await getReviewsService(id);
   console.log("result of posting a review:", result);
   res.code(200).send({
     success: true,
-    message: result
-  })
-}
+    message: result,
+  });
+};
 
-const updateCourseProperties = async (request,reply) => {
-  try{
-    const {course_id,filter,value} = request?.body;
-    const result = await updateCoursePropertiesService({course_id,filter,value});
+const updateCourseProperties = async (request, reply) => {
+  try {
+    const { course_id, filter, value } = request?.body;
+    const result = await updateCoursePropertiesService({
+      course_id,
+      filter,
+      value,
+    });
     reply.status(result.status).send(result);
-  }catch(err){
-    console.log("ERR:",err);
-    res.status(500).send("Some exception occured while handling this route:",err);
+  } catch (err) {
+    console.log("ERR:", err);
+    reply
+      .status(500)
+      .send("Some exception occured while handling this route:", err);
   }
-}
+};
 
 const uploadCourseIntroVideo = async (request, response) => {
   const parts = await request.parts();
@@ -222,14 +272,14 @@ const uploadCourseIntroVideo = async (request, response) => {
   let videoFilePath = null;
   let instructorId = null;
 
-  const uploadDir = path.join(__dirname, 'uploads');
+  const uploadDir = path.join(__dirname, "uploads");
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir);
   }
 
   for await (const part of parts) {
     if (part.file) {
-      if (part.fieldname === 'video') {
+      if (part.fieldname === "video") {
         let filename = part.filename;
         let saveTo = path.join(uploadDir, filename);
         if (fs.existsSync(saveTo)) {
@@ -250,35 +300,33 @@ const uploadCourseIntroVideo = async (request, response) => {
         console.log(`File [${part.fieldname}] Finished: ${videoFilePath}`);
         break;
       }
-    }
-    else {
-      if (part.fieldname === 'courseId') {
+    } else {
+      if (part.fieldname === "courseId") {
         console.log("part.fieldname:", part.fieldname);
         courseId = part.value;
-        console.log('course id is :', courseId);
+        console.log("course id is :", courseId);
       }
     }
   }
   try {
-    const result = await uploadCourseVideoToYT(courseId, videoFilePath)
+    const result = await uploadCourseVideoToYT(courseId, videoFilePath);
     console.log("result in upload course video:", result);
     if (result?.video_url) {
       response.status(200).send(result);
     }
   } catch (error) {
-    console.log('Error uploading video', error)
+    console.log("Error uploading video", error);
   } finally {
     fs.unlink(videoFilePath, (err) => {
       console.log("video file path in finally block:", videoFilePath);
       if (err) {
-        console.error('Failed to delete video file:', err);
+        console.error("Failed to delete video file:", err);
       } else {
         console.log(`Successfully deleted video file: ${videoFilePath}`);
       }
-    })
+    });
   }
-}
-
+};
 
 const uploadCourseContent = async (request, reply) => {
   let videoFilePaths = [];
@@ -290,14 +338,14 @@ const uploadCourseContent = async (request, reply) => {
 
   try {
     const parts = await request.parts();
-    const uploadDir = path.join(__dirname, 'uploads');
+    const uploadDir = path.join(__dirname, "uploads");
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir);
     }
 
     for await (const part of parts) {
       if (part.file) {
-        if (part.fieldname === 'video') {
+        if (part.fieldname === "video") {
           let filename = `${uuidv4()}-${part.filename}`;
           let saveTo = path.join(uploadDir, filename);
           const writeStream = fs.createWriteStream(saveTo);
@@ -318,7 +366,7 @@ const uploadCourseContent = async (request, reply) => {
           queue.enqueue(saveTo);
         }
       } else {
-        if (part.fieldname === 'modules') {
+        if (part.fieldname === "modules") {
           try {
             moduleInfo = JSON.parse(part.value);
             console.log("Parsed moduleInfo:", moduleInfo?.modules);
@@ -326,11 +374,11 @@ const uploadCourseContent = async (request, reply) => {
               throw new Error("Parsed moduleInfo is not an array");
             }
           } catch (error) {
-            console.error('Failed to parse moduleInfo:', error);
+            console.error("Failed to parse moduleInfo:", error);
             reply.status(400).send("Invalid modules JSON format");
             return;
           }
-        } else if (part.fieldname === 'course_id') {
+        } else if (part.fieldname === "course_id") {
           try {
             console.log("course id:", part.value);
             course_id = part?.value;
@@ -348,18 +396,25 @@ const uploadCourseContent = async (request, reply) => {
         const videoUrl = response.video_url;
         videoUrls.push(videoUrl);
         console.log("response of uploading a video to youtube:", response);
-        // console.log("response of uploading a video to youtube:", response);
       }
 
-
-      let updated = false; ``
       for (const module of moduleInfo?.modules) {
         for (const contentItem of module.content) {
-          console.log("video index:", videoIndex, "video urls length:", videoUrls.length);
-          if (contentItem.content.startsWith('path/to/video') && videoIndex < videoUrls.length) {
+          console.log(
+            "video index:",
+            videoIndex,
+            "video urls length:",
+            videoUrls.length
+          );
+          if (
+            contentItem.content.startsWith("path/to/video") &&
+            videoIndex <= videoUrls.length
+          ) {
             console.log("videoUrls[videoIndex]:", videoUrls[videoIndex]);
-            contentItem.content = videoUrls[videoIndex];
-            console.log("contentItem.content:", contentItem.content);
+            console.log("[module name]:", module?.title);
+            console.log("[content]:", contentItem);
+            contentItem.content = "updated url";
+            console.log("[contentItem.content]:", contentItem.content);
             videoIndex++;
           }
         }
@@ -370,10 +425,14 @@ const uploadCourseContent = async (request, reply) => {
       console.log("[FINAL RESULT]:", finalResult);
       return finalResult;
     }
-
   } catch (err) {
-    console.log("Some error occurred while handling course content upload.", err);
-    reply.status(500).send("Some error occurred while handling course content upload.", err);
+    console.log(
+      "Some error occurred while handling course content upload.",
+      err
+    );
+    reply
+      .status(500)
+      .send("Some error occurred while handling course content upload.", err);
   } finally {
     for (const videoFilePath of videoFilePaths) {
       fs.unlink(videoFilePath, (err) => {
@@ -387,8 +446,22 @@ const uploadCourseContent = async (request, reply) => {
   }
 };
 
-
-
+const setCourseStatus = async (request, response) => {
+  try {
+    const { course_id, status, reason, status_desc } = request?.body;
+    const result = await setCourseStatusService({
+      course_id,
+      status,
+      reason,
+      status_desc,
+    });
+    console.log("[DATA TO BE SENT AS RESPONSE:]", result);
+    response.status(200).send(result);
+  } catch (err) {
+    console.log("[Err]:", err);
+    response.status(500).send("Internal Server Error");
+  }
+};
 
 module.exports = {
   postCourse,
@@ -403,5 +476,7 @@ module.exports = {
   getReviews,
   uploadCourseIntroVideo,
   uploadCourseContent,
-  updateCourseProperties
+  updateCourseProperties,
+  setCourseStatus,
+  allStudentCourses
 };
