@@ -124,7 +124,7 @@ const AddSSOUser = async (data) => {
       const token = jwt.sign(payload, secretKey, options);
       
       // Return the signed token
-      return { message: token, status : 200 };
+      return { message: token,user, status : 200 };
     } else {
       return {message: "User Not Found", status : 404};
     }

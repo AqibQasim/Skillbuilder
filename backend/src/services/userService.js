@@ -400,6 +400,7 @@ const createGoogleUser = async (userInfo) => {
   try {
     const { email } = userInfo;
     let user = await findUser({ email: email });
+    let token;
     if (!user) {
       const userData = {
         first_name: userInfo.given_name,
@@ -407,11 +408,16 @@ const createGoogleUser = async (userInfo) => {
         email: userInfo.email,
         source: userInfo.provider,
       };
-      user = await createUser(userData);
+      let registeredUser= await createUser(userData);
+      token = jwt.sign(registeredUser, process.env.JWT_SECRET);
+      console.log(token)
+       return {...registeredUser,token};
     }
+    
     console.log("user in database", user);
-    let token = jwt.sign(user, process.env.JWT_SECRET);
-    return token;
+    token = jwt.sign(user, process.env.JWT_SECRET);
+    console.log(token)
+    return {token,...user};
   } catch (error) {
     logger.error(["src > services > userService > 21", error.message]);
   }

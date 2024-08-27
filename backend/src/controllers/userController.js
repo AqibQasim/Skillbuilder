@@ -188,11 +188,33 @@ const SignupGoogleSSO = async (req, res) => {
     console.log("findUserByEmail done");
     if (!result) {
       const SSOresult = await AddSSOUser(data);
+      //const SSOresult= await createGoogleUser(data)
       console.log("$$$$$$$$$$$$$$$", SSOresult);
       // return SSOresult;
       res.status(SSOresult.status).send(SSOresult);
      }else{
-      res.status(500).send("User Already Exists");
+      console.log('else running.................')
+      console.log(result)
+      const payload = {
+        id: result.id,             // Include the user's ID
+        email: result.email,       // Include the user's email
+        // picture: data.picture         // Include the user's picture (if available)
+      };
+
+      // Secret key for signing the token (you should store this in an environment variable)
+      const secretKey = process.env.JWT_SECRET;
+
+      // Options for token expiration and algorithm
+      const options = {
+        expiresIn: '35h',             // Token expiration time
+        algorithm: 'HS256'           // Algorithm for signing the token
+      };
+
+      // Sign the JWT
+      const token = jwt.sign(payload, secretKey, options);
+      res.status(200).send({
+        ...result,token
+      });
      }
     // const result = await enrollInCourseService({student_id,course_id,filter});
     res.status(200).send(result);
