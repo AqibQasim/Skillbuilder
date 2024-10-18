@@ -269,164 +269,166 @@ const updateCourseProperties = async (request, reply) => {
 };
 
 const uploadCourseIntroVideo = async (request, response) => {
-  const parts = await request.parts();
-  let fieldsData = {};
-  let videoFilePath = null;
-  let instructorId = null;
+  // const parts = await request.parts();
+  // let fieldsData = {};
+  // let videoFilePath = null;
+  // let instructorId = null;
 
-  const uploadDir = path.join(__dirname, "uploads");
-  if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir);
-  }
+  // const uploadDir = path.join(__dirname, "uploads");
+  // if (!fs.existsSync(uploadDir)) {
+  //   fs.mkdirSync(uploadDir);
+  // }
 
-  for await (const part of parts) {
-    if (part.file) {
-      if (part.fieldname === "video") {
-        let filename = part.filename;
-        let saveTo = path.join(uploadDir, filename);
-        if (fs.existsSync(saveTo)) {
-          const ext = path.extname(filename);
-          const name = path.basename(filename, ext);
-          filename = `${name}-${uuidv4()}${ext}`;
-          saveTo = path.join(uploadDir, filename);
-        }
+  // for await (const part of parts) {
+  //   if (part.file) {
+  //     if (part.fieldname === "video") {
+  //       let filename = part.filename;
+  //       let saveTo = path.join(uploadDir, filename);
+  //       if (fs.existsSync(saveTo)) {
+  //         const ext = path.extname(filename);
+  //         const name = path.basename(filename, ext);
+  //         filename = `${name}-${uuidv4()}${ext}`;
+  //         saveTo = path.join(uploadDir, filename);
+  //       }
 
-        videoFilePath = saveTo;
+  //       videoFilePath = saveTo;
 
-        const writeStream = fs.createWriteStream(saveTo);
-        for await (const chunk of part.file) {
-          writeStream.write(chunk);
-        }
-        writeStream.end();
+  //       const writeStream = fs.createWriteStream(saveTo);
+  //       for await (const chunk of part.file) {
+  //         writeStream.write(chunk);
+  //       }
+  //       writeStream.end();
 
-        console.log(`File [${part.fieldname}] Finished: ${videoFilePath}`);
-        break;
-      }
-    } else {
-      if (part.fieldname === "courseId") {
-        console.log("part.fieldname:", part.fieldname);
-        courseId = part.value;
-        console.log("course id is :", courseId);
-      }
-    }
-  }
+  //       console.log(`File [${part.fieldname}] Finished: ${videoFilePath}`);
+  //       break;
+  //     }
+  //   } else {
+  //     if (part.fieldname === "courseId") {
+  //       console.log("part.fieldname:", part.fieldname);
+  //       courseId = part.value;
+  //       console.log("course id is :", courseId);
+  //     }
+  //   }
+  // }
   try {
-    const result = await uploadCourseVideoToYT(courseId, videoFilePath);
+    const result = await uploadCourseVideoToYT(request?.body?.course_id, request?.body?.video_url);
     console.log("result in upload course video:", result);
-    if (result?.video_url) {
-      response.status(200).send(result);
-    }
+    response.status(result?.status).send({...result});
   } catch (error) {
     console.log("Error uploading video", error);
-  } finally {
-    fs.unlink(videoFilePath, (err) => {
-      console.log("video file path in finally block:", videoFilePath);
-      if (err) {
-        console.error("Failed to delete video file:", err);
-      } else {
-        console.log(`Successfully deleted video file: ${videoFilePath}`);
-      }
-    });
-  }
+  } 
+  // finally {
+  //   fs.unlink(videoFilePath, (err) => {
+  //     console.log("video file path in finally block:", request?.video_url);
+  //     if (err) {
+  //       console.error("Failed to delete video file:", err);
+  //     } else {
+  //       console.log(`Successfully deleted video file: ${videoFilePath}`);
+  //     }
+  //   });
+  // }
 };
 
 const uploadCourseContent = async (request, reply) => {
-  let videoFilePaths = [];
-  const queue = new SimpleQueue();
-  let course_id;
-  let moduleInfo = [];
-  let videoIndex = 0;
-  let videoUrls = [];
+  // let videoFilePaths = [];
+  // const queue = new SimpleQueue();
+  // let course_id;
+  // let moduleInfo = [];
+  // let videoIndex = 0;
+  // let videoUrls = [];
 
   try {
-    const parts = await request.parts();
-    const uploadDir = path.join(__dirname, "uploads");
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir);
-    }
+    // const parts = await request.parts();
+    // const uploadDir = path.join(__dirname, "uploads");
+    // if (!fs.existsSync(uploadDir)) {
+    //   fs.mkdirSync(uploadDir);
+    // }
 
-    for await (const part of parts) {
-      if (part.file) {
-        if (part.fieldname === "video") {
-          let filename = `${uuidv4()}-${part.filename}`;
-          let saveTo = path.join(uploadDir, filename);
-          const writeStream = fs.createWriteStream(saveTo);
-          try {
-            for await (const chunk of part.file) {
-              writeStream.write(chunk);
-            }
-          } catch (error) {
-            console.error(`Failed to write file: ${saveTo}`, error);
-            throw error;
-          } finally {
-            writeStream.end();
-          }
+    // for await (const part of parts) {
+    //   if (part.file) {
+    //     if (part.fieldname === "video") {
+    //       let filename = `${uuidv4()}-${part.filename}`;
+    //       let saveTo = path.join(uploadDir, filename);
+    //       const writeStream = fs.createWriteStream(saveTo);
+    //       try {
+    //         for await (const chunk of part.file) {
+    //           writeStream.write(chunk);
+    //         }
+    //       } catch (error) {
+    //         console.error(`Failed to write file: ${saveTo}`, error);
+    //         throw error;
+    //       } finally {
+    //         writeStream.end();
+    //       }
 
-          videoFilePaths.push(saveTo);
-          console.log(`File [${part.fieldname}] Finished: ${saveTo}`);
+    //       videoFilePaths.push(saveTo);
+    //       console.log(`File [${part.fieldname}] Finished: ${saveTo}`);
 
-          queue.enqueue(saveTo);
-        }
-      } else {
-        if (part.fieldname === "modules") {
-          try {
-            moduleInfo = JSON.parse(part.value);
-            console.log("Parsed moduleInfo:", moduleInfo?.modules);
-            if (!Array.isArray(moduleInfo?.modules)) {
-              throw new Error("Parsed moduleInfo is not an array");
-            }
-          } catch (error) {
-            console.error("Failed to parse moduleInfo:", error);
-            reply.status(400).send("Invalid modules JSON format");
-            return;
-          }
-        } else if (part.fieldname === "course_id") {
-          try {
-            console.log("course id:", part.value);
-            course_id = part?.value;
-          } catch (err) {
-            console.log("ERR:", err);
-          }
-        }
+    //       queue.enqueue(saveTo);
+    //     }
+    //   } else {
+    //     if (part.fieldname === "modules") {
+    //       try {
+    //         moduleInfo = JSON.parse(part.value);
+    //         console.log("Parsed moduleInfo:", moduleInfo?.modules);
+    //         if (!Array.isArray(moduleInfo?.modules)) {
+    //           throw new Error("Parsed moduleInfo is not an array");
+    //         }
+    //       } catch (error) {
+    //         console.error("Failed to parse moduleInfo:", error);
+    //         reply.status(400).send("Invalid modules JSON format");
+    //         return;
+    //       }
+    //     } else if (part.fieldname === "course_id") {
+    //       try {
+    //         console.log("course id:", part.value);
+    //         course_id = part?.value;
+    //       } catch (err) {
+    //         console.log("ERR:", err);
+    //       }
+    //     }
+    //   }
+    // }
+    
+    // const response = await uploadVideoToYT(reqcourse_id, path);
+    // if (moduleInfo?.modules?.length > 0 && videoFilePaths.length > 0) {
+    //   for (const path of videoFilePaths) {
+    //     console.log("ind file path:", path);
+    //     const videoUrl = response.video_url;
+    //     videoUrls.push(videoUrl);
+    //     console.log("response of uploading a video to youtube:", response);
+    //   }
+
+    //   for (const module of moduleInfo?.modules) {
+    //     for (const contentItem of module.content) {
+    //       console.log(
+    //         "video index:",
+    //         videoIndex,
+    //         "video urls length:",
+    //         videoUrls.length
+    //       );
+    //       if (
+    //         contentItem.content.startsWith("path/to/video") &&
+    //         videoIndex <= videoUrls.length
+    //       ) {
+    //         console.log("videoUrls[videoIndex]:", videoUrls[videoIndex]);
+    //         console.log("[module name]:", module?.title);
+    //         console.log("[content]:", contentItem);
+    //         contentItem.content = videoUrls[videoIndex];
+    //         console.log("[contentItem.content]:", contentItem.content);
+    //         videoIndex++;
+    //       }
+    //     }
+    //   }
+
+      const finalResult = await updateCoursecontent(request?.body?.course_id, req?.body?.moduleInfo);
+      if(finalResult==="Course has been updated successfully"){
+        res.s
       }
-    }
 
-    if (moduleInfo?.modules?.length > 0 && videoFilePaths.length > 0) {
-      for (const path of videoFilePaths) {
-        console.log("ind file path:", path);
-        const response = await uploadVideoToYT(course_id, path);
-        const videoUrl = response.video_url;
-        videoUrls.push(videoUrl);
-        console.log("response of uploading a video to youtube:", response);
-      }
-
-      for (const module of moduleInfo?.modules) {
-        for (const contentItem of module.content) {
-          console.log(
-            "video index:",
-            videoIndex,
-            "video urls length:",
-            videoUrls.length
-          );
-          if (
-            contentItem.content.startsWith("path/to/video") &&
-            videoIndex <= videoUrls.length
-          ) {
-            console.log("videoUrls[videoIndex]:", videoUrls[videoIndex]);
-            console.log("[module name]:", module?.title);
-            console.log("[content]:", contentItem);
-            contentItem.content = "updated url";
-            console.log("[contentItem.content]:", contentItem.content);
-            videoIndex++;
-          }
-        }
-      }
-
-      const finalResult = await updateCoursecontent(course_id, moduleInfo);
-
-      console.log("[FINAL RESULT]:", finalResult);
-      return finalResult;
-    }
+    //   console.log("[FINAL RESULT]:", finalResult);
+    //   return finalResult;
+    // }
   } catch (err) {
     console.log(
       "Some error occurred while handling course content upload.",
@@ -468,9 +470,11 @@ const setCourseStatus = async (request, response) => {
 const getUserAuthorizedByYT = async (request, response) => {
   try {
     const { course_id, student_id } = request?.body;
-    const serviceAccConfigResult = await serviceAccConfig(course_id, student_id);
-    if (serviceAccConfigResult){
-      const result = await grantAccess(course_id);
+    const youtube = await serviceAccConfig(course_id, student_id);
+    if (youtube){
+      const result = await grantAccess(course_id, student_id, youtube);
+      console.log("[RESULT]:", result.message);
+      response.status(result.status).send(result.message);
     }
   } catch (err) {
     console.log("ERROR OCCURED WHILE HANDLING THE ROUTE:", err);

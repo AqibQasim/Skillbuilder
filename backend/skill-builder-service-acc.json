@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "skillbuiler",
+  "private_key_id": "ccad29301b96036bc90ff9b5794880a9989ca765",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDOkybOXdVPC1ZR\na2VXF+1S3TADO+dPFMp1Wh+2s3ZIWRvCukc4rEzldM7prHbf7SGWWIeqoA8Bkch7\nyXjf+9xEXJGhcKi7qri24U2hreHyluvpW/7+1jC+yKO+vPqzi1GcDh/W5mL9E/YG\n4l1ACR3bMHUSq4pP5J5UwUFib5YC8zj7kfFkwGhYAbrL92eeiI4AGWIEdICHWNIl\n9YTlibGXiyQ+lj9I8kO0+44hnRtprBWiAOM21D4ECQ6dkfhLhGiV1X8Hw+qoj2lS\nlLDSFMIzyD735ewfe7OzQi/lZVrJ9Tlv8/o2eKoMHePoWKfNahEabnjD7SEQGSDa\nQ5VPRhQ1AgMBAAECggEANaaYNI7AQMhEAd9vsYAAXj4eIyjiuXI/5tyiUfQoK0Ah\naqCwsLJnQkzlFGF7ekr/JyoVCiaJ3zF6rVO1Ng8WtRaJqDE3UY5UbQL1A6HChhvW\nZ4RCJPOCM3qutHImdo0fg/VTJaAuY2ZUxpLx/xifDXd3YIL26CsLSB3tGmC6yEbl\nXPqoZIdqQYJRz1BxPLidtob0OqI7XK/jKr5s6Q0GxPtr59EqVQmM5NKM1t6uhIaE\nH7036co0PJYVFZG3TE1SsaFDF1Q/jU514guF5RaopuMCQjz+uwFMQXUOElM6nor1\nlMEk53ZlopJnJLvcjZXo18R5P49nTFZjFZDj+guLPQKBgQD4g5ENdcN4rVAKStKa\nZ5O9JuUQrzLgCSoK8LsRrj3UNLLRC6ZITGCNuBMhEZ5eU1EkM9w5YaUaXheVbQzf\nSkQL3Ck9FOaTdcLYWXC+I22sYtQ5Ft6BYFe9brVZHoyqjjLpSQQ8DiBW9nBhSllz\n1DF8M1gXeqInwWjaZhKgDvZFnwKBgQDUzCsaTRzer/6hbLNFAfyde96fP2k2gWmi\nAP/rK3nFM4aJr6pAQnaE5+9lDgRXwhG3qCX2TBcuA5vt7+j3hmiMv97AfQjDetd3\ntok+s5PaR1rpPRn9/ZooyqjKc/w23LIsTOrQkqFA04e7wMUVTLuH1msGun2xEq7H\npnid2nONqwKBgAG9kieA+qR+uj/INF9meE9r1VDfmUCeb8/xza2bBc3VrKbwKPL6\nrfZwIpopsG1Csh/JyTIRsAFWRV4DjIKH16Apo5RM8Cx6N6oiPjrmrp71dj0MHvTT\nAupNuzFrmFqdclfV7hSpmKpjQXg8+BFqnAodpfFMJ5SVszFMY7cBQ9JLAoGBAK4y\niKJaN+Tv66EXi9VU4AfHTCHO1gFBhUiSSu2nxGIzYNI7lEJQZhc8ipOOGu4AN2LB\n6nmqJluLpszr1SkzxUhbFS077b2gRNyB9+31MXbBbOF8HFf4j4cPB4fb1L7QgaaU\nPLELJ6gawYVoM63RB78WPrzeU2BuK9fSJfEK0AdLAoGAIO3yB2MABk8yxN5K1Fva\n94QuV7OP7PAO3MRZOVao9NaMBlZGc4qMTNh95Kqb1vekhasXoqTmy5nvfbqUCNh5\noJaHB2iUa4r3XSO6Hg+sTrbQYbI/E0F2jCPvwUdIOJEjUu9vcNn4YILDTM3cv9L3\nHCdlNgk8kcnMBscZ2Raj/1s=\n-----END PRIVATE KEY-----\n",
+  "client_email": "skill-builder@skillbuiler.iam.gserviceaccount.com",
+  "client_id": "108090652234197607277",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/skill-builder%40skillbuiler.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

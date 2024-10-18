@@ -1,0 +1,16 @@
+{"modules":
+[
+     {
+    "title": "Introduction to SQA",
+    "content": [
+      {
+        "title": "What is test automation?",
+        "content_type": "video",
+        "content": "path/to/video.mp4",
+        "duration":"10:00",
+        "order": 1
+      }
+    ]
+  }
+]
+}

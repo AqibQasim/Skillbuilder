@@ -127,7 +127,7 @@ const uploadVideoToYT = async (courseId, videoFilePath) => {
     });
 
     const videoId = response?.data?.id;
-    const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+    const videoUrl = `https://www.youtube.com/embed/${videoId}`;
 
     return {
       message: "The introductory video has been successfully posted.",
@@ -170,47 +170,50 @@ const getAllStudentCourses= async()=>{
 
 const uploadCourseVideoToYT = async (courseId, videoFilePath, user_role) => {
   try {
-    const youtube = google.youtube({
-      version: "v3",
-      auth: oauth2Client,
-    });
+    // const youtube = google.youtube({
+    //   version: "v3",
+    //   auth: oauth2Client,
+    // });
 
-    console.log("video file path in service:", videoFilePath);
+    // console.log("video file path in service:", videoFilePath);
 
-    const response = await youtube.videos.insert({
-      part: "snippet,status",
-      requestBody: {
-        snippet: {
-          title: "Course Introductory Video",
-          description:
-            "Describes about what course is all about, share details about course with you!",
-          tags: ["education"],
-          categoryId: "27",
-        },
-        status: {
-          privacyStatus: "unlisted",
-        },
-      },
-      media: {
-        body: fs.createReadStream(videoFilePath),
-      },
-      mediaType: "video/*",
-    });
+    // const response = await youtube.videos.insert({
+    //   part: "snippet,status",
+    //   requestBody: {
+    //     snippet: {
+    //       title: "Course Introductory Video",
+    //       description:
+    //         "Describes about what course is all about, share details about course with you!",
+    //       tags: ["education"],
+    //       categoryId: "27",
+    //     },
+    //     status: {
+    //       privacyStatus: "unlisted",
+    //     },
+    //   },
+    //   media: {
+    //     body: fs.createReadStream(videoFilePath),
+    //   },
+    //   mediaType: "video/*",
+    // });
 
-    console.log("youtube repsonse:", response);
+    // console.log("youtube repsonse:", response);
 
-    const videoId = response?.data?.id;
-    const videoUrl = `https://www.youtube.com/embed/${videoId}`;
+    // const videoId = response?.data?.id;
+    // const videoUrl = `https://www.youtube.com/embed/${videoId}`;
 
-    const updatedCourse = await updateCourse(courseId, videoUrl);
+    const updatedCourse = await updateCourse(courseId, videoFilePath);
     console.log("course", updatedCourse);
     return {
+      status: 200,
       message: "The introductory video has been successfully posted.",
-      video_url: videoUrl,
     };
   } catch (e) {
     console.log("ERR while uploading:", e);
-    return e;
+    return {
+      status: 500,
+      message: e.message,
+    };
   }
 };
 

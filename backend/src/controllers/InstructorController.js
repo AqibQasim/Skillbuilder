@@ -38,9 +38,9 @@ const getInstructorsall = async (request, reply) => {
 const createInstructor = async (request, reply) => {
   try {
     logger.info("src > controllers > InstructorController > createInstructor");
-    // const body = JSON.parse(request.body);
+    // const body = JSON.pars-e(request.body);
     logger.info(request?.body);
-    const result= await createNewInstructor(request?.body);
+    const result = await createNewInstructor(request?.body);
     reply.send({
       status: result.status,
       message: result.message,
@@ -81,8 +81,8 @@ const getAllInstructor = async (request, reply) => {
 const instructorDetail = async (request, reply) => {
   logger.info("src > InstructorController > instructorDetail ", request.params);
   try {
-    const {id} = request.params;
-    console.log("data in request query:",id);
+    const { id } = request.params;
+    console.log("data in request query:", id);
     const instructorData = await getInstructorById(id);
     console.log("Instructor Data:", instructorData);
     if (instructorData) {
@@ -134,11 +134,11 @@ const getOneInstByUser = async (request, reply) => {
 const getCoursesByInstructor = async (request, reply) => {
   try {
     const id = request?.params?.id;
-    const isUserAnInstructor= await getInstructorById(id);
+    const isUserAnInstructor = await getInstructorById(id);
 
-    if(!isUserAnInstructor){
+    if (!isUserAnInstructor) {
       reply.status(403).send({
-        message:"this user is not an instructor"
+        message: "this user is not an instructor"
       });
     }
     const allCoursesByInstructor = await getCoursesByInstService(id);
@@ -164,7 +164,7 @@ const stripeAccRegister = async (request, reply) => {
   }
 };
 
-const checkPaymentRecord = async (request,reply) => {
+const checkPaymentRecord = async (request, reply) => {
   try {
     const { id } = request?.query;
     const result = await checkPaymentRecordService({ id });
@@ -181,49 +181,50 @@ async function uploadInstVideo(request, reply) {
   console.log("API IS HITTTINGGGGGGGG");
   const parts = await request.parts();
   let fieldsData = {};
-  let videoFilePath = null;
-  let instructorId = null;
+  let videoFilePath = request?.video_url;
+  let instructorId = request?.instructor_id;
   // console.log("video file path in controller:",videoFilePath);
 
-  const uploadDir = path.join(__dirname, "uploads");
-  if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir);
-  } 
+  // const uploadDir = path.join(__dirname, "uploads");
+  // if (!fs.existsSync(uploadDir)) {
+  //   fs.mkdirSync(uploadDir);
+  // }
 
-  for await (const part of parts) {
-    if (part.file) {
-      if (part.fieldname === "video") {
-        let filename = part.filename;
-        let saveTo = path.join(uploadDir, filename);
-        if (fs.existsSync(saveTo)) {
-          const ext = path.extname(filename);
-          const name = path.basename(filename, ext);
-          filename = `${name}-${uuidv4()}${ext}`;
-          saveTo = path.join(uploadDir, filename);
-        }
+  // for await (const part of parts) {
+  //   if (part.file) {
+  //     if (part.fieldname === "video") {
+  //       let filename = part.filename;
+  //       let saveTo = path.join(uploadDir, filename);
+  //       if (fs.existsSync(saveTo)) {
+  //         const ext = path.extname(filename);
+  //         const name = path.basename(filename, ext);
+  //         filename = `${name}-${uuidv4()}${ext}`;
+  //         saveTo = path.join(uploadDir, filename);
+  //       }
 
-        videoFilePath = saveTo;
+  //       videoFilePath = saveTo;
 
-        const writeStream = fs.createWriteStream(saveTo);
-        for await (const chunk of part.file) {
-          writeStream.write(chunk);
-        }
-        writeStream.end();
+  //       const writeStream = fs.createWriteStream(saveTo);
+  //       for await (const chunk of part.file) {
+  //         writeStream.write(chunk);
+  //       }
+  //       writeStream.end();
 
-        console.log(`File [${part.fieldname}] Finished: ${videoFilePath}`);
-        break;
-      } 
-    } else {
-      if (part.fieldname === "instructorId") {
-        console.log("part.fieldname:", part.fieldname);
-        instructorId = part.value;
-        console.log("instructor id is :", instructorId);
-      }
-    }
-  }
+  //       console.log(`File [${part.fieldname}] Finished: ${videoFilePath}`);
+  //       break;
+  //     }
+  //   } else {
+  //     if (part.fieldname === "instructorId") {
+  //       console.log("part.fieldname:", part.fieldname);
+  //       instructorId = part.value;
+  //       console.log("instructor id is :", instructorId);
+  //     }
+  //   }
+  // }
   try {
     console.log("video file path in controller:", videoFilePath);
-    const result = await uploadVideoToYT(instructorId, videoFilePath);
+    const updatedInstructor = await updateInstructor(instructorId, request?.video_url);
+    console.log("instructor:", updatedInstructor);
     console.log("result in upload inst video:", result);
     if (result?.video_url) {
       reply.status(200).send(result);

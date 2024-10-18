@@ -236,37 +236,37 @@ const checkPaymentRecordService = async ({ id }) => {
 
 const uploadVideoToYT = async (instructorId, videoFilePath, user_role) => {
   try {
-    const youtube = google.youtube({
-      version: "v3",
-      auth: oauth2Client,
-    });
+    // const youtube = google.youtube({
+    //   version: "v3",
+    //   auth: oauth2Client,
+    // });
 
-    console.log("video file path in service:", videoFilePath);
+    // console.log("video file path in service:", videoFilePath);
 
-    const response = await youtube.videos.insert({
-      part: "snippet,status",
-      requestBody: {
-        snippet: {
-          title: "Instructor Introduction",
-          description:
-            "Describes about what instructor is all about, share details about his/her years of experience with you!",
-          tags: ["education"],
-          categoryId: "27",
-        },
-        status: {
-          privacyStatus: "unlisted",
-        },
-      },
-      media: {
-        body: fs.createReadStream(videoFilePath),
-      },
-      mediaType: "video/*",
-    });
+    // const response = await youtube.videos.insert({
+    //   part: "snippet,status",
+    //   requestBody: {
+    //     snippet: {
+    //       title: "Instructor Introduction",
+    //       description:
+    //         "Describes about what instructor is all about, share details about his/her years of experience with you!",
+    //       tags: ["education"],
+    //       categoryId: "27",
+    //     },
+    //     status: {
+    //       privacyStatus: "unlisted",
+    //     },
+    //   },
+    //   media: {
+    //     body: fs.createReadStream(videoFilePath),
+    //   },
+    //   mediaType: "video/*",
+    // });
 
-    console.log("youtube repsonse:", response);
+    // console.log("youtube repsonse:", response);
 
-    const videoId = response?.data?.id;
-    const videoUrl = `https://www.youtube.com/embed/${videoId}`;
+    // const videoId = response?.data?.id;
+    // const videoUrl = `https://www.youtube.com/embed/${videoId}`;
     // fastify.log.info('Video uploaded:', response.data);
 
     // if (user_role === 'instructor') {
@@ -276,7 +276,7 @@ const uploadVideoToYT = async (instructorId, videoFilePath, user_role) => {
     //   }
     //   else if (user_role === 'course') {
     //     if (courseId && videoId) {
-    const updatedInstructor = await updateInstructor(instructorId, videoUrl);
+    const updatedInstructor = await updateInstructor(instructorId, videoFilePa);
     console.log("instructor:", updatedInstructor);
     //     }
     //   }
