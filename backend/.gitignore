@@ -5,3 +5,5 @@ node_modules/
 # src/env/local.json
 db/
 package-lock.json
+
+skill-builder-service-acc.json

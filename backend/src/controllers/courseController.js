@@ -421,9 +421,9 @@ const uploadCourseContent = async (request, reply) => {
     //     }
     //   }
 
-      const finalResult = await updateCoursecontent(request?.body?.course_id, req?.body?.moduleInfo);
+      const finalResult = await updateCoursecontent(request?.body?.course_id, request?.body?.module_info);
       if(finalResult==="Course has been updated successfully"){
-        res.s
+        reply.status(200).send(finalResult)
       }
 
     //   console.log("[FINAL RESULT]:", finalResult);
@@ -437,17 +437,18 @@ const uploadCourseContent = async (request, reply) => {
     reply
       .status(500)
       .send("Some error occurred while handling course content upload.", err);
-  } finally {
-    for (const videoFilePath of videoFilePaths) {
-      fs.unlink(videoFilePath, (err) => {
-        if (err) {
-          console.error(`Failed to delete video file: ${videoFilePath}`, err);
-        } else {
-          console.log(`Successfully deleted video file: ${videoFilePath}`);
-        }
-      });
-    }
-  }
+  } 
+  // finally {
+  //   for (const videoFilePath of videoFilePaths) {
+  //     fs.unlink(videoFilePath, (err) => {
+  //       if (err) {
+  //         console.error(`Failed to delete video file: ${videoFilePath}`, err);
+  //       } else {
+  //         console.log(`Successfully deleted video file: ${videoFilePath}`);
+  //       }
+  //     });
+  //   }
+  // }
 };
 
 const setCourseStatus = async (request, response) => {
@@ -467,20 +468,20 @@ const setCourseStatus = async (request, response) => {
   }
 };
 
-const getUserAuthorizedByYT = async (request, response) => {
-  try {
-    const { course_id, student_id } = request?.body;
-    const youtube = await serviceAccConfig(course_id, student_id);
-    if (youtube){
-      const result = await grantAccess(course_id, student_id, youtube);
-      console.log("[RESULT]:", result.message);
-      response.status(result.status).send(result.message);
-    }
-  } catch (err) {
-    console.log("ERROR OCCURED WHILE HANDLING THE ROUTE:", err);
-    response.status(500).send("ERROR OCCURED WHILE HANDLING THE ROUTE");
-  }
-}
+// const getUserAuthorizedByYT = async (request, response) => {
+//   try {
+//     const { course_id, student_id } = request?.body;
+//     const youtube = await serviceAccConfig(course_id, student_id);
+//     if (youtube){
+//       const result = await grantAccess(course_id, student_id, youtube);
+//       console.log("[RESULT]:", result.message);
+//       response.status(result.status).send(result.message);
+//     }
+//   } catch (err) {
+//     console.log("ERROR OCCURED WHILE HANDLING THE ROUTE:", err);
+//     response.status(500).send("ERROR OCCURED WHILE HANDLING THE ROUTE");
+//   }
+// }
 
 module.exports = {
   postCourse,
@@ -497,6 +498,6 @@ module.exports = {
   uploadCourseContent,
   updateCourseProperties,
   setCourseStatus,
-  getUserAuthorizedByYT,
+  // getUserAuthorizedByYT,
   allStudentCourses
 };

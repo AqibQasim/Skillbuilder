@@ -46,7 +46,7 @@ const coursesRoutes = async (fastify, options) => {
   fastify.post("/upload-course-content", uploadCourseContent);
   fastify.put("/set-course-prop", updatecourseSchema, updateCourseProperties);
   fastify.put("/set-course-status", courseStatusSchema, setCourseStatus);
-  fastify.post("/authorize-user-yt", getUserAuthorizedByYT);
+  //fastify.post("/authorize-user-yt", getUserAuthorizedByYT);
 };
 
 module.exports = coursesRoutes;
