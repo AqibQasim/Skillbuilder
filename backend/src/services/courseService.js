@@ -19,6 +19,7 @@ const { saveReview } = require("../repositories/courseReviewRepository.js");
 const { google } = require("googleapis");
 const { oauth2Client } = require("../../Infrastructure/youtubeConfig");
 const fs = require("fs");
+const dataSource = require("../../Infrastructure/postgres.js");
 
 const createCourseWithDetails = async (requestedData) => {
   try {
@@ -98,6 +99,41 @@ const setCourseStatusService = async ({
     };
   }
 };
+
+const isCoursePurchasedService=async({course_id, student_id})=>{
+  try{
+    const purchasedCourse= dataSource.getRepository('purchased_course');
+    const isPurchased= await purchasedCourse.findOne({
+      where:{
+        course_id,
+        purchased_by: student_id
+      }
+    });
+
+    if(isPurchased){
+      return {
+        status: 200,
+        message: "You already have purchased this course",
+        data:{
+          is_purchased: true
+        }
+      }
+    }
+
+    return {
+      status: 404,
+      message: "You have not purchased this course",
+      data:{
+        is_purchased: false
+      }
+    }
+  }catch(e){
+    return {
+      status: 500,
+      message: e.message
+    }
+  }
+}
 
 const uploadVideoToYT = async (courseId, videoFilePath) => {
   try {
@@ -331,5 +367,6 @@ module.exports = {
   uploadVideoToYT,
   updateCoursePropertiesService,
   setCourseStatusService,
-  getAllStudentCourses
+  getAllStudentCourses,
+  isCoursePurchasedService
 };

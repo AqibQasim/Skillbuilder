@@ -12,6 +12,7 @@ const {
   updateCoursePropertiesService,
   setCourseStatusService,
   getAllStudentCourses,
+  isCoursePurchasedService,
 } = require("../services/courseService");
 const { getInstructorById } = require("../services/instructorService");
 const {
@@ -468,6 +469,18 @@ const setCourseStatus = async (request, response) => {
   }
 };
 
+const getIsCoursePurchased= async(req,res)=>{
+  try {
+    const { course_id, student_id } = req?.query;
+    const result = await isCoursePurchasedService({course_id,student_id});
+    console.log("[DATA TO BE SENT AS RESPONSE:]", result);
+    res.status(result.status).send(result);
+  } catch (err) {
+    console.log("[Err]:", err);
+    response.status(500).send("Internal Server Error");
+  }
+}
+
 // const getUserAuthorizedByYT = async (request, response) => {
 //   try {
 //     const { course_id, student_id } = request?.body;
@@ -499,5 +512,6 @@ module.exports = {
   updateCourseProperties,
   setCourseStatus,
   // getUserAuthorizedByYT,
-  allStudentCourses
+  allStudentCourses,
+  getIsCoursePurchased
 };
