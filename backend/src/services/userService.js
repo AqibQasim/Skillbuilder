@@ -363,6 +363,12 @@ const UserLogin = async (loginData) => {
 
 const getOneUserService = async (id) => {
   try {
+    if(id===null){
+      return {
+        status: 400,
+        message:"user id can not be null"
+      }
+    }
     let user = await findOneUser(id);
     if (user) {
       console.log("User:", user);
@@ -372,12 +378,16 @@ const getOneUserService = async (id) => {
       };
     } else {
       return {
-        status: 400,
+        status: 404,
         message: "User not found",
       };
     }
   } catch (e) {
     console.log("ERR:", e);
+    return {
+      status: 400,
+      message:e.message
+    }
   }
 };
 

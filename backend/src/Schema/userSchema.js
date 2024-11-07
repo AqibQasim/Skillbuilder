@@ -472,4 +472,5 @@ module.exports = {
   setStudentStatusschema,
   getAllUsersSchema,
   userEnrollcourseSchema,
+  getUserByIdSchema
 };

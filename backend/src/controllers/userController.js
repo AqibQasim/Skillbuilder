@@ -154,7 +154,7 @@ const login = async (request, reply) => {
 };
 
 const getOneUser = async (req, res) => {
-  try {
+  //try {
     const id = req?.params?.id;
     const result = await getOneUserService(id);
     console.log("result:", result);
@@ -162,9 +162,14 @@ const getOneUser = async (req, res) => {
       success: result?.status,
       message: result?.message,
     });
-  } catch (err) {
-    console.log("ERR:", err);
-  }
+  // } catch (err) {
+  //   console.log("ERR:", err);
+  //   res.status(500)
+  //   .send({
+  //     status: 500,
+  //     message:e.message
+  //   })
+  // }
 };
 
 const enrollInCourse = async (request, reply) => {

@@ -45,8 +45,11 @@ const findUser = async (filter) => {
 
 const findOneUser = async (id) => {
   console.log("id in find one user method:", id);
-  try {
+  //try {
     const userRepository = dataSource.getRepository("User");
+    if(id===null){
+      return null;
+    }
     const user = await userRepository.findOne({
       where: { id: id }
     });
@@ -82,10 +85,10 @@ const findOneUser = async (id) => {
     }
 
     return { ...user, enrolled_courses_by_student };
-  } catch (err) {
-    console.log("ERR:", err);
-    return null;
-  }
+  // } catch (err) {
+  //   console.log("ERR:", err);
+  //   return null;
+  // }
 };
 
 const updateUserByEmail = async (email, newData) => {
