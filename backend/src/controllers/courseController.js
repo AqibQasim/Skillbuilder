@@ -13,6 +13,8 @@ const {
   setCourseStatusService,
   getAllStudentCourses,
   isCoursePurchasedService,
+  saveProgressService,
+  getSavedModuleProgressService,
 } = require("../services/courseService");
 const { getInstructorById } = require("../services/instructorService");
 const {
@@ -481,6 +483,30 @@ const getIsCoursePurchased= async(req,res)=>{
   }
 }
 
+const saveProgressController= async(req,res)=>{
+  try{
+    const result= await saveProgressService(req);
+    res.status(result.status).send({...result})
+  }catch(e){
+    res.status(500)
+    .send({
+      message: e.message
+    })
+  }
+}
+
+const getSavedModuleProgressController= async(req,res)=>{
+  try{
+    const result= await getSavedModuleProgressService(req);
+    res.status(result.status).send({...result})
+  }catch(e){
+    res.status(500)
+    .send({
+      message: e.message
+    })
+  }
+}
+
 // const getUserAuthorizedByYT = async (request, response) => {
 //   try {
 //     const { course_id, student_id } = request?.body;
@@ -513,5 +539,7 @@ module.exports = {
   setCourseStatus,
   // getUserAuthorizedByYT,
   allStudentCourses,
-  getIsCoursePurchased
+  getIsCoursePurchased,
+  saveProgressController,
+  getSavedModuleProgressController
 };

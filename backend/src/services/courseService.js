@@ -20,6 +20,7 @@ const { google } = require("googleapis");
 const { oauth2Client } = require("../../Infrastructure/youtubeConfig");
 const fs = require("fs");
 const dataSource = require("../../Infrastructure/postgres.js");
+const studentVideoProgress = dataSource.getRepository("student_video_progress");
 
 const createCourseWithDetails = async (requestedData) => {
   try {
@@ -35,7 +36,7 @@ const createCourseWithDetails = async (requestedData) => {
       modules,
       description,
       video_url,
-      skills
+      skills,
     } = requestedData;
     const courseBasicsPayload = {
       instructor_id,
@@ -100,40 +101,40 @@ const setCourseStatusService = async ({
   }
 };
 
-const isCoursePurchasedService=async({course_id, student_id})=>{
-  try{
-    const purchasedCourse= dataSource.getRepository('purchased_course');
-    const isPurchased= await purchasedCourse.findOne({
-      where:{
+const isCoursePurchasedService = async ({ course_id, student_id }) => {
+  try {
+    const purchasedCourse = dataSource.getRepository("purchased_course");
+    const isPurchased = await purchasedCourse.findOne({
+      where: {
         course_id,
-        purchased_by: student_id
-      }
+        purchased_by: student_id,
+      },
     });
 
-    if(isPurchased){
+    if (isPurchased) {
       return {
         status: 200,
         message: "You already have purchased this course",
-        data:{
-          is_purchased: true
-        }
-      }
+        data: {
+          is_purchased: true,
+        },
+      };
     }
 
     return {
       status: 404,
       message: "You have not purchased this course",
-      data:{
-        is_purchased: false
-      }
-    }
-  }catch(e){
+      data: {
+        is_purchased: false,
+      },
+    };
+  } catch (e) {
     return {
       status: 500,
-      message: e.message
-    }
+      message: e.message,
+    };
   }
-}
+};
 
 const uploadVideoToYT = async (courseId, videoFilePath) => {
   try {
@@ -193,7 +194,7 @@ const getAllCourses = async () => {
   }
 };
 
-const getAllStudentCourses= async()=>{
+const getAllStudentCourses = async () => {
   try {
     logger.info("src > services > getAllCourses");
     const CoursesReceive = await findAllStudentCourses();
@@ -202,7 +203,7 @@ const getAllStudentCourses= async()=>{
   } catch (error) {
     return error;
   }
-}
+};
 
 const uploadCourseVideoToYT = async (courseId, videoFilePath, user_role) => {
   try {
@@ -259,7 +260,7 @@ const courseGetById = async (id) => {
 
     // Pass both filter and id as course_id to findOneCourse
     //const result = await findOneCourse(filter, id);
-    const result= await findOneCourseWithStudentID(id);
+    const result = await findOneCourseWithStudentID(id);
 
     if (!result) {
       console.log("Course not found");
@@ -354,6 +355,85 @@ const updateCoursePropertiesService = async ({ course_id, filter, value }) => {
   }
 };
 
+const saveProgressService = async (req) => {
+  //try{
+  const { course_content_id, user_id, is_completed } = req?.body;
+  const isProgressExists = await studentVideoProgress.findOne({
+    where: {
+      course_content_id,
+      user_id,
+    },
+  });
+
+  if (!isProgressExists) {
+    const s = studentVideoProgress.create({
+      course_content_id,
+      user_id,
+      is_completed,
+    });
+    await studentVideoProgress.save(s);
+  } else {
+    await studentVideoProgress.update(
+      { course_content_id, user_id },
+      { is_completed }
+    );
+  }
+  return {
+    status: 200,
+    message: "progress saved",
+  };
+  // }catch(e){
+  //   console.log(e)
+  //   return {
+  //     status: 500,
+  //     message: e.message
+  //   }
+  // }
+};
+
+const getSavedModuleProgressService = async (req) => {
+  //try{
+  const { module_id, user_id } = req?.query;
+  const isProgressExists = await studentVideoProgress.findOne({
+    where: {
+      //course_content_id,
+      user_id,
+    },
+  });
+
+  let progress= null;
+  if (!isProgressExists) {
+    return {
+      status: 404,
+      message: "progress of student not found",
+    };
+  } else {
+    // await studentVideoProgress.update(
+    //   { course_content_id, user_id },
+    //   { is_completed }
+    // );
+    progress= await dataSource.getRepository('student_video_progress')
+    .createQueryBuilder('student_progress')
+    .leftJoinAndSelect('student_progress.course_content','course_content')
+    
+    .where("course_content.module_id= :module_id", { module_id })
+    //.andWhere('student_progress.user_id=:user_id',{user_id})
+    .getMany();
+  }
+  return {
+    status: 200,
+    message: "progress saved",
+    data: progress
+  };
+  // }catch(e){
+  //   console.log(e)
+  //   return {
+  //     status: 500,
+  //     message: e.message
+  //   }
+  // }
+};
+
 module.exports = {
   createCourseWithDetails,
   getAllCourses,
@@ -368,5 +448,7 @@ module.exports = {
   updateCoursePropertiesService,
   setCourseStatusService,
   getAllStudentCourses,
-  isCoursePurchasedService
+  isCoursePurchasedService,
+  saveProgressService,
+  getSavedModuleProgressService
 };
