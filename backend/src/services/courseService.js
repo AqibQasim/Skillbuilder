@@ -401,10 +401,10 @@ const getSavedModuleProgressService = async (req) => {
     },
   });
 
-  let progress= null;
-  const course_contents=[];
-  let total_videos=0;
-  let completed_videos=0;
+  let progress = null;
+  const course_contents = [];
+  let total_videos = 0;
+  let completed_videos = 0;
 
   if (!isProgressExists) {
     return {
@@ -416,30 +416,36 @@ const getSavedModuleProgressService = async (req) => {
     //   { course_content_id, user_id },
     //   { is_completed }
     // );
-    progress= await dataSource
-    .getRepository('student_video_progress')
-    .createQueryBuilder('student_progress')
-    .leftJoinAndSelect('student_progress.course_content', 'course_content')
-    .where("student_progress.user_id = :user_id", { user_id })
-    .andWhere("student_progress.course_content_id=course_content.id")
-    .andWhere("course_content.module_id = :module_id", { module_id })
-    .getMany();
+    progress = await dataSource
+      .getRepository("student_video_progress")
+      .createQueryBuilder("student_progress")
+      .leftJoinAndSelect("student_progress.course_content", "course_content")
+      .where("student_progress.user_id = :user_id", { user_id })
+      .andWhere("student_progress.course_content_id=course_content.id")
+      .andWhere("course_content.module_id = :module_id", { module_id })
+      .getMany();
 
-    for(let p of progress){
+    for (let p of progress) {
       total_videos++;
-      if(p?.is_completed===true){
+      if (p?.is_completed === true) {
         completed_videos++;
       }
-      if(p?.course_content!==null && p?.course_content?.module_id==module_id){
-        console.log(p)
-        course_contents.push(p?.course_content)
+      if (
+        p?.course_content !== null &&
+        p?.course_content?.module_id == module_id
+      ) {
+        console.log(p);
+        course_contents.push(p?.course_content);
       }
     }
   }
   return {
     status: 200,
     message: "Fetched saved progress",
-    data: {course_contents, completed_percentage_module: (completed_videos/total_videos)*100}
+    data: {
+      course_contents,
+      completed_percentage_module: (completed_videos / total_videos) * 100,
+    },
   };
   // }catch(e){
   //   console.log(e)
@@ -448,6 +454,38 @@ const getSavedModuleProgressService = async (req) => {
   //     message: e.message
   //   }
   // }
+};
+
+const completionCoursePercentage = async (user_id, course_id) => {
+  const isProgressExists = await studentVideoProgress.findOne({
+    where: {
+      //course_content_id,
+      user_id,
+    },
+  });
+
+  if (!isProgressExists) {
+    return {
+      status: 404,
+      message: "progress of student not found",
+    };
+  }
+
+  progress = await dataSource
+    .getRepository("student_video_progress")
+    .createQueryBuilder("student_progress")
+    .leftJoinAndSelect("student_progress.course_content", "course_content")
+    .leftJoinAndSelect("course_content.content_module", "content_module")
+    .where("student_progress.user_id = :user_id", { user_id })
+    .andWhere("student_progress.course_content_id=course_content.id")
+    .andWhere("content_module.course_id = :course_id", { course_id })
+    .getMany();
+
+  return {
+    status: 200,
+    message: "Fetched saved progress",
+    data: progress,
+  };
 };
 
 module.exports = {
@@ -466,5 +504,5 @@ module.exports = {
   getAllStudentCourses,
   isCoursePurchasedService,
   saveProgressService,
-  getSavedModuleProgressService
+  getSavedModuleProgressService,
 };

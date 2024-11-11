@@ -49,7 +49,7 @@ const coursesRoutes = async (fastify, options) => {
   fastify.put("/set-course-prop", updatecourseSchema, updateCourseProperties);
   fastify.put("/set-course-status", courseStatusSchema, setCourseStatus);
   fastify.get('/is-course-purchased', getIsCoursePurchased);
-  fastify.post('/save-progress', saveProgressController);
+  fastify.put('/save-progress', saveProgressController);
   fastify.get('/get-saved-module-progress-of-student', getSavedModuleProgressController)
   //fastify.post("/authorize-user-yt", getUserAuthorizedByYT);
 };
