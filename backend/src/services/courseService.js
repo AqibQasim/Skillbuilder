@@ -402,6 +402,10 @@ const getSavedModuleProgressService = async (req) => {
   });
 
   let progress= null;
+  const course_contents=[];
+  let total_videos=0;
+  let completed_videos=0;
+
   if (!isProgressExists) {
     return {
       status: 404,
@@ -412,18 +416,30 @@ const getSavedModuleProgressService = async (req) => {
     //   { course_content_id, user_id },
     //   { is_completed }
     // );
-    progress= await dataSource.getRepository('student_video_progress')
+    progress= await dataSource
+    .getRepository('student_video_progress')
     .createQueryBuilder('student_progress')
-    .leftJoinAndSelect('student_progress.course_content','course_content')
-    
-    .where("course_content.module_id= :module_id", { module_id })
-    //.andWhere('student_progress.user_id=:user_id',{user_id})
+    .leftJoinAndSelect('student_progress.course_content', 'course_content')
+    .where("student_progress.user_id = :user_id", { user_id })
+    .andWhere("student_progress.course_content_id=course_content.id")
+    .andWhere("course_content.module_id = :module_id", { module_id })
     .getMany();
+
+    for(let p of progress){
+      total_videos++;
+      if(p?.is_completed===true){
+        completed_videos++;
+      }
+      if(p?.course_content!==null && p?.course_content?.module_id==module_id){
+        console.log(p)
+        course_contents.push(p?.course_content)
+      }
+    }
   }
   return {
     status: 200,
-    message: "progress saved",
-    data: progress
+    message: "Fetched saved progress",
+    data: {course_contents, completed_percentage_module: (completed_videos/total_videos)*100}
   };
   // }catch(e){
   //   console.log(e)
