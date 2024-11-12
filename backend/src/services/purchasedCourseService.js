@@ -1,5 +1,5 @@
 const { logger } = require("../../logger");
-const { findAll, create, purchaseCourseDetailsRepository } = require("../repositories/purchasedCourseRepository");
+const { findAll, create, purchaseCourseDetailsRepository, createProgressOfStudentOnCourse } = require("../repositories/purchasedCourseRepository");
 const { findUserById } = require("./userService");
 const { findUser } = require('../repositories/userRepository')
 
@@ -18,6 +18,10 @@ const postPurchasedCourse = async (data) => {
         created_at: new Date(),
       };
       await create(payload);
+      await createProgressOfStudentOnCourse({
+        course_id: courseId,
+        user_id: userId
+      })
     // }
     return "success";
   }

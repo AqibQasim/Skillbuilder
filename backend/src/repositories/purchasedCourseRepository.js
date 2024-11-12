@@ -8,6 +8,30 @@ const create = async (payload) => {
   return result;
 };
 
+const createProgressOfStudentOnCourse= async(payload)=>{
+  const {course_id,user_id}= payload;
+  const course_contents_of_course= await dataSource.getRepository('course_content')
+  .createQueryBuilder('course_content')
+  .innerJoin('course_content.modules','course_modules','course_modules.id=course_content.module_id')
+  .innerJoin('course_modules.course','course','course_modules.course_id=course.id')
+  .select()
+  .getMany();
+  
+  const student_video_progress = dataSource.getRepository("student_video_progress");
+
+  for(let content of course_contents_of_course){
+    const create = await student_video_progress.create({
+      user_id,
+      course_id,
+      course_content_id: content.id
+    });
+    await student_video_progress.save(create);
+
+  }
+
+  console.log("//////////////////////////////////////////////",course_contents_of_course)
+}
+
 const findAll = async (filter) => {
   const result = await purchasedCourseRepo.find(filter);
   return result;
@@ -59,4 +83,5 @@ module.exports = {
   findOneByFilter,
   deleteOne,
   purchaseCourseDetailsRepository,
+  createProgressOfStudentOnCourse
 };
