@@ -456,37 +456,61 @@ const getSavedModuleProgressService = async (req) => {
   // }
 };
 
-const completionCoursePercentage = async (user_id, course_id) => {
+const completionCoursePercentageService = async (user_id, course_id) => {
+  // Check if there is progress for the user
   const isProgressExists = await studentVideoProgress.findOne({
-    where: {
-      //course_content_id,
-      user_id,
-    },
+    where: { user_id },
   });
 
   if (!isProgressExists) {
     return {
       status: 404,
-      message: "progress of student not found",
+      message: "Progress of student not found",
     };
   }
 
-  progress = await dataSource
+  // Fetch video progress for the specified course_id
+  const progress = await dataSource
     .getRepository("student_video_progress")
     .createQueryBuilder("student_progress")
-    .leftJoinAndSelect("student_progress.course_content", "course_content")
-    .leftJoinAndSelect("course_content.content_module", "content_module")
     .where("student_progress.user_id = :user_id", { user_id })
-    .andWhere("student_progress.course_content_id=course_content.id")
-    .andWhere("content_module.course_id = :course_id", { course_id })
+    .innerJoin(
+      "student_progress.course_content",
+      "course_content",
+      "student_progress.course_content_id = course_content.id"
+    )
+    .innerJoin(
+      "course_content.modules",
+      "modules",
+      "course_content.module_id = modules.id"
+    )
+    .innerJoin(
+      "modules.course",
+      "course",
+      "modules.course_id = course.id and modules.course_id= :course_id",{course_id}
+    )
+    .select()
     .getMany();
+
+    let total_course_videos= progress.length;
+    let completed_course_videos= 0;
+
+  for(let p of progress){
+    if(p?.is_completed===true){
+      completed_course_videos++;
+    }
+  }
+
+  //calculate percentage of the course completion
+  const completion_percentage= (completed_course_videos/total_course_videos)*100
 
   return {
     status: 200,
     message: "Fetched saved progress",
-    data: progress,
+    completion: completion_percentage,
   };
 };
+
 
 module.exports = {
   createCourseWithDetails,
@@ -505,4 +529,5 @@ module.exports = {
   isCoursePurchasedService,
   saveProgressService,
   getSavedModuleProgressService,
+  completionCoursePercentageService,
 };

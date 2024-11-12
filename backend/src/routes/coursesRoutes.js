@@ -17,6 +17,7 @@ const {
   getIsCoursePurchased,
   saveProgressController,
   getSavedModuleProgressController,
+  getCourseCompletionProgressController,
 } = require("../controllers/courseController");
 const {
   createCourseSchema,
@@ -51,6 +52,7 @@ const coursesRoutes = async (fastify, options) => {
   fastify.get('/is-course-purchased', getIsCoursePurchased);
   fastify.put('/save-progress', saveProgressController);
   fastify.get('/get-saved-module-progress-of-student', getSavedModuleProgressController)
+  fastify.get('/get-course-completion-progress', getCourseCompletionProgressController);
   //fastify.post("/authorize-user-yt", getUserAuthorizedByYT);
 };
 

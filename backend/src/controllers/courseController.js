@@ -15,6 +15,7 @@ const {
   isCoursePurchasedService,
   saveProgressService,
   getSavedModuleProgressService,
+  completionCoursePercentageService,
 } = require("../services/courseService");
 const { getInstructorById } = require("../services/instructorService");
 const {
@@ -495,6 +496,18 @@ const saveProgressController= async(req,res)=>{
   }
 }
 
+const getCourseCompletionProgressController= async(req,res)=>{
+  try{
+    const result= await completionCoursePercentageService(req?.query?.user_id,req?.query?.course_id);
+    res.status(result.status).send({...result})
+  }catch(e){
+    res.status(500)
+    .send({
+      message: e.message
+    })
+  }
+}
+
 const getSavedModuleProgressController= async(req,res)=>{
   try{
     const result= await getSavedModuleProgressService(req);
@@ -541,5 +554,6 @@ module.exports = {
   allStudentCourses,
   getIsCoursePurchased,
   saveProgressController,
-  getSavedModuleProgressController
+  getSavedModuleProgressController,
+  getCourseCompletionProgressController
 };
