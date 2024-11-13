@@ -11,7 +11,7 @@ const getLockStatusService = async (user_id, course_id) => {
     });
 
     if (!isPurchased) {
-      return { status: 403, lock_status: "lockaed", lock: true };
+      return { status: 403, lock_status: "locked", lock: true };
     }
     return {
       status: 200,
