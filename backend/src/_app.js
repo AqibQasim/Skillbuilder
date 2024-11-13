@@ -15,6 +15,7 @@ const uploadOnS3Routes = require("./routes/s3Route");
 const ytRoutes = require('../src/routes/youtubeAPIroutes');
 const {authUrl} = require('../Infrastructure/youtubeConfig');
 const purchsedCoursesRoutes = require("./routes/purchasedCourseRoutes");
+const { lockStatusRoutes } = require("./routes/lockStatusRoutes");
 require("./Authentication/googleAuth");
 
 
@@ -80,6 +81,7 @@ const startServer = async () => {
   app.register(uploadOnS3Routes);
   app.register(ytRoutes);
   app.register(purchsedCoursesRoutes);
+  app.register(lockStatusRoutes);
 
   try {
     await dataSource

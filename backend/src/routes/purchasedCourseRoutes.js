@@ -1,5 +1,5 @@
 const fastify = require("fastify");
-const { getPurchasedCoursesByUserIdController } = require("../controllers/purchasedCoursesController");
+const { getPurchasedCoursesByUserIdController, getLockStatus } = require("../controllers/purchasedCoursesController");
 
 
 const purchsedCoursesRoutes= async (fastify,options)=>{
