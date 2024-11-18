@@ -43,6 +43,7 @@ const {
   createOrder,
   createOrderItem,
 } = require("./orderService");
+const { createNotificationInstructor, createNotificationStudent } = require("./notificationService");
 // const { ConfigurationServicePlaceholders } = require("aws-sdk/lib/config_service_placeholders");
 
 // const emailVerificationForRegister = async (userInfo) => {
@@ -177,6 +178,17 @@ const enrollInCourseService = async ({ student_id, courses, filter }) => {
           },
         });
 
+        const createInstructorNotification= createNotificationInstructor({
+          notification_title:"Congrats!!",
+          notification_message:`One student has purchased a course ${c.title}`,
+          instructor_id: c.instructor.id
+        })
+
+        const createStudentNotification= createNotificationStudent({
+          notification_title:"Congrats!!",
+          notification_message:"You have purchased course successfully",
+          student_id: c.instructor.id
+        })
         //console.log("/////////////////////////", isUserAlreadyPurchasedCourse);
 
         if (isUserAlreadyPurchasedCourse) {
@@ -190,6 +202,8 @@ const enrollInCourseService = async ({ student_id, courses, filter }) => {
             userId: student_id,
             courseId: course.course_id,
           });
+
+
 
           if (result === "success") {
             let enrolledCustomers =

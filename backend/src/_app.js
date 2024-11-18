@@ -16,6 +16,7 @@ const ytRoutes = require('../src/routes/youtubeAPIroutes');
 const {authUrl} = require('../Infrastructure/youtubeConfig');
 const purchsedCoursesRoutes = require("./routes/purchasedCourseRoutes");
 const { lockStatusRoutes } = require("./routes/lockStatusRoutes");
+const { notificationRoutes } = require("./routes/notificationRoutes");
 require("./Authentication/googleAuth");
 
 
@@ -82,6 +83,7 @@ const startServer = async () => {
   app.register(ytRoutes);
   app.register(purchsedCoursesRoutes);
   app.register(lockStatusRoutes);
+  app.register(notificationRoutes);
 
   try {
     await dataSource
