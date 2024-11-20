@@ -1,4 +1,5 @@
 const notificationService = require("../services/notificationService");
+const webPush = require('web-push')
 
 const createNotification = async (req, res) => {
   const { notification_for_instructor, notification_for_student } = req.body;
@@ -42,7 +43,32 @@ const getNotification = async (req, res) => {
   res.status(notifications.status).send({...notifications});
 };
 
+const subscribe= (req, res) => {
+  const subscription = req.body;
+  console.log("Subscription received:", subscription);
+
+  const payload = JSON.stringify({
+    title: "Welcome!",
+    body: "You are subscribed to notifications.",
+  });
+
+  webPush.setVapidDetails(
+    "mailto:alwani.aahil25@gmail.com",
+    process.env.VAPID_PUBLIC_KEY,
+    process.env.VAPID_PRIVATE_KEY
+  );
+
+  webPush
+    .sendNotification(subscription, payload)
+    .then(() => res.status(201).send({ success: true }))
+    .catch((error) => {
+      console.error("Error sending notification:", error);
+      res.status(500).send(error);
+    });
+}
+
 module.exports = {
   createNotification,
   getNotification,
+  subscribe
 };

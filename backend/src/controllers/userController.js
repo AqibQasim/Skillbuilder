@@ -174,9 +174,9 @@ const getOneUser = async (req, res) => {
 
 const enrollInCourse = async (request, reply) => {
   try {
-    const { student_id, courses, filter } = request?.body;
+    const { student_id, courses, filter, subscription } = request?.body;
     //console.log("body:", request?.body);
-    const result = await enrollInCourseService({student_id, courses, filter});
+    const result = await enrollInCourseService({student_id, courses, filter, subscription});
     reply.status(200).send(result);
   } catch (err) {
     console.log("Some internal server error occured", err);

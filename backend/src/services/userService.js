@@ -43,30 +43,11 @@ const {
   createOrder,
   createOrderItem,
 } = require("./orderService");
-const { createNotificationInstructor, createNotificationStudent } = require("./notificationService");
-// const { ConfigurationServicePlaceholders } = require("aws-sdk/lib/config_service_placeholders");
-
-// const emailVerificationForRegister = async (userInfo) => {
-//   try {
-//     console.log('user info:', userInfo);
-//     console.log("Hey2");
-//     const { email } = userInfo;
-//     const existingUser = await findUser({ where: { email } });
-//     if (existingUser) {
-//       throw Error("User Already Exists With This Email");
-//     }
-
-//     const verificationToken = jwt.sign(userInfo, process.env.JWT_SECRET, {
-//       expiresIn: "10h",
-//     });
-
-//     logger.info(["src > repository > userRepository > verificationToken", verificationToken]);
-//     await redisClient.set(email, verificationToken);
-//     await sendVerificationEmail(email, verificationToken);
-//   } catch (err) {
-//     console.log("error:", err);
-//   }
-// };
+const {
+  createNotificationInstructor,
+  createNotificationStudent,
+} = require("./notificationService");
+const webPush = require("../../notification_config/notificationConfig");
 
 const emailVerificationForRegister = async (userInfo) => {
   try {
@@ -151,10 +132,17 @@ const sendEmailService = async (email, content, subject) => {
   }
 };
 
-const enrollInCourseService = async ({ student_id, courses, filter }) => {
+const enrollInCourseService = async ({
+  student_id,
+  courses,
+  filter,
+  subscription,
+}) => {
   //let isCourseNotFound= false;
   //console.log(courses);
-
+  
+  
+  console.log("Subscription received:", subscription);
   let mess = null;
   let totalAmount = 0;
 
@@ -178,18 +166,18 @@ const enrollInCourseService = async ({ student_id, courses, filter }) => {
           },
         });
 
-        const createInstructorNotification= createNotificationInstructor({
-          notification_title:"Congrats!!",
-          notification_message:`One student has purchased a course ${c.title}`,
-          instructor_id: c.instructor.id
-        })
+        const createInstructorNotification = await createNotificationInstructor({
+          notification_title: "Congrats!!",
+          notification_message: `One student has purchased a course ${c.title}`,
+          instructor_id: c.instructor.id,
+        });
 
-        const createStudentNotification= createNotificationStudent({
-          notification_title:"Congrats!!",
-          notification_message:"You have purchased course successfully",
-          student_id: c.instructor.id
-        })
-        //console.log("/////////////////////////", isUserAlreadyPurchasedCourse);
+        const createStudentNotification = await createNotificationStudent({
+          notification_title: "Congrats!!",
+          notification_message: "You have purchased course successfully",
+          student_id: c.instructor.id,
+        });
+
 
         if (isUserAlreadyPurchasedCourse) {
           mess = {
@@ -203,8 +191,6 @@ const enrollInCourseService = async ({ student_id, courses, filter }) => {
             courseId: course.course_id,
           });
 
-
-
           if (result === "success") {
             let enrolledCustomers =
               c.enrolled_customers?.length > 0 ? c.enrolled_customers : [];
@@ -216,6 +202,17 @@ const enrollInCourseService = async ({ student_id, courses, filter }) => {
             await courseRepository.save(c);
           }
         }
+
+        const notificationPayload = {
+          title: "Congrats!!",
+          body: "You have purchased course successfully",
+        };
+
+        webPush
+          .sendNotification(subscription, JSON.stringify(notificationPayload))
+          .then((res) => {
+            console.log("notification sent successfullyyy");
+          });
       } catch (err) {
         console.log("ERROR while enrolling:", err);
         return "ERROR while enrolling:", err;
@@ -223,17 +220,15 @@ const enrollInCourseService = async ({ student_id, courses, filter }) => {
     }
   }
 
-  
-
   if (!mess) {
-    const order_result= await createOrder(student_id, totalAmount);
+    const order_result = await createOrder(student_id, totalAmount);
 
     //console.log(courses)
 
     for (let course of courses) {
-      console.log("\\\\\\\\\\\\\\\\\\\a",course);
+      console.log("\\\\\\\\\\\\\\\\\\a", course);
       //update orders and order items table
-      const order_item_result = await createOrderItem(order_result.id,course);
+      const order_item_result = await createOrderItem(order_result.id, course);
       if (order_item_result.length == 0) {
         mess = {
           status: 500,
@@ -244,73 +239,16 @@ const enrollInCourseService = async ({ student_id, courses, filter }) => {
     }
   }
 
-  if(!mess){
+  if (!mess) {
     return {
       status: 200,
-      message: "enrolled course successfully"
-    }
+      message: "enrolled course successfully",
+    };
   }
 
   return mess;
   //const confirmOrder = await createOrderService(student_id, courses);
 };
-
-// const enrollInCourseService = async ({ student_id, course_id, filter, amount }) => {
-//   try {
-//     const course = await findOneCourse(filter, course_id);
-
-//     console.log("course:", course);
-//     console.log(
-//       "JSON.parse(course?.enrolled_customers):",
-//       course?.enrolled_customers
-//     );
-
-//     if (!course) {
-//       return "The requested course either doesn't exist or has been removed";
-//     } else {
-//       let enrolledCustomers = course.enrolled_customers
-//         ? course.enrolled_customers
-//         : [];
-//       enrolledCustomers.push({ student_id: student_id });
-//       console.log("enrolled customers:", enrolledCustomers);
-
-//       const isUserAlreadyPurchasedCourse = await findOneByFilter({
-//         where: {
-//           purchased_by: student_id,
-//           course_id,
-//         },
-//       });
-
-//       //console.log(isUserAlreadyPurchasedCourse);
-
-//       if (isUserAlreadyPurchasedCourse != null) {
-//         return {
-//           status: 400,
-//           message: "course already purchased",
-//         };
-//       } else {
-//         const result = await postPurchasedCourse({
-//           userId: student_id,
-//           courseId: course_id,
-//         });
-
-//         if (result === "success") {
-//           course.enrolled_customers = enrolledCustomers;
-//           const course_result = await courseRepository.save(course);
-//           console.log("updated result:", result);
-//           return {
-//             status: 200,
-//             message: "enrolled in course successfully",
-//             course_result
-//           };
-//         }
-//       }
-//     }
-//   } catch (err) {
-//     console.log("ERROR while enrolling:", err);
-//     return "ERROR while enrolling:", err;
-//   }
-// };
 
 const createUserAfterVerification = async (verificationToken) => {
   try {
@@ -377,11 +315,11 @@ const UserLogin = async (loginData) => {
 
 const getOneUserService = async (id) => {
   try {
-    if(id===null){
+    if (id === null) {
       return {
         status: 400,
-        message:"user id can not be null"
-      }
+        message: "user id can not be null",
+      };
     }
     let user = await findOneUser(id);
     if (user) {
@@ -400,8 +338,8 @@ const getOneUserService = async (id) => {
     console.log("ERR:", e);
     return {
       status: 400,
-      message:e.message
-    }
+      message: e.message,
+    };
   }
 };
 

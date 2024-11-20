@@ -135,6 +135,7 @@ const userEnrollcourseSchema = {
         student_id: { type: "number" },
         courses: { type: "array" },
         filter: { type: "string" },
+        subscription: { type: "object"}
       },
       required: ["student_id", "courses", "filter"],
     },
