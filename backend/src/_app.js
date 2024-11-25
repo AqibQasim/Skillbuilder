@@ -26,7 +26,7 @@ const startServer = async () => {
   console.log("authURL:", authUrl);
 
   app.register(require("@fastify/cors"), {
-    origin: process.env.ALLOWED_CLIENT,
+    origin: "*",
     // origin: "*",
     methods: ["GET", "POST", "DELETE", "PUT"],
   });
