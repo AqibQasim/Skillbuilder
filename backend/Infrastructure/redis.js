@@ -8,7 +8,7 @@ const redis = require('redis');
 
 const redisClient = redis.createClient({
     socket:{
-        host: 'localhost',
+        host: process.env.SERVER_HOST,
         port: 6379
     },
     //password:'postgres'
