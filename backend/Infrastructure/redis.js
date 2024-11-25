@@ -1,12 +1,18 @@
 const redis = require('redis');
 
-const redisConfig = {
-    host: 'localhost',
-    port: 6379,
-    // password: '', If password
-};
+// const redisConfig = {
+//     host: 'localhost',
+//     port: 6379,
+//     // password: '', If password
+// };
 
-const redisClient = redis.createClient(redisConfig);
+const redisClient = redis.createClient({
+    socket:{
+        host: 'localhost',
+        port: 6379
+    },
+    //password:'postgres'
+});
 
 redisClient.on('error', (err) => {
     console.log('Redis Client Error', err);

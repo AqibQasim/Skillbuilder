@@ -135,7 +135,7 @@ const userEnrollcourseSchema = {
         student_id: { type: "number" },
         courses: { type: "array" },
         filter: { type: "string" },
-        subscription: { type: "object"}
+        subscription: { type: "object" },
       },
       required: ["student_id", "courses", "filter"],
     },
@@ -180,6 +180,23 @@ const userSwaggerSchema = {
     //     apiKey: [],
     //   },
     // ],
+  },
+};
+
+const googleAuthSchema = {
+  schema: {
+    description: "Auth with google",
+    tags: ["google-auth"],
+    summary: "Login",
+    body: {
+      type: "object",
+      properties: {
+        email: { type: "string", format: "email" },
+        first_name: { type: "string" },
+        last_name: { type: "string" },
+      },
+      required: ["email", "first_name", "last_name"], // Make sure to include required properties as an array
+    },
   },
 };
 
@@ -469,7 +486,7 @@ module.exports = {
   passwordResetSchema,
   otpVerificationSchema,
   googleAuthCallbackSchema,
-  // googleAuthSchema,
+  googleAuthSchema,
   setStudentStatusschema,
   getAllUsersSchema,
   userEnrollcourseSchema,

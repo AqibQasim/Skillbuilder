@@ -17,7 +17,7 @@ const scopes = [
     'https://www.googleapis.com/auth/youtube'
 ];
 
-// const redirectUri = 'http://localhost:4000/oauth2callback';
+// const redirectUri = '${process.env.SERVER_BASE_URL}/oauth2callback';
 // oauth2Client.setRedirectUri(redirectUri);
 
 const authUrl = oauth2Client.generateAuthUrl({

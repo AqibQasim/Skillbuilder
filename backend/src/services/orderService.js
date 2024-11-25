@@ -136,8 +136,8 @@ async function initiateCheckoutService(userId, items) {
     payment_method_types: ["card"],
     line_items: lineItems,
     mode: "payment",
-    success_url: `http://localhost:4000/complete?session_id={CHECKOUT_SESSION_ID}&order_id=${order.id}`,
-    cancel_url: `http://localhost:4000/cancel`,
+    success_url: `${process.env.SERVER_BASE_URL}/complete?session_id={CHECKOUT_SESSION_ID}&order_id=${order.id}`,
+    cancel_url: `${process.env.SERVER_BASE_URL}/cancel`,
   });
 
   console.log("session details ----------->>>>>", session);
