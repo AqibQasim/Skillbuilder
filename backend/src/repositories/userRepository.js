@@ -3,8 +3,6 @@ const dataSource = require("../../Infrastructure/postgres");
 const userRepository = dataSource.getRepository("User");
 const bcrypt = require("bcrypt");
 
-
-
 const createUser = async (userInfo) => {
   logger.info(["src > repository > userRepository > ", userInfo]);
   try {
@@ -34,7 +32,7 @@ const findUser = async (filter) => {
   try {
     const userRepository = dataSource.getRepository("User");
     const user = await userRepository.findOne({
-      where: filter
+      where: filter,
     });
     return user ? user : null;
   } catch (error) {
@@ -46,45 +44,47 @@ const findUser = async (filter) => {
 const findOneUser = async (id) => {
   console.log("id in find one user method:", id);
   //try {
-    const userRepository = dataSource.getRepository("User");
-    if(id===null){
-      return null;
-    }
-    const user = await userRepository.findOne({
-      where: { id: id }
+  const userRepository = dataSource.getRepository("User");
+  if (id === null) {
+    return null;
+  }
+  const user = await userRepository.findOne({
+    where: { id: id },
+  });
+
+  if (!user) {
+    return null;
+  }
+
+  const coursesRepository = dataSource.getRepository("Course");
+  const courses = await coursesRepository.find();
+
+  const enrolled_courses_by_student = [];
+
+  if (courses && courses.length > 0) {
+    courses.forEach((course) => {
+      const enrolledCustomers = course.enrolled_customers;
+
+      if (enrolledCustomers && enrolledCustomers.length > 0) {
+        enrolledCustomers.forEach((student) => {
+          console.log(student);
+          if (student.student_id === parseInt(id)) {
+            enrolled_courses_by_student.push({
+              id: course.id,
+              title: course.title,
+              learning_outcomes: course.learning_outcomes,
+              image: course.image,
+              amount: course.amount,
+              discount: course.discount,
+              rating: course.rating,
+            });
+          }
+        });
+      }
     });
+  }
 
-    if (!user) {
-      return null;
-    }
-
-    const coursesRepository = dataSource.getRepository("Course");
-    const courses = await coursesRepository.find();
-
-    const enrolled_courses_by_student = [];
-
-    if (courses && courses.length > 0) {
-      courses.forEach((course) => {
-        const enrolledCustomers = course.enrolled_customers;
-        
-        if (enrolledCustomers && enrolledCustomers.length > 0) {
-          enrolledCustomers.forEach((student) => {
-            console.log(student);
-            if (student.student_id === parseInt(id)) {
-              enrolled_courses_by_student.push({
-                title: course.title,
-                learning_outcomes: course.learning_outcomes,
-                image: course.image,
-                amount: course.amount,
-                rating: course.rating
-              });
-            }
-          });
-        }
-      });
-    }
-
-    return { ...user, enrolled_courses_by_student };
+  return { ...user, enrolled_courses_by_student };
   // } catch (err) {
   //   console.log("ERR:", err);
   //   return null;
@@ -104,28 +104,29 @@ const updateUserByEmail = async (email, newData) => {
     if (!user) {
       return {
         status: false,
-        message: "Email is incorrect"
-      }
+        message: "Email is incorrect",
+      };
     } else {
-      const passwordMatch = await bcrypt.compare(newData.current_password, user?.password);
+      const passwordMatch = await bcrypt.compare(
+        newData.current_password,
+        user?.password
+      );
 
       if (!passwordMatch) {
         return {
           status: false,
-          message: "Password does not match"
-        }
+          message: "Password does not match",
+        };
       } else {
         user.password = await bcrypt.hash(newData.new_password, 10);
         let updatedUser = await userRepository.save(user);
         return {
           status: true,
           message: "Password updated successfully",
-          userData: updatedUser
+          userData: updatedUser,
         };
       }
-
     }
-
   } catch (error) {
     console.error("Error updating user:", error.message);
     throw error;
@@ -147,13 +148,13 @@ const updateUserById = async (id, payload) => {
 
     let update = userRepository.merge(user, payload);
     let updated = userRepository.save(update);
-    console.log("updated data: ", update)
+    console.log("updated data: ", update);
     if (update) {
       return {
         status: true,
         message: "Profile updated successfully",
-        data: update
-      }
+        data: update,
+      };
     } else {
       throw new Error("Profile not updated");
     }
@@ -178,35 +179,43 @@ const UserContact = async (userInfo) => {
   }
 };
 
-const setUserStatusRepository = async (requestedUser, enrolledStudents, id, status, status_desc) => {
+const setUserStatusRepository = async (
+  requestedUser,
+  enrolledStudents,
+  id,
+  status,
+  status_desc
+) => {
   const userExist = await userRepository.findOne({
     where: { id: id },
   });
 
   if (!userExist) {
-    return 'No such student exists!';
-  };
+    return "No such student exists!";
+  }
 
   enrolledStudents.forEach((stud) => {
     console.log("[student]:", stud);
     if (stud?.id === id) {
-      requestedUser = stud
+      requestedUser = stud;
     }
-  }); 
+  });
 
   if (!requestedUser) {
     console.log("[REQUESTED USER IS NOT ENROLLED IN ANY COURSE]");
-    return "[REQUESTED USER IS NOT ENROLLED IN ANY COURSE]"
+    return "[REQUESTED USER IS NOT ENROLLED IN ANY COURSE]";
   } else {
-    console.log("[REQUESTED USER THAT IS ENROLLED IN A COURSE]:", requestedUser);
-    Object.assign(userExist, {status: status, status_desc: status_desc });
+    console.log(
+      "[REQUESTED USER THAT IS ENROLLED IN A COURSE]:",
+      requestedUser
+    );
+    Object.assign(userExist, { status: status, status_desc: status_desc });
 
     const updatedCourse = await userRepository.save(userExist);
     console.log("[UPDATED COURSE]:", updatedCourse);
-    return "[UPDATED COURSE]:", updatedCourse
+    return "[UPDATED COURSE]:", updatedCourse;
   }
-}
-
+};
 
 module.exports = {
   createUser,
@@ -216,5 +225,5 @@ module.exports = {
   updateUserById,
   UserContact,
   findOneUser,
-  setUserStatusRepository
+  setUserStatusRepository,
 };
