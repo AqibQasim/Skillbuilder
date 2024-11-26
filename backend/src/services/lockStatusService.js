@@ -9,7 +9,6 @@ const getLockStatusService = async (user_id, course_id) => {
         purchased_by: user_id,
       },
     });
-
     if (!isPurchased) {
       return { status: 403, lock_status: "locked", lock: true };
     }
@@ -25,7 +24,6 @@ const getLockStatusService = async (user_id, course_id) => {
     };
   }
 };
-
 module.exports = {
   getLockStatusService,
 };

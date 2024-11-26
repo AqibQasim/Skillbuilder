@@ -30,6 +30,7 @@ const {
   getEnrolledStudentsService,
   setStudentStatusService,
   getStudentEnrolledCoursesOnInstructorService,
+  googleAuthService,
 } = require("../services/userService");
 
 const createStudent = async (request, reply) => {
@@ -74,6 +75,11 @@ const sendEmail = async (req, res) => {
     res.status(200).send("Some error occured:", e);
   }
 };
+
+const googleAuth= async(req,res)=>{
+  const result= await googleAuthService(req.body);
+  res.status(result.status).send({...result})
+}
 
 const EmailVerify = async (request, reply) => {
   try {
@@ -193,7 +199,7 @@ const GoggleLoginCallBAck = async (request, reply) => {
     const userCreation = await createGoogleUser(user);
     console.log("userCreation: ", userCreation);
 
-    reply.redirect(`${process.env.HOME_PAGE_REDIRECT}/home`);
+    reply.redirect(`${process.env.HOME_PAGE_REDIRECT}`);
 
     // reply.send({
     //   status: true,
@@ -415,5 +421,6 @@ module.exports = {
   getOneInstCourseStudents,
   getEnrolledStudents,
   setStudentStatus,
-  getStudentEnrolledCoursesOnInstructorController
+  getStudentEnrolledCoursesOnInstructorController,
+  googleAuth
 };

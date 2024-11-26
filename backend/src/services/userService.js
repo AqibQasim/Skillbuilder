@@ -280,6 +280,32 @@ const createUserAfterVerification = async (verificationToken) => {
   }
 };
 
+const googleAuthService= async(body)=>{
+  const isUserExist = await findUser({ email: body?.email });
+    if (isUserExist) {
+      logger.info(["user already exists", isUserExist]);
+      return{
+        status: 200,
+        message: "user already exist",
+        data: isUserExist
+      }
+    }
+    
+    //console.log("currentTime: ", currentTime);
+    const currentTime = new Date();
+    const userData = {
+      ...body,
+      password: null,
+      created_at: currentTime,
+    };
+    let newUser = await createUser(userData);
+    return {
+      status: 200,
+      message: "user registered successfully",
+      data: newUser
+    }
+}
+
 const findAllUser = async () => {
   try {
     const data = await readAllUser();
@@ -734,4 +760,5 @@ module.exports = {
   getEnrolledStudentsService,
   setStudentStatusService,
   getStudentEnrolledCoursesOnInstructorService,
+  googleAuthService
 };

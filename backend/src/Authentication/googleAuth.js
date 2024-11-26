@@ -6,7 +6,7 @@ const { createGoogleUser } = require("../services/userService");
 fastifyPassport.use('google', new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "http://localhost:4000/auth/google/callback"
+    callbackURL: `${process.env.SERVER_BASE_URL}/auth/google/callback`
 }, async function (accessToken, refreshToken, profile, cb) {
     cb(undefined, profile)
     // const fullName = profile.displayName;

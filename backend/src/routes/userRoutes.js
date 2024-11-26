@@ -1,37 +1,24 @@
 const { default: passport } = require("@fastify/passport");
 const {
   createStudent,
-
   getAllUsers,
-
   login,
-
   GoggleLoginCallBAck,
-
   EmailVerify,
-
   ContactUS,
-
   passwordResetHandler,
-
   otpVerification,
-
   changePassword,
-
   profileUpdateHandler,
-
   getOneUser,
-
   sendEmail,
-
   enrollInCourse,
-
   getStudentsByInstructorId,
-
   getOneInstCourseStudents,
   getEnrolledStudents,
   setStudentStatus,
   getStudentEnrolledCoursesOnInstructorController,
+  googleAuth,
 } = require("../controllers/userController");
 const {
   ValidateUser,
@@ -46,6 +33,7 @@ const {
   userEnrollcourseSchema,
   getAllUsersSchema,
   setStudentStatusschema,
+  googleAuthSchema,
 } = require("../Schema/userSchema");
 const {
   contactUsSchema,
@@ -65,6 +53,7 @@ const userRoutes = async (fastify, options) => {
 
   //signin as student
   fastify.post("/login", loginSchema, login);
+  fastify.put("/google-auth", googleAuthSchema, googleAuth)
 
   //sign in with google
   fastify.get(
