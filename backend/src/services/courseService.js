@@ -38,10 +38,11 @@ const createCourseWithDetails = async (requestedData) => {
       video_url,
       skills,
     } = requestedData;
+    console.log(requestedData)
     const courseBasicsPayload = {
       instructor_id,
       title,
-      creation_duration_hours,
+      //creation_duration_hours,
       learning_outcomes,
       category,
       modulesCount,

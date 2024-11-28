@@ -4,10 +4,16 @@ const courseContent = require("../entities/courseContent");
 const courseRepository = dataSource.getRepository("Course");
 const courseRevRep = dataSource.getRepository("courseReviews");
 const courseContentRepository = dataSource.getRepository("course_content");
+const uuid= require('uuid');
+const { base64_decode } = require("../utils/base64_decode");
+const { join } = require("lodash");
 
 const createCourse = async (data) => {
   try {
-    const courseCreating = courseRepository.create(data);
+    const randomFileName= uuid.v4()+'.'+data.image.extension;
+    const targetDir= join(process.cwd(),"media","images","course");
+    base64_decode(data.image.image, randomFileName,targetDir);
+    const courseCreating = courseRepository.create({...data, image: randomFileName.toString()});
     const courseBasics = await courseRepository.save(courseCreating);
     return courseBasics;
   } catch (error) {

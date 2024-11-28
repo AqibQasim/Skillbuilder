@@ -21,6 +21,7 @@ module.exports = new EntitySchema({
     },
     creation_duration_hours: {
       type: "int",
+      default:0
     },
     learning_outcomes: {
       type: "varchar",

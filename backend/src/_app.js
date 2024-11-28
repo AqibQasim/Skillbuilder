@@ -75,15 +75,15 @@ const startServer = async () => {
     res.send(result);
   });
 
-  //Register routes
-  app.register(userRoutes);
-  app.register(coursesRoutes);
-  app.register(instructorRoutes);
-  app.register(uploadOnS3Routes);
-  app.register(ytRoutes);
-  app.register(purchsedCoursesRoutes);
-  app.register(lockStatusRoutes);
-  app.register(notificationRoutes);
+  // Register all routes under the /v1 prefix
+  app.register(userRoutes, { prefix: "/v1" });
+  app.register(coursesRoutes, { prefix: "/v1" });
+  app.register(instructorRoutes, { prefix: "/v1" });
+  app.register(uploadOnS3Routes, { prefix: "/v1" });
+  app.register(ytRoutes, { prefix: "/v1" });
+  app.register(purchsedCoursesRoutes, { prefix: "/v1" });
+  app.register(lockStatusRoutes, { prefix: "/v1" });
+  app.register(notificationRoutes, { prefix: "/v1" });
 
   try {
     await dataSource
