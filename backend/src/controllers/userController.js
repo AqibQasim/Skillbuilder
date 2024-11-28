@@ -90,7 +90,7 @@ const EmailVerify = async (request, reply) => {
       await redisClient.del(email);
       let newUser = await createUserAfterVerification(token);
       console.log("newUser creation status:", newUser);
-      reply.redirect(process.env.LOGINREDIRECTPAGE);
+      reply.redirect('/login');
       return;
     } else {
       reply.status(400).send("Link Expired");
