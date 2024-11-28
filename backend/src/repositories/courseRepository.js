@@ -4,10 +4,31 @@ const courseContent = require("../entities/courseContent");
 const courseRepository = dataSource.getRepository("Course");
 const courseRevRep = dataSource.getRepository("courseReviews");
 const courseContentRepository = dataSource.getRepository("course_content");
+const uuid = require("uuid");
+const { base64_decode } = require("../utils/base64_decode");
+const { join } = require("lodash");
 
 const createCourse = async (data) => {
   try {
-    const courseCreating = courseRepository.create(data);
+    // Generate a random file name with the appropriate extension
+    const randomFileName = uuid.v4() + "." + data.image.extension;
+
+    // Define the target directory
+    const targetDir = join(process.cwd(), "media", "images", "course");
+
+    // Ensure the Base64 string does not include the prefix
+    const base64String = data.image.image.replace(
+      /^data:image\/\w+;base64,/,
+      ""
+    );
+
+    // Call the function
+    base64_decode(base64String, randomFileName, targetDir);
+
+    const courseCreating = courseRepository.create({
+      ...data,
+      image: randomFileName.toString(),
+    });
     const courseBasics = await courseRepository.save(courseCreating);
     return courseBasics;
   } catch (error) {
@@ -344,7 +365,7 @@ const studentEnrolledCoursesOnInstructorRepository = async (
           learning_outcomes: course.learning_outcomes,
           amount: course.amount,
           rating: course.rating,
-          id: course.id
+          id: course.id,
         });
       }
     });
@@ -371,6 +392,6 @@ module.exports = {
   setCourseStatusRepository,
   findOneCourseWithStudentID,
   studentEnrolledCoursesOnInstructorRepository,
-  findAllStudentCourses
+  findAllStudentCourses,
   // saveReview
 };
