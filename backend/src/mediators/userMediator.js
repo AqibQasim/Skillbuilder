@@ -30,8 +30,7 @@ const sendVerificationEmail = async (email, verificationToken) => {
       html: `
       <h1>Click on the link below to verify your email!</h1>
       
-      <a href="http://${process.env.SERVER_HOST}:${process.env.SERVER_PORT
-        }/v1/verify-email?email=${encodeURIComponent(
+      <a href="${process.env.SERVER_BBASE_URL}/verify-email?email=${encodeURIComponent(
           email
         )}&token=${verificationToken}">Verify your email</a>`,
     };
