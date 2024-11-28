@@ -5,14 +5,16 @@ const jwt = require("jsonwebtoken");
 const cookie = require("cookie");
 const randomstring = require('randomstring');
 const { redisClient } = require("../../Infrastructure/redis");
+const mailTransporter= require('../../Infrastructure/mailConfig')
 
-const transporter = nodemailer.createTransport({
-  service: "Gmail",
-  auth: {
-    user: process.env.MAIL_USER,
-    pass: process.env.MAIL_PASS,
-  },
-});
+
+// const transporter = nodemailer.createTransport({
+//   service: "Gmail",
+//   auth: {
+//     user: process.env.MAIL_USER,
+//     pass: process.env.MAIL_PASS,
+//   },
+// });
 
 const generateOTP = async () => {
   return randomstring.generate({
@@ -24,7 +26,7 @@ const generateOTP = async () => {
 const sendVerificationEmail = async (email, verificationToken) => {
   try {
     const mailOptions = {
-      from: "fa21bscs0017@maju.edu.pk",
+      from: "skillbuilder@gmail.com",
       to: email,
       subject: "Email Verification",
       html: `
@@ -36,7 +38,7 @@ const sendVerificationEmail = async (email, verificationToken) => {
         )}&token=${verificationToken}">Verify your email</a>`,
     };
 
-    await transporter.sendMail(mailOptions);
+    await mailTransporter.sendMail(mailOptions);
 
     logger.info("Verification email sent successfully.");
     return "Verification email has been sent to your email, please confirm your email."
@@ -86,7 +88,7 @@ const sendOTPMail = async (email) => {
       html: `<h1> Please enter the below mentioned OTP for reset password </h1> <br> <h2> ${OTP} </h2>`,
     };
 
-    await transporter.sendMail(mailOptions);
+    await mailTransporter.sendMail(mailOptions);
     redisClient.set(`otp-${email}`, OTP)
 
   } catch (error) {

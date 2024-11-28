@@ -48,6 +48,7 @@ const {
   createNotificationStudent,
 } = require("./notificationService");
 const webPush = require("../../notification_config/notificationConfig");
+const mailTransporter= require('../../Infrastructure/mailConfig')
 
 const emailVerificationForRegister = async (userInfo) => {
   try {
@@ -87,13 +88,13 @@ const emailVerificationForRegister = async (userInfo) => {
   }
 };
 
-const transporter = nodemailer.createTransport({
-  service: "Gmail",
-  auth: {
-    user: process.env.MAIL_USER,
-    pass: process.env.MAIL_PASS,
-  },
-});
+// const transporter = nodemailer.createTransport({
+//   service: "Gmail",
+//   auth: {
+//     user: process.env.MAIL_USER,
+//     pass: process.env.MAIL_PASS,
+//   },
+// });
 
 const sendEmailService = async (email, content, subject) => {
   try {
@@ -105,7 +106,7 @@ const sendEmailService = async (email, content, subject) => {
 
     if (checkIfUserIsInDb) {
       const mailOptions = {
-        from: "fa21bscs0017@maju.edu.pk",
+        from: process.env.MAIL_USER,
         to: email,
         subject: subject,
         html: ` <p>
@@ -113,7 +114,7 @@ const sendEmailService = async (email, content, subject) => {
         </p>`,
       };
 
-      await transporter.sendMail(mailOptions);
+      await mailTransporter.sendMail(mailOptions);
 
       logger.info("Email sent successfully.");
       return {
@@ -468,13 +469,13 @@ const ContactUser = async (userInfo) => {
     const ContactUs = await UserContact(userInfo);
     console.log("Contact Us in Service ", ContactUs);
     if (ContactUs) {
-      const transporter = nodemailer.createTransport({
-        service: "Gmail",
-        auth: {
-          user: process.env.MAIL_USER,
-          pass: process.env.MAIL_PASS,
-        },
-      });
+      // const transporter = nodemailer.createTransport({
+      //   service: "Gmail",
+      //   auth: {
+      //     user: process.env.MAIL_USER,
+      //     pass: process.env.MAIL_PASS,
+      //   },
+      // });
 
       const UsermailOptions = {
         from: process.env.MAIL_USER,
@@ -491,8 +492,8 @@ const ContactUser = async (userInfo) => {
                <p>${userInfo.text}</p>`,
       };
 
-      await transporter.sendMail(UsermailOptions);
-      await transporter.sendMail(AdminmailOptions);
+      await mailTransporter.sendMail(UsermailOptions);
+      await mailTransporter.sendMail(AdminmailOptions);
       logger.info(`Email Successfully Send to ${userInfo.email}`);
       return "A mail has successfully being sent to the user.";
     }

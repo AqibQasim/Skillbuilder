@@ -1,11 +1,11 @@
 const GoogleStrategy = require("passport-google-oauth2").Strategy;
 const fastifyPassport = require('@fastify/passport');
 const { logger } = require("../../logger");
-const { createGoogleUser } = require("../services/userService");
+// { createGoogleUser } = require("../services/userService");
 
 fastifyPassport.use('google', new GoogleStrategy({
-    clientID: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    clientID: process.env.GMAIL_CLIENT_ID,
+    clientSecret: process.env.GMAIL_CLIENT_SECRET,
     callbackURL: `${process.env.SERVER_BASE_URL}/auth/google/callback`
 }, async function (accessToken, refreshToken, profile, cb) {
     cb(undefined, profile)
@@ -20,7 +20,7 @@ fastifyPassport.use('google', new GoogleStrategy({
     //     source: profile.provider
     // };
     // console.log(userData);
-    // await createGoogleUser(userData);
+    // await createGMAILUser(userData);
 }
 ))
 
