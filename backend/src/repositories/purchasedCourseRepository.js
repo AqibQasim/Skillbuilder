@@ -57,8 +57,11 @@ const purchaseCourseDetailsRepository = async (user_id) => {
     .innerJoinAndSelect("instructor.user", "instructor_user") // Join with user table for instructor details
     .select([
       "purchased_course.id",
+      "purchased_course.created_at",
       "user.id",
       "course.id",
+      "course.amount",
+      "course.discount",
       "course.description",
       "course.created_at",
       "course.image",
