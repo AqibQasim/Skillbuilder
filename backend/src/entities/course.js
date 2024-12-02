@@ -57,6 +57,7 @@ module.exports = new EntitySchema({
     },
     image: {
       type: "varchar",
+      nullable: true,
     },
     rating: {
       type: "decimal",

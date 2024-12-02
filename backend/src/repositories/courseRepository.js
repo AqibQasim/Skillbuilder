@@ -6,12 +6,14 @@ const courseRevRep = dataSource.getRepository("courseReviews");
 const courseContentRepository = dataSource.getRepository("course_content");
 const uuid= require('uuid');
 const { base64_decode } = require("../utils/base64_decode");
-const { join } = require("lodash");
+const path= require('path')
+
 
 const createCourse = async (data) => {
   try {
+    console.log(data)
     const randomFileName= uuid.v4()+'.'+data.image.extension;
-    const targetDir= join(process.cwd(),"media","images","course");
+    const targetDir= path.join(process.cwd(),"media","images","course");
     base64_decode(data.image.image, randomFileName,targetDir);
     const courseCreating = courseRepository.create({...data, image: randomFileName.toString()});
     const courseBasics = await courseRepository.save(courseCreating);

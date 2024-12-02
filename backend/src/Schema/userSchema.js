@@ -75,6 +75,7 @@ const updateProfileValidation = Joi.object({
   id: Joi.number().required(),
   first_name: Joi.string(),
   last_name: Joi.string(),
+  profile: Joi.object().optional().allow(null),
   email: Joi.string()
     .pattern(
       new RegExp(
@@ -283,6 +284,7 @@ const updateProfileSchema = {
         email: { type: "string" },
         password: { type: "string" },
         profession: { type: "string" },
+        profile: { type: "object", nullable: true },
         location: { type: "string" },
         twitter_profile: { type: "string" },
         facebook_profile: { type: "string" },

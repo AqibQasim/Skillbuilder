@@ -51,7 +51,7 @@ const createCourseWithDetails = async (requestedData) => {
       video_url,
       discount: requestedData?.discount,
       charges: amount * 0.03,
-      image: image,
+      image,
       skills,
       created_at: new Date(),
     };

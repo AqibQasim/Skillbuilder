@@ -2,6 +2,9 @@ const { logger } = require("../../logger");
 const dataSource = require("../../Infrastructure/postgres");
 const userRepository = dataSource.getRepository("User");
 const bcrypt = require("bcrypt");
+const uuid = require("uuid");
+const path = require("path");
+const { base64_decode } = require("../utils/base64_decode");
 
 const createUser = async (userInfo) => {
   logger.info(["src > repository > userRepository > ", userInfo]);
@@ -145,8 +148,24 @@ const updateUserById = async (id, payload) => {
     if (!user) {
       throw Error("User not found");
     }
+    const prevImage= user?.profile;
+    let randomFileName = null;
+    let update = null;
+    if (payload?.profile?.image!=null) {
+      randomFileName = uuid.v4() + "." + payload.profile.extension;
+      const targetDir = path.join(process.cwd(), "media", "images", "profile");
+      base64_decode(payload.profile.image, randomFileName, targetDir);
+      update = userRepository.merge(user, {
+        ...payload,
+        profile: randomFileName,
+      });
+    } else {
+      update = userRepository.merge(user, {
+        ...payload,
+        profile: prevImage
+      });
+    }
 
-    let update = userRepository.merge(user, payload);
     let updated = userRepository.save(update);
     console.log("updated data: ", update);
     if (update) {

@@ -20,6 +20,7 @@
     "@fastify/oauth2": "^7.8.0",
     "@fastify/passport": "^2.4.0",
     "@fastify/secure-session": "^7.1.0",
+    "@fastify/static": "^6.11.1",
     "@fastify/swagger": "^8.14.0",
     "@fastify/swagger-ui": "^3.0.0",
     "aws-sdk": "^2.1609.0",

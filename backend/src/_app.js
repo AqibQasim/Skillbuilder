@@ -11,14 +11,13 @@ const { fastifyOptions } = require("../fastifyOpts");
 const userRoutes = require("./routes/userRoutes");
 const coursesRoutes = require("./routes/coursesRoutes");
 const instructorRoutes = require("./routes/instructorRoutes");
-const uploadOnS3Routes = require("./routes/s3Route"); 
-const ytRoutes = require('../src/routes/youtubeAPIroutes');
-const {authUrl} = require('../Infrastructure/youtubeConfig');
+const uploadOnS3Routes = require("./routes/s3Route");
+const ytRoutes = require("../src/routes/youtubeAPIroutes");
+const { authUrl } = require("../Infrastructure/youtubeConfig");
 const purchsedCoursesRoutes = require("./routes/purchasedCourseRoutes");
 const { lockStatusRoutes } = require("./routes/lockStatusRoutes");
 const { notificationRoutes } = require("./routes/notificationRoutes");
 require("./Authentication/googleAuth");
-
 
 const startServer = async () => {
   const app = fastify(fastifyOptions);
@@ -38,6 +37,32 @@ const startServer = async () => {
       path: "/",
     },
   });
+
+  const course_path = path.join(__dirname, "..", "media", "images", "course");
+  if (!fs.existsSync(course_path)) {
+    // Create the directory if it does not exist
+    fs.mkdirSync(course_path, { recursive: true });
+  }
+
+  const profile_path = path.join(__dirname, "..", "media", "images", "profile");
+  if (!fs.existsSync(profile_path)) {
+    // Create the directory if it does not exist
+    fs.mkdirSync(profile_path, { recursive: true });
+  }
+
+  // Register the static file server for courses
+  app.register(require("@fastify/static"), {
+    root: course_path,
+    prefix: "/v1/media/course/", // URL prefix for course images
+  });
+
+  // Register the static file server for profiles
+  app.register(require("@fastify/static"), {
+    root: profile_path,
+    prefix: "/v1/media/profile/", // URL prefix for profile images
+    decorateReply: false, // Avoid adding `sendFile` decorator
+  });
+
   // app.register(require('fastify-multipart'));
   app.register(fastifyPassport.default.initialize());
   app.register(fastifyPassport.default.secureSession());
