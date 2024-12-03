@@ -18,6 +18,8 @@ const purchsedCoursesRoutes = require("./routes/purchasedCourseRoutes");
 const { lockStatusRoutes } = require("./routes/lockStatusRoutes");
 const { notificationRoutes } = require("./routes/notificationRoutes");
 require("./Authentication/googleAuth");
+const fastifyMultipart = require('@fastify/multipart');
+
 
 const startServer = async () => {
   const app = fastify(fastifyOptions);
@@ -63,10 +65,17 @@ const startServer = async () => {
     decorateReply: false, // Avoid adding `sendFile` decorator
   });
 
+  app.register(fastifyMultipart, {
+    limits: {
+      files: 7,
+      fileSize: 150 * 1024 * 1024, // Set file size limit to 150MB
+    }
+  })
+
   // app.register(require('fastify-multipart'));
   app.register(fastifyPassport.default.initialize());
   app.register(fastifyPassport.default.secureSession());
-  app.register(require("@fastify/multipart"));
+  //app.register(require("@fastify/multipart"));
   // app.register(require('fastify-multer'))
   app.register(require("@fastify/swagger"));
   app.register(require("@fastify/swagger-ui"), {
