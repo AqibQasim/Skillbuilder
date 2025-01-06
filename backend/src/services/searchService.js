@@ -9,8 +9,10 @@ const searchCourse= async(courseName)=>{
 
     const courses = await courseRepository
         .createQueryBuilder("course")
-        .leftJoinAndSelect("course.instructor","instructor")
+        .innerJoinAndSelect("course.instructor","instructor")
+        .innerJoinAndSelect("instructor.user","user","instructor.user_id=user.id")
         .where("course.title ILIKE :courseName", { courseName: `%${courseName}%` })
+        .orWhere("course.description ILIKE :courseName",{courseName:`%${courseName}%`})
         .andWhere("course.status='approved'")
         .getMany();
 
