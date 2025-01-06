@@ -12,7 +12,7 @@ const searchCourse= async(courseName)=>{
         .innerJoinAndSelect("course.instructor","instructor")
         .innerJoinAndSelect("instructor.user","user","instructor.user_id=user.id")
         .where("course.title ILIKE :courseName", { courseName: `%${courseName}%` })
-        .orWhere("course.description ILIKE :courseName",{courseName:`%${courseName}%`})
+        .orWhere("course.learning_outcomes ILIKE :courseName",{courseName:`%${courseName}%`})
         .andWhere("course.status='approved'")
         .getMany();
 
