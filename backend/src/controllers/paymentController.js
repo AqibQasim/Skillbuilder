@@ -16,4 +16,24 @@ async function cancelCheckout(req, reply) {
     reply.send('Payment cancelled.');
 }
 
-module.exports = { completeCheckout, cancelCheckout };
+async function completeCareerCounsellingPayment(req,reply) {
+    try {
+        const result= await paymentService.completeCareerCounsellingPayment(req);
+        reply.status(200).send({...result});
+    } catch (error) {
+        console.error("Error completing checkout session:", error);
+        reply.status(500).send({ error: "Internal server error" });
+    }
+}
+
+async function getCareerCounsellingPayment(req,reply) {
+    try {
+        const result= await paymentService.getCareerCounsellingPayment(req);
+        reply.status(200).send({...result});
+    } catch (error) {
+        console.error("Error completing checkout session:", error);
+        reply.status(500).send({ error: "Internal server error" });
+    }
+}
+
+module.exports = { completeCheckout, cancelCheckout, completeCareerCounsellingPayment, getCareerCounsellingPayment };

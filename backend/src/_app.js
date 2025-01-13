@@ -20,6 +20,7 @@ const { notificationRoutes } = require("./routes/notificationRoutes");
 require("./Authentication/googleAuth");
 const fastifyMultipart = require('@fastify/multipart');
 const searchRoutes = require("./routes/searchRoute");
+const paymentRoutes = require("./routes/paymentRoutes");
 
 
 const startServer = async () => {
@@ -120,6 +121,7 @@ const startServer = async () => {
   app.register(lockStatusRoutes, { prefix: "/v1" });
   app.register(notificationRoutes, { prefix: "/v1" });
   app.register(searchRoutes,{prefix:"/v1"})
+  app.register(paymentRoutes,{prefix: '/v1'})
 
   try {
     await dataSource

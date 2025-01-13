@@ -1,6 +1,8 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const dataSource = require('../../Infrastructure/postgres');
 const orderRepository = require('../repositories/orderRepository');
 const paymentRepository = require('../repositories/paymentRepository');
+const careerCounsellingPaymentRepository= dataSource.getRepository('CareerCounsellingPayments');
 
 
 
@@ -33,4 +35,39 @@ async function completeCheckoutSessionService(session_id, order_id) {
     }
 }
 
-module.exports = { completeCheckoutSessionService };
+const completeCareerCounsellingPayment= async(req)=>{
+    const { student_id, booking_date, booking_time } = req.body;
+    const createdCareerCounsellingObject= careerCounsellingPaymentRepository?.create({
+        student_id,
+        booking_date,
+        booking_time
+    });
+    await careerCounsellingPaymentRepository?.save(createdCareerCounsellingObject);
+    return {
+        status: 200,
+        message: 'Payment done successfully'
+    }
+}
+
+const getCareerCounsellingPayment= async (req)=>{
+    const {student_id}= req?.query;
+    const studentCareerCounsellingPayment= await careerCounsellingPaymentRepository?.findOne({
+        where:{
+            student_id
+        }
+    });
+
+    if(!studentCareerCounsellingPayment){
+        return {
+            status: 404,
+            message: 'Payment of student not found'
+        }
+    }
+    return {
+        status: 200,
+        message: 'Payment found',
+        data: studentCareerCounsellingPayment
+    }
+}
+
+module.exports = { completeCheckoutSessionService, completeCareerCounsellingPayment, getCareerCounsellingPayment };
