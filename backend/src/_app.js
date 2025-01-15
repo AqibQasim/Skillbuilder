@@ -21,6 +21,7 @@ require("./Authentication/googleAuth");
 const fastifyMultipart = require('@fastify/multipart');
 const searchRoutes = require("./routes/searchRoute");
 const paymentRoutes = require("./routes/paymentRoutes");
+const liveSessionCourseRoutes = require("./routes/liveSessionCourseRoutes");
 
 
 const startServer = async () => {
@@ -122,6 +123,7 @@ const startServer = async () => {
   app.register(notificationRoutes, { prefix: "/v1" });
   app.register(searchRoutes,{prefix:"/v1"})
   app.register(paymentRoutes,{prefix: '/v1'})
+  app.register(liveSessionCourseRoutes,{prefix: '/v1'})
 
   try {
     await dataSource
