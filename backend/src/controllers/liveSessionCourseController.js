@@ -5,4 +5,14 @@ const createLiveSessionCourse= async(req,res)=>{
     return res.status(result?.status).send({...result})
 }
 
-module.exports={createLiveSessionCourse}
+const getLiveSessionCourse= async(req,res)=>{
+    const result= await liveSessionCourseService.getLiveSessionCourse()
+    return res.status(result?.status).send({...result})
+}
+
+const getLiveSessionCourseById= async(req,res)=>{
+    const result= await liveSessionCourseService.getLiveSessionCourseById(req)
+    return res.status(result?.status).send({...result})
+}
+
+module.exports={createLiveSessionCourse, getLiveSessionCourse, getLiveSessionCourseById}

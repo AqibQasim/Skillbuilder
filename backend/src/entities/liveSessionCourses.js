@@ -114,20 +114,20 @@ module.exports = new EntitySchema({
         name: "instructor_id",
       },
     },
-    reviews: {
-      target: "course_reviews",
-      type: "one-to-many",
-      inverseSide: "course",
-    },
-    modules: {
-      target: "content_module",
-      type: "one-to-many",
-      inverseSide: "course",
-    },
-    purchased_course: {
-      target: "purchased_course",
-      type: "one-to-many",
-      inverseSide: "course",
-    },
+    // reviews: {
+    //   target: "course_reviews",
+    //   type: "one-to-many",
+    //   inverseSide: "course",
+    // },
+    // modules: {
+    //   target: "content_module",
+    //   type: "one-to-many",
+    //   inverseSide: "course",
+    // },
+    // purchased_course: {
+    //   target: "purchased_course",
+    //   type: "one-to-many",
+    //   inverseSide: "course",
+    // },
   },
 });
