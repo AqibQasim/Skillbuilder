@@ -55,6 +55,20 @@ const completeCareerCounsellingPayment = async (req) => {
 
 const completeLiveSessionCoursePayment = async (req) => {
   const { student_id, instructor_id, amount, course_id } = req.body;
+
+  const hasStudentAlreadyPaid= liveSessionPaymentRepository?.findOne({
+    where:{
+        student_id,
+        course_id
+    }
+  });
+
+  if(hasStudentAlreadyPaid){
+    return {
+        status: 400,
+        message: "You already have paid for this course"
+    }
+  }
   const liveSessionCoursePaymentObject =
     liveSessionPaymentRepository?.create({
       student_id,
@@ -93,9 +107,34 @@ const getCareerCounsellingPayment = async (req) => {
   };
 };
 
+const getLiveSessionCoursesOfStudent= async(req)=>{
+    const {student_id,course_id}= req?.query;
+    const courses= await liveSessionPaymentRepository?.findOne({
+        where:{
+            student_id,
+            course_id
+        }
+    });
+
+    if(courses){
+        return {
+            status: 200,
+            message: "live courses",
+            data: courses
+        }
+    }
+
+    return {
+        status: 404,
+        message: "Student has not paid for that course"
+    }
+}
+
+
 module.exports = {
   completeCheckoutSessionService,
   completeCareerCounsellingPayment,
   getCareerCounsellingPayment,
-  completeLiveSessionCoursePayment
+  completeLiveSessionCoursePayment,
+  getLiveSessionCoursesOfStudent
 };
