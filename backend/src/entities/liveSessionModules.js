@@ -10,6 +10,12 @@ module.exports = new EntitySchema({
       type: "int",
       generated: true,
     },
+    title: {
+      type: "varchar",
+    },
+    description: {
+      type: "varchar",
+    },
     live_session_course_id: {
       type: "int",
       joinColumn: {
@@ -17,25 +23,14 @@ module.exports = new EntitySchema({
         referencedColumnName: "id",
       },
     },
-    title: {
-      type: "varchar",
-    },
-    description: {
-      type: "varchar",
-    },
   },
   relations: {
-    course: {
+    live_course: {
       target: "live-course",
       type: "many-to-one",
       joinColumn: {
         name: "live_session_course_id",
       },
     },
-    // content: {
-    //   target: "course_content",
-    //   type: "one-to-many",
-    //   inverseSide: "modules",
-    // },
   },
 });

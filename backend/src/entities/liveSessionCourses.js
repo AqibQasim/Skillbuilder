@@ -19,13 +19,9 @@ module.exports = new EntitySchema({
     description: {
       type: "varchar",
     },
-    // creation_duration_hours: {
-    //   type: "int",
-    //   default:0
-    // },
     learning_outcomes: {
       type: "varchar",
-      nullable: true
+      nullable: true,
     },
     category: {
       type: "varchar",
@@ -47,16 +43,11 @@ module.exports = new EntitySchema({
       type: "boolean",
       default: false,
     },
-    level:{
-        type: "enum",
-        enum:["beginner","intermediate","expert"],
-        default:"beginner"
+    level: {
+      type: "enum",
+      enum: ["beginner", "intermediate", "expert"],
+      default: "beginner",
     },
-    // status: {
-    //   type: "enum",
-    //   enum: ["pending", "approved", "declined", "suspended"],
-    //   default: "pending",
-    // },
     enrolled_customers: {
       type: "jsonb",
       default: [],
@@ -71,9 +62,6 @@ module.exports = new EntitySchema({
       scale: 1,
       nullable: true,
     },
-    // created_at: {
-    //   type: "timestamp with time zone",
-    // },
     updated_at: {
       type: "timestamp with time zone",
       nullable: true,
@@ -105,6 +93,14 @@ module.exports = new EntitySchema({
       nullable: true,
       default: null,
     },
+    // live_session_course_id: {
+    //   type: "int",
+    //   nullable: true,
+    //   joinColumn: {
+    //     name: "live_session_course_id",
+    //     referencedColumnName: "id",
+    //   },
+    // },
   },
   relations: {
     instructor: {
@@ -114,20 +110,13 @@ module.exports = new EntitySchema({
         name: "instructor_id",
       },
     },
-    // reviews: {
-    //   target: "course_reviews",
-    //   type: "one-to-many",
-    //   inverseSide: "course",
-    // },
-    // modules: {
-    //   target: "content_module",
-    //   type: "one-to-many",
-    //   inverseSide: "course",
-    // },
-    // purchased_course: {
-    //   target: "purchased_course",
-    //   type: "one-to-many",
-    //   inverseSide: "course",
-    // },
+    modules: {
+      target: "live-content-module",
+      type: "one-to-many",
+      // joinColumn:{
+      //   name:"id"
+      // },
+      inverseSide: "live_course",
+    },
   },
 });

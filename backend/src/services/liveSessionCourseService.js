@@ -46,15 +46,12 @@ const createLiveSessionCourse = async (req) => {
             description: module?.description,
             live_session_course_id: savedLiveSessionCourse?.id,
           });
-        const savedLiveSessionCourseModule =
-          await liveSessionCourseModuleRepository.save(liveSessionCourseModule);
-        if (savedLiveSessionCourseModule) {
-          return {
-            status: 200,
-            message: "Live courses created successfully",
-          };
-        }
+        await liveSessionCourseModuleRepository.save(liveSessionCourseModule);
       }
+      return {
+        status: 200,
+        message: "Live courses created successfully",
+      };
     }
 
     return {
@@ -72,19 +69,12 @@ const createLiveSessionCourse = async (req) => {
 
 const getLiveSessionCourse = async () => {
   try {
-    const getLiveCourses = await liveSessionCourseModuleRepository
-      .createQueryBuilder("live-content-module")
-      .leftJoinAndSelect(
-        "live-content-module.course",
-        "course",
-        "course.id = live-content-module.live_session_course_id"
-      )
-      .leftJoinAndSelect(
-        "course.instructor",
-        "instructor",
-        "course.instructor_id = instructor.id"
-      )
-      //.select()
+    const getLiveCourses = await liveSessionCourseRepository
+      .createQueryBuilder("live-course")
+      .leftJoinAndSelect("live-course.modules", "modules")
+      .leftJoinAndSelect("live-course.instructor","instructor")
+      .leftJoinAndSelect("instructor.user","user")
+      .where("modules.live_session_course_id = live-course.id")
       .getMany();
 
     return {
@@ -101,35 +91,32 @@ const getLiveSessionCourse = async () => {
 };
 
 const getLiveSessionCourseById = async (req) => {
-    const {course_id}= req?.params;
-    try {
-      const getLiveCourses = await liveSessionCourseModuleRepository
-        .createQueryBuilder("live-content-module")
-        .leftJoinAndSelect(
-          "live-content-module.course",
-          "course",
-          "course.id = live-content-module.live_session_course_id"
-        )
-        .leftJoinAndSelect(
-          "course.instructor",
-          "instructor",
-          "course.instructor_id = instructor.id"
-        )
-        .where("course.id=:id",{id:course_id})
-        //.select()
-        .getOne();
-  
-      return {
-        status: 200,
-        message: "live courses found",
-        data: getLiveCourses,
-      };
-    } catch (e) {
-      return {
-        status: 500,
-        message: e.message,
-      };
-    }
-  };
+  const { course_id } = req?.params;
+  try {
+    const getLiveCourses = await liveSessionCourseRepository
+      .createQueryBuilder("live-course")
+      .leftJoinAndSelect("live-course.modules", "modules")
+      .leftJoinAndSelect("live-course.instructor","instructor")
+      .leftJoinAndSelect("instructor.user","user")
+      .where("modules.live_session_course_id = live-course.id")
+      .andWhere("live-course.id=:id",{id: course_id})
+      .getOne();
 
-module.exports = { createLiveSessionCourse, getLiveSessionCourse, getLiveSessionCourseById };
+    return {
+      status: 200,
+      message: "live courses found",
+      data: getLiveCourses,
+    };
+  } catch (e) {
+    return {
+      status: 500,
+      message: e.message,
+    };
+  }
+};
+
+module.exports = {
+  createLiveSessionCourse,
+  getLiveSessionCourse,
+  getLiveSessionCourseById,
+};
