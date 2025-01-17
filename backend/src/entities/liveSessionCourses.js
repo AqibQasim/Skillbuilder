@@ -20,7 +20,7 @@ module.exports = new EntitySchema({
       type: "varchar",
     },
     learning_outcomes: {
-      type: "varchar",
+      type: "jsonb",
       nullable: true,
     },
     category: {
