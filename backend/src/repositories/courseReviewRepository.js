@@ -3,6 +3,26 @@ const dataSource = require("../../Infrastructure/postgres");
 
 const getAllReviews = async (id) => {
   try {
+    if(!id){
+      const courseRevRep = await dataSource
+      .getRepository("courseReviews")
+      .createQueryBuilder("course_reviews")
+      .leftJoin("course_reviews.course", "course")
+      .leftJoin("course_reviews.user", "user")
+      .where("course_reviews.course_id= course.id")
+      .select([
+        "course_reviews.id",
+        "user.first_name",
+        "user.last_name",
+        "user.profile",
+        "course_reviews.rating",
+        "course_reviews.review",
+        "course_reviews.date",
+        "user.id",
+      ])
+      .getMany();
+      return courseRevRep;
+    }
     const courseRevRep = await dataSource
       .getRepository("courseReviews")
       .createQueryBuilder("course_reviews")

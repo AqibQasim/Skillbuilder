@@ -45,6 +45,7 @@ const coursesRoutes = async (fastify, options) => {
   fastify.get("/my-courses/:user_id", myCoursesSchema, getMyCourses);
   fastify.post("/post-review", postSchema, postReview);
   fastify.get("/get-all-reviews/:id", getreviewSchema, getReviews);
+  fastify.get("/get-all-reviews", getReviews);
   fastify.post("/upload-course-intro", uploadCourseIntroVideo);
   fastify.post("/upload-course-content", uploadCourseContent);
   fastify.put("/set-course-prop", updatecourseSchema, updateCourseProperties);

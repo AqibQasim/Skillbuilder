@@ -255,6 +255,16 @@ const getReviews = async (req, res) => {
   });
 };
 
+const getAllReviews = async (req, res) => {
+  // const id = req?.params?.id;
+  const result = await getReviewsService(null);
+  console.log("result of posting a review:", result);
+  res.code(200).send({
+    success: true,
+    message: result,
+  });
+};
+
 const updateCourseProperties = async (request, reply) => {
   try {
     const { course_id, filter, value } = request?.body;
