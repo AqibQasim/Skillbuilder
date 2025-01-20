@@ -37,7 +37,7 @@ module.exports = new EntitySchema({
   relations: {
     student: {
       target: "User",
-      type: "one-to-one",
+      type: "one-to-many",
       //inverseSide: "carts",
       joinColumn: {
         name: "student_id",
@@ -46,7 +46,7 @@ module.exports = new EntitySchema({
     },
     instructor: {
       target: "Instructor",
-      type: "one-to-one",
+      type: "one-to-many",
       //inverseSide: "carts",
       joinColumn: {
         name: "instructor_id",

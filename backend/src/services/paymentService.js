@@ -37,10 +37,11 @@ async function completeCheckoutSessionService(session_id, order_id) {
 }
 
 const completeCareerCounsellingPayment = async (req) => {
-  const { student_id, booking_date, booking_time } = req.body;
+  const { student_id, instructor_id, booking_date, booking_time } = req.body;
   const createdCareerCounsellingObject =
     careerCounsellingPaymentRepository?.create({
       student_id,
+      instructor_id,
       booking_date,
       booking_time,
     });
