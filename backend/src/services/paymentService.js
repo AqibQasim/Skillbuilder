@@ -5,7 +5,9 @@ const paymentRepository = require("../repositories/paymentRepository");
 const careerCounsellingPaymentRepository = dataSource.getRepository(
   "CareerCounsellingPayments"
 );
-const liveSessionPaymentRepository= dataSource.getRepository('live-session-payments')
+const liveSessionPaymentRepository = dataSource.getRepository(
+  "live-session-payments"
+);
 
 async function completeCheckoutSessionService(session_id, order_id) {
   try {
@@ -57,29 +59,26 @@ const completeCareerCounsellingPayment = async (req) => {
 const completeLiveSessionCoursePayment = async (req) => {
   const { student_id, instructor_id, amount, course_id } = req.body;
 
-  const hasStudentAlreadyPaid= liveSessionPaymentRepository?.findOne({
-    where:{
-        student_id,
-        course_id
-    }
+  const hasStudentAlreadyPaid = liveSessionPaymentRepository?.findOne({
+    where: {
+      student_id,
+      course_id,
+    },
   });
 
-  if(hasStudentAlreadyPaid){
+  if (hasStudentAlreadyPaid) {
     return {
-        status: 400,
-        message: "You already have paid for this course"
-    }
+      status: 400,
+      message: "You already have paid for this course",
+    };
   }
-  const liveSessionCoursePaymentObject =
-    liveSessionPaymentRepository?.create({
-      student_id,
-      instructor_id,
-      amount,
-      course_id
-    });
-  await liveSessionPaymentRepository?.save(
-    liveSessionCoursePaymentObject
-  );
+  const liveSessionCoursePaymentObject = liveSessionPaymentRepository?.create({
+    student_id,
+    instructor_id,
+    amount,
+    course_id,
+  });
+  await liveSessionPaymentRepository?.save(liveSessionCoursePaymentObject);
   return {
     status: 200,
     message: "Payment done successfully",
@@ -108,34 +107,64 @@ const getCareerCounsellingPayment = async (req) => {
   };
 };
 
-const getLiveSessionCoursesOfStudent= async(req)=>{
-    const {student_id,course_id}= req?.query;
-    const courses= await liveSessionPaymentRepository?.findOne({
-        where:{
-            student_id,
-            course_id
-        }
+const getLiveSessionCoursesOfStudent = async (req) => {
+  const { student_id, course_id } = req?.query;
+  const courses = await liveSessionPaymentRepository?.findOne({
+    where: {
+      student_id,
+      course_id,
+    },
+  });
+
+  if (courses) {
+    return {
+      status: 200,
+      message: "live courses",
+      data: courses,
+    };
+  }
+
+  return {
+    status: 404,
+    message: "Student has not paid for that course",
+  };
+};
+
+const setBookingOfCareerCounselling = async (req) => {
+  const { booking_date, booking_time, student_id, instructor_id } = req.body;
+  const checkIfStudentHasPaidForCareerCounselling = await careerCounsellingPaymentRepository?.find({
+      where: {
+        student_id,
+        instructor_id,
+      },
     });
 
-    if(courses){
-        return {
-            status: 200,
-            message: "live courses",
-            data: courses
-        }
-    }
-
+  if (!checkIfStudentHasPaidForCareerCounselling) {
     return {
-        status: 404,
-        message: "Student has not paid for that course"
-    }
-}
+      status: 404,
+      message: "Student has not paid for career counselling",
+    };
+  }
+  //update
+  const updateResult = await careerCounsellingPaymentRepository?.update(
+    {student_id, instructor_id},
+    {booking_date,booking_time},
+  );
 
+  if (updateResult?.affected > 0) {
+    return {
+      status: 200,
+      message: "Updated",
+      data: checkIfStudentHasPaidForCareerCounselling,
+    };
+  }
+};
 
 module.exports = {
   completeCheckoutSessionService,
   completeCareerCounsellingPayment,
   getCareerCounsellingPayment,
   completeLiveSessionCoursePayment,
-  getLiveSessionCoursesOfStudent
+  getLiveSessionCoursesOfStudent,
+  setBookingOfCareerCounselling,
 };

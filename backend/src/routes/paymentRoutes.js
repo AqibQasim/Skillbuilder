@@ -5,6 +5,7 @@ async function paymentRoutes(fastify, options) {
     fastify.get('/complete', paymentController.completeCheckout);
     fastify.get('/cancel', paymentController.cancelCheckout);
     fastify.post('/career-counselling-payment',paymentController.completeCareerCounsellingPayment);
+    fastify.put('/set-booking', paymentController.setBookingOfCareerCounselling)
     fastify.get('/get-career-counselling-payment', paymentController.getCareerCounsellingPayment);
     fastify.post('/live-session-course-payment',paymentController.completeLiveSessionCoursePayment);
     fastify.get('/get-live-session-course-payment-of-student',paymentController.getLiveSessionCoursesOfStudent);

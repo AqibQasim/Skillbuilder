@@ -55,7 +55,18 @@ async function getLiveSessionCoursesOfStudent(req, reply) {
     }
   }
 
+  const setBookingOfCareerCounselling= async(req, reply)=>{
+    try {
+      const result = await paymentService.setBookingOfCareerCounselling(req);
+      reply.status(200).send({ ...result });
+    } catch (error) {
+      console.error("Error completing checkout session:", error);
+      reply.status(500).send({ error: "Internal server error" });
+    }
+  }
+
 module.exports = {
+  setBookingOfCareerCounselling,
   completeCheckout,
   completeLiveSessionCoursePayment,
   cancelCheckout,
