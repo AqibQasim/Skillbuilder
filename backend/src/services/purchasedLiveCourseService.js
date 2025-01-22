@@ -7,24 +7,27 @@ const purchaseLiveCourseDetailsService = async () => {
       .createQueryBuilder("live_session_payments")
       .leftJoinAndSelect("live_session_payments.student","student")
       .leftJoinAndSelect("live_session_payments.course", "course")
-      //.innerJoinAndSelect("course.instructor", "instructor") // Join with instructor table
-      //.innerJoinAndSelect("instructor.user", "instructor_user") // Join with user table for instructor details
-    //   .select([
-    //     "purchased_course.id",
-    //     "purchased_course.created_at",
-    //     "user.id",
-    //     "course.id",
-    //     "course.amount",
-    //     "course.discount",
-    //     "course.description",
-    //     "course.created_at",
-    //     "course.image",
-    //     "course.title",
-    //     "course.instructor_id",
-    //     "instructor.id", // Instructor's id
-    //     "instructor_user.first_name", // Instructor's first name
-    //     "instructor_user.last_name", // Instructor's last name
-    //   ])
+      .leftJoinAndSelect("course.instructor", "instructor") // Join with instructor table
+      .leftJoinAndSelect("instructor.user", "instructor_user") // Join with user table for instructor details
+      .select([
+        "live_session_payments.id",
+        "live_session_payments.created_at",
+        //"user.id",
+        "course.id",
+        "course.amount",
+        "course.discount",
+        "course.description",
+        //"course.created_at",
+        "course.image",
+        "course.title",
+        "course.instructor_id",
+        "instructor.id", // Instructor's id
+        "instructor_user.first_name", // Instructor's first name
+        "instructor_user.last_name", // Instructor's last name
+        "student.first_name",
+        "student.last_name",
+        "student.email",
+      ])
       //.where("purchased_course.purchased_by = :user_id", { user_id: user_id })
       .getMany();
   
