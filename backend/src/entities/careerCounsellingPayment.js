@@ -29,6 +29,10 @@ module.exports = new EntitySchema({
       type: "varchar",
       nullable: true,
     },
+    recruitinn_summary:{
+      type: "varchar",
+      nullable: true,
+    },
     created_at: {
       type: "timestamp",
       default: () => "CURRENT_TIMESTAMP",

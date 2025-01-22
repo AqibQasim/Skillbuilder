@@ -47,7 +47,7 @@ const postCourse = async (request, reply) => {
       reply.send({
         status: true,
         message: "course has been created succesfully",
-        courseId: result?.id
+        courseId: result?.id,
       });
     } else {
       reply.code(400).send({
@@ -119,7 +119,7 @@ const allStudentCourses = async (request, reply) => {
     });
   }
 };
- 
+
 const getCourseById = async (request, reply) => {
   try {
     const id = request.params.id;
@@ -325,12 +325,15 @@ const uploadCourseIntroVideo = async (request, response) => {
   //   }
   // }
   try {
-    const result = await uploadCourseVideoToYT(request?.body?.course_id, request?.body?.video_url);
+    const result = await uploadCourseVideoToYT(
+      request?.body?.course_id,
+      request?.body?.video_url
+    );
     console.log("result in upload course video:", result);
-    response.status(result?.status).send({...result});
+    response.status(result?.status).send({ ...result });
   } catch (error) {
     console.log("Error uploading video", error);
-  } 
+  }
   // finally {
   //   fs.unlink(videoFilePath, (err) => {
   //     console.log("video file path in finally block:", request?.video_url);
@@ -403,7 +406,7 @@ const uploadCourseContent = async (request, reply) => {
     //     }
     //   }
     // }
-    
+
     // const response = await uploadVideoToYT(reqcourse_id, path);
     // if (moduleInfo?.modules?.length > 0 && videoFilePaths.length > 0) {
     //   for (const path of videoFilePaths) {
@@ -435,10 +438,13 @@ const uploadCourseContent = async (request, reply) => {
     //     }
     //   }
 
-      const finalResult = await updateCoursecontent(request?.body?.course_id, request?.body?.module_info);
-      if(finalResult==="Course has been updated successfully"){
-        reply.status(200).send(finalResult)
-      }
+    const finalResult = await updateCoursecontent(
+      request?.body?.course_id,
+      request?.body?.module_info
+    );
+    if (finalResult === "Course has been updated successfully") {
+      reply.status(200).send(finalResult);
+    }
 
     //   console.log("[FINAL RESULT]:", finalResult);
     //   return finalResult;
@@ -451,7 +457,7 @@ const uploadCourseContent = async (request, reply) => {
     reply
       .status(500)
       .send("Some error occurred while handling course content upload.", err);
-  } 
+  }
   // finally {
   //   for (const videoFilePath of videoFilePaths) {
   //     fs.unlink(videoFilePath, (err) => {
@@ -482,53 +488,53 @@ const setCourseStatus = async (request, response) => {
   }
 };
 
-const getIsCoursePurchased= async(req,res)=>{
+const getIsCoursePurchased = async (req, res) => {
   try {
     const { course_id, student_id } = req?.query;
-    const result = await isCoursePurchasedService({course_id,student_id});
+    const result = await isCoursePurchasedService({ course_id, student_id });
     console.log("[DATA TO BE SENT AS RESPONSE:]", result);
     res.status(result.status).send(result);
   } catch (err) {
     console.log("[Err]:", err);
     response.status(500).send("Internal Server Error");
   }
-}
+};
 
-const saveProgressController= async(req,res)=>{
-  try{
-    const result= await saveProgressService(req);
-    res.status(result.status).send({...result})
-  }catch(e){
-    res.status(500)
-    .send({
-      message: e.message
-    })
+const saveProgressController = async (req, res) => {
+  try {
+    const result = await saveProgressService(req);
+    res.status(result.status).send({ ...result });
+  } catch (e) {
+    res.status(500).send({
+      message: e.message,
+    });
   }
-}
+};
 
-const getCourseCompletionProgressController= async(req,res)=>{
-  try{
-    const result= await completionCoursePercentageService(req?.query?.user_id,req?.query?.course_id);
-    res.status(result.status).send({...result})
-  }catch(e){
-    res.status(500)
-    .send({
-      message: e.message
-    })
+const getCourseCompletionProgressController = async (req, res) => {
+  try {
+    const result = await completionCoursePercentageService(
+      req?.query?.user_id,
+      req?.query?.course_id
+    );
+    res.status(result.status).send({ ...result });
+  } catch (e) {
+    res.status(500).send({
+      message: e.message,
+    });
   }
-}
+};
 
-const getSavedModuleProgressController= async(req,res)=>{
-  try{
-    const result= await getSavedModuleProgressService(req);
-    res.status(result.status).send({...result})
-  }catch(e){
-    res.status(500)
-    .send({
-      message: e.message
-    })
+const getSavedModuleProgressController = async (req, res) => {
+  try {
+    const result = await getSavedModuleProgressService(req);
+    res.status(result.status).send({ ...result });
+  } catch (e) {
+    res.status(500).send({
+      message: e.message,
+    });
   }
-}
+};
 
 // const getUserAuthorizedByYT = async (request, response) => {
 //   try {
@@ -565,5 +571,5 @@ module.exports = {
   getIsCoursePurchased,
   saveProgressController,
   getSavedModuleProgressController,
-  getCourseCompletionProgressController
+  getCourseCompletionProgressController,
 };
