@@ -15,4 +15,9 @@ const getLiveSessionCourseById= async(req,res)=>{
     return res.status(result?.status).send({...result})
 }
 
-module.exports={createLiveSessionCourse, getLiveSessionCourse, getLiveSessionCourseById}
+const getLiveSessionCourseEnrolledStudents=async(req,res)=>{
+    const result= await liveSessionCourseService.getLiveSessionCourseEnrolledStudents(req)
+    return res.status(result?.status).send({...result})
+}
+
+module.exports={createLiveSessionCourse, getLiveSessionCourse, getLiveSessionCourseById, getLiveSessionCourseEnrolledStudents}
