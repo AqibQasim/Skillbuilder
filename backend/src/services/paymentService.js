@@ -182,7 +182,7 @@ const insertRecruitinnSummary = async (req) => {
     }
     //update
     const updateResult = await careerCounsellingPaymentRepository?.update(
-      { student_id, instructor_id },
+      { student_id: parseInt(student_id) , instructor_id: parseInt(instructor_id) },
       { recruitinn_summary }
     );
 
