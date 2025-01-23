@@ -88,11 +88,27 @@ const completeLiveSessionCoursePayment = async (req) => {
 const getCareerCounsellingPayment = async (req) => {
   const { student_id } = req?.query;
   const studentCareerCounsellingPayment =
-    await careerCounsellingPaymentRepository?.findOne({
-      where: {
-        student_id,
-      },
-    });
+    // await careerCounsellingPaymentRepository?.createQueryBuilder()({
+    //   where: {
+    //     student_id,
+    //   },
+    // });
+    await careerCounsellingPaymentRepository
+      ?.createQueryBuilder("career_counselling_payments")
+      .leftJoinAndSelect("career_counselling_payments.student", "student")
+      .leftJoinAndSelect("career_counselling_payments.instructor", "instructor")
+      .leftJoinAndSelect("instructor.user", "user")
+      .select([
+        "career_counselling_payments.amount",
+        "career_counselling_payments.booking_date",
+        "career_counselling_payments.booking_time",
+        "career_counselling_payments.recruitinn_summary",
+        "career_counselling_payments.created_at",
+        "student.first_name",
+        "student.last_name"
+      ])
+      .where("career_counselling_payments.student_id= :student_id",{student_id})
+      .getOne();
 
   if (!studentCareerCounsellingPayment) {
     return {
@@ -116,6 +132,8 @@ const getCareerCounsellingPayments = async () => {
       .leftJoinAndSelect("instructor.user", "user")
       .select([
         "career_counselling_payments.amount",
+        "career_counselling_payments.booking_date",
+        "career_counselling_payments.booking_time",
         "career_counselling_payments.recruitinn_summary",
         "career_counselling_payments.created_at",
         "student.first_name",
