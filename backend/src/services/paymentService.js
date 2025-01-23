@@ -137,7 +137,8 @@ const getCareerCounsellingPayments = async () => {
         "career_counselling_payments.recruitinn_summary",
         "career_counselling_payments.created_at",
         "student.first_name",
-        "student.last_name"
+        "student.last_name",
+        "student.email"
       ])
       .getMany();
 
