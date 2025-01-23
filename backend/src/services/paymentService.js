@@ -59,7 +59,7 @@ const completeCareerCounsellingPayment = async (req) => {
 const completeLiveSessionCoursePayment = async (req) => {
   const { student_id, instructor_id, amount, course_id } = req.body;
 
-  const hasStudentAlreadyPaid = liveSessionPaymentRepository?.findOne({
+  const hasStudentAlreadyPaid = await liveSessionPaymentRepository?.findOne({
     where: {
       student_id,
       course_id,
