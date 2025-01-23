@@ -132,7 +132,8 @@ const getLiveSessionCoursesOfStudent = async (req) => {
 
 const setBookingOfCareerCounselling = async (req) => {
   const { booking_date, booking_time, student_id, instructor_id } = req.body;
-  const checkIfStudentHasPaidForCareerCounselling = await careerCounsellingPaymentRepository?.find({
+  const checkIfStudentHasPaidForCareerCounselling =
+    await careerCounsellingPaymentRepository?.find({
       where: {
         student_id,
         instructor_id,
@@ -147,8 +148,8 @@ const setBookingOfCareerCounselling = async (req) => {
   }
   //update
   const updateResult = await careerCounsellingPaymentRepository?.update(
-    {student_id, instructor_id},
-    {booking_date,booking_time},
+    { student_id, instructor_id },
+    { booking_date, booking_time }
   );
 
   if (updateResult?.affected > 0) {
@@ -160,6 +161,47 @@ const setBookingOfCareerCounselling = async (req) => {
   }
 };
 
+const insertRecruitinnSummary = async (req) => {
+  const { student_id, instructor_id, recruitinn_summary } = req.body;
+
+  try {
+    //find the row
+    const checkIfStudentHasPaidForCareerCounselling =
+      await careerCounsellingPaymentRepository?.find({
+        where: {
+          student_id,
+          instructor_id,
+        },
+      });
+
+    if (!checkIfStudentHasPaidForCareerCounselling) {
+      return {
+        status: 404,
+        message: "Student has not paid for career counselling",
+      };
+    }
+    //update
+    const updateResult = await careerCounsellingPaymentRepository?.update(
+      { student_id, instructor_id },
+      { recruitinn_summary }
+    );
+
+    if (updateResult?.affected > 0) {
+      return {
+        status: 200,
+        message: "Updated",
+        data: checkIfStudentHasPaidForCareerCounselling,
+      };
+    }
+  } catch (e) {
+    console.log(e);
+    return {
+      status: 500,
+      message: e.message,
+    };
+  }
+};
+
 module.exports = {
   completeCheckoutSessionService,
   completeCareerCounsellingPayment,
@@ -167,4 +209,5 @@ module.exports = {
   completeLiveSessionCoursePayment,
   getLiveSessionCoursesOfStudent,
   setBookingOfCareerCounselling,
+  insertRecruitinnSummary,
 };
