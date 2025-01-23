@@ -193,6 +193,11 @@ const insertRecruitinnSummary = async (req) => {
         data: checkIfStudentHasPaidForCareerCounselling,
       };
     }
+
+    return {
+      status: 400,
+      message:"something went wrong while inserting recruitinn summary"
+    }
   } catch (e) {
     console.log(e);
     return {
