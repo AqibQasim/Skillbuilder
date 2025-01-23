@@ -107,6 +107,35 @@ const getCareerCounsellingPayment = async (req) => {
   };
 };
 
+const getCareerCounsellingPayments = async () => {
+  const studentCareerCounsellingPayment =
+    await careerCounsellingPaymentRepository
+      ?.createQueryBuilder("career_counselling_payments")
+      .leftJoinAndSelect("career_counselling_payments.student", "student")
+      .leftJoinAndSelect("career_counselling_payments.instructor", "instructor")
+      .leftJoinAndSelect("instructor.user", "user")
+      .select([
+        "career_counselling_payments.amount",
+        "career_counselling_payments.recruitinn_summary",
+        "career_counselling_payments.created_at",
+        "student.first_name",
+        "student.last_name"
+      ])
+      .getMany();
+
+  if (!studentCareerCounsellingPayment) {
+    return {
+      status: 404,
+      message: "Payment of students not found",
+    };
+  }
+  return {
+    status: 200,
+    message: "Payments found",
+    data: studentCareerCounsellingPayment,
+  };
+};
+
 const getLiveSessionCoursesOfStudent = async (req) => {
   const { student_id, course_id } = req?.query;
   const courses = await liveSessionPaymentRepository?.findOne({
@@ -182,7 +211,10 @@ const insertRecruitinnSummary = async (req) => {
     }
     //update
     const updateResult = await careerCounsellingPaymentRepository?.update(
-      { student_id: parseInt(student_id) , instructor_id: parseInt(instructor_id) },
+      {
+        student_id: parseInt(student_id),
+        instructor_id: parseInt(instructor_id),
+      },
       { recruitinn_summary }
     );
 
@@ -196,8 +228,8 @@ const insertRecruitinnSummary = async (req) => {
 
     return {
       status: 400,
-      message:"something went wrong while inserting recruitinn summary"
-    }
+      message: "something went wrong while inserting recruitinn summary",
+    };
   } catch (e) {
     console.log(e);
     return {
@@ -215,4 +247,5 @@ module.exports = {
   getLiveSessionCoursesOfStudent,
   setBookingOfCareerCounselling,
   insertRecruitinnSummary,
+  getCareerCounsellingPayments,
 };

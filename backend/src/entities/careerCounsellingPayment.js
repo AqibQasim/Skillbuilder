@@ -29,7 +29,7 @@ module.exports = new EntitySchema({
       type: "varchar",
       nullable: true,
     },
-    recruitinn_summary:{
+    recruitinn_summary: {
       type: "varchar",
       nullable: true,
     },
@@ -40,21 +40,19 @@ module.exports = new EntitySchema({
   },
   relations: {
     student: {
-      target: "User",
-      type: "one-to-one",
-      //inverseSide: "carts",
+      target: "User", // Entity name for User
+      type: "many-to-one", // A student can have many career counselling payments
       joinColumn: {
-        name: "student_id",
+        name: "student_id", // Maps to `student_id` in the table
         referencedColumnName: "id",
       },
     },
     instructor: {
-      target: "Instructor",
-      type: "one-to-many",
-      //inverseSide: "carts",
+      target: "Instructor", // Entity name for Instructor
+      type: "many-to-one", // An instructor can have many career counselling payments
       joinColumn: {
-        name: "instructor_id",
-        //referencedColumnName: "id",
+        name: "instructor_id", // Maps to `instructor_id` in the table
+        referencedColumnName: "id",
       },
     },
   },
