@@ -24,7 +24,13 @@ module.exports = new EntitySchema({
       default:0
     },
     learning_outcomes: {
-      type: "varchar",
+      type: "jsonb",
+      nullable: true
+    },
+    level:{
+      type: "enum",
+      enum:["beginner","intermediate","expert"],
+      default:"beginner"
     },
     category: {
       type: "varchar",

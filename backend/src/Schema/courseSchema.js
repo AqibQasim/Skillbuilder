@@ -126,7 +126,9 @@ const createCourseSchema = {
       properties: {
         instructor_id: { type: "integer" },
         title: { type: "string" }, // Removed 'required: true'
-        learning_outcomes: { type: "string" },
+        learning_outcomes: { type: "array" },
+        level:{type:"string"},
+        description: {type: "string"},
         category: { type: "string" },
         modulesCount: { type: "integer" },
         amount: { type: "number" },
@@ -140,6 +142,8 @@ const createCourseSchema = {
         "modulesCount",
         "amount",
         "charges",
+        "description",
+        "level"
       ],
     },
     // response: {
