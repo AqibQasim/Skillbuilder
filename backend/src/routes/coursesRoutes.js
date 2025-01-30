@@ -54,6 +54,7 @@ const coursesRoutes = async (fastify, options) => {
   fastify.put('/save-progress', saveProgressController);
   fastify.get('/get-saved-module-progress-of-student', getSavedModuleProgressController)
   fastify.get('/get-course-completion-progress', getCourseCompletionProgressController);
+  fastify.get("/get-top-selling-courses", allCoursesSchema, allStudentCourses);
   //fastify.post("/authorize-user-yt", getUserAuthorizedByYT);
 };
 

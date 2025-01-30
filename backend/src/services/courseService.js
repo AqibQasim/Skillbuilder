@@ -13,6 +13,7 @@ const {
   setCourseStatusRepository,
   findOneCourseWithStudentID,
   findAllStudentCourses,
+  findTopSellingCourses,
 } = require("../repositories/courseRepository");
 const { getAllReviews } = require("../repositories/courseReviewRepository.js");
 const { saveReview } = require("../repositories/courseReviewRepository.js");
@@ -199,6 +200,17 @@ const getAllStudentCourses = async () => {
   try {
     logger.info("src > services > getAllCourses");
     const CoursesReceive = await findAllStudentCourses();
+    console.log(CoursesReceive);
+    return CoursesReceive;
+  } catch (error) {
+    return error;
+  }
+};
+
+const getTopSellingCoursesService = async () => {
+  try {
+    logger.info("src > services > getAllCourses");
+    const CoursesReceive = await findTopSellingCourses();
     console.log(CoursesReceive);
     return CoursesReceive;
   } catch (error) {
@@ -531,4 +543,5 @@ module.exports = {
   saveProgressService,
   getSavedModuleProgressService,
   completionCoursePercentageService,
+  getTopSellingCoursesService
 };

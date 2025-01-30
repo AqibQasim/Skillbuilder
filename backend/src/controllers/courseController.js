@@ -16,6 +16,7 @@ const {
   saveProgressService,
   getSavedModuleProgressService,
   completionCoursePercentageService,
+  getTopSellingCoursesService,
 } = require("../services/courseService");
 const { getInstructorById } = require("../services/instructorService");
 const {
@@ -97,6 +98,34 @@ const allStudentCourses = async (request, reply) => {
   try {
     console.log("req body:", request?.body);
     const courses = await getAllStudentCourses();
+    console.log("courses:", courses);
+    // if (courses) {
+    return reply.status(200).send({
+      status: true,
+      message: "success",
+      data: courses,
+    });
+    // } else {
+    //   return reply.status(200).send({
+    //     status: true,
+    //     message: "success",
+    //     data: null,
+    //   });
+    // }
+  } catch (error) {
+    logger.error(error);
+    reply.status(500).send({
+      status: false,
+      message: error.message,
+    });
+  }
+};
+
+const getTopSellingCourses = async (request, reply) => {
+  logger.info("src > controller > controllerALlrCourse ", request.body);
+  try {
+    console.log("req body:", request?.body);
+    const courses = await getTopSellingCoursesService();
     console.log("courses:", courses);
     // if (courses) {
     return reply.status(200).send({
@@ -552,6 +581,7 @@ const getSavedModuleProgressController = async (req, res) => {
 // }
 
 module.exports = {
+  getTopSellingCourses,
   postCourse,
   allCourses,
   getCourseById,

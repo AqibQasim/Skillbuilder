@@ -4,18 +4,20 @@ const courseContent = require("../entities/courseContent");
 const courseRepository = dataSource.getRepository("Course");
 const courseRevRep = dataSource.getRepository("courseReviews");
 const courseContentRepository = dataSource.getRepository("course_content");
-const uuid= require('uuid');
+const uuid = require("uuid");
 const { base64_decode } = require("../utils/base64_decode");
-const path= require('path')
-
+const path = require("path");
 
 const createCourse = async (data) => {
   try {
-    console.log(data)
-    const randomFileName= uuid.v4()+'.'+data.image.extension;
-    const targetDir= path.join(process.cwd(),"media","images","course");
-    base64_decode(data.image.image, randomFileName,targetDir);
-    const courseCreating = courseRepository.create({...data, image: randomFileName.toString()});
+    console.log(data);
+    const randomFileName = uuid.v4() + "." + data.image.extension;
+    const targetDir = path.join(process.cwd(), "media", "images", "course");
+    base64_decode(data.image.image, randomFileName, targetDir);
+    const courseCreating = courseRepository.create({
+      ...data,
+      image: randomFileName.toString(),
+    });
     const courseBasics = await courseRepository.save(courseCreating);
     return courseBasics;
   } catch (error) {
@@ -58,6 +60,30 @@ const findAllStudentCourses = async () => {
       .where("course.status!='declined'")
       .andWhere("course.status!='suspended'")
       .andWhere("course.status!='pending'")
+      .getMany();
+
+    return allCourses;
+  } catch (error) {
+    logger.error("Error : src > repositories > courseRepository");
+    logger.error(error.message);
+    throw new Error(error);
+  }
+};
+
+const findTopSellingCourses = async () => {
+  logger.info("src > Repository > fetchAllCourses");
+  try {
+    //const allCourses = await courseRepository.find();
+
+    const allCourses = await courseRepository
+      .createQueryBuilder("course")
+      .leftJoinAndSelect("course.instructor", "instructor")
+      .leftJoinAndSelect("instructor.user", "user")
+      .where("user.id = instructor.user_id")
+      .andWhere("course.status != 'declined'")
+      .andWhere("course.status != 'suspended'")
+      .andWhere("course.status != 'pending'")
+      .orderBy("jsonb_array_length(course.enrolled_customers)", "DESC")
       .getMany();
 
     return allCourses;
@@ -352,7 +378,7 @@ const studentEnrolledCoursesOnInstructorRepository = async (
           learning_outcomes: course.learning_outcomes,
           amount: course.amount,
           rating: course.rating,
-          id: course.id
+          id: course.id,
         });
       }
     });
@@ -379,6 +405,7 @@ module.exports = {
   setCourseStatusRepository,
   findOneCourseWithStudentID,
   studentEnrolledCoursesOnInstructorRepository,
-  findAllStudentCourses
+  findAllStudentCourses,
+  findTopSellingCourses,
   // saveReview
 };
