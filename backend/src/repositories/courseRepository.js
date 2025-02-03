@@ -37,6 +37,7 @@ const findAllCourses = async () => {
       .leftJoinAndSelect("course.instructor", "instructor")
       .leftJoinAndSelect("instructor.user", "user")
       .where("user.id=instructor.user_id")
+      .orderBy("course.created_at", "DESC")
       .getMany();
 
     return allCourses;
@@ -60,6 +61,7 @@ const findAllStudentCourses = async () => {
       .where("course.status!='declined'")
       .andWhere("course.status!='suspended'")
       .andWhere("course.status!='pending'")
+      .orderBy("course.created_at", "DESC")
       .getMany();
 
     return allCourses;
