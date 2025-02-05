@@ -43,14 +43,16 @@ const createStudent = async (request, reply) => {
         console.log("validation error:", error);
         return reply.code(400).send({
           status: false,
+          code: 400,
           message: error.details[0].message,
         });
       }
       const result = await emailVerificationForRegister(request.body);
-      reply.code(result.code).send(result.message);
+      reply.code(result.code).send({...result});
     } else {
       reply.code(400).send({
         status: false,
+        code: 400,
         message: "Cannot request without body",
       });
     }
@@ -59,6 +61,7 @@ const createStudent = async (request, reply) => {
     logger.error(["Error registering user:", error.message]);
     reply.code(500).send({
       status: false,
+      code: 500,
       message: error.message,
     });
   }
