@@ -88,10 +88,12 @@ const emailVerificationForRegister = async (userInfo) => {
 };
 
 const transporter = nodemailer.createTransport({
-  service: "Gmail",
+  host: "smtp.hostinger.com", // Replace with your Hostinger SMTP server
+  port: 465, // Use 587 for TLS or 465 for SSL
+  secure: true, // true for SSL
   auth: {
-    user: process.env.MAIL_USER,
-    pass: process.env.MAIL_PASS,
+      user: process.env.MAIL_USER, // Your Hostinger email
+      pass: process.env.MAIL_PASS, // Your email password
   },
 });
 
@@ -469,10 +471,12 @@ const ContactUser = async (userInfo) => {
     console.log("Contact Us in Service ", ContactUs);
     if (ContactUs) {
       const transporter = nodemailer.createTransport({
-        service: "Gmail",
+        host: "smtp.hostinger.com", // Replace with your Hostinger SMTP server
+        port: 465, // Use 587 for TLS or 465 for SSL
+        secure: true, // true for SSL
         auth: {
-          user: process.env.MAIL_USER,
-          pass: process.env.MAIL_PASS,
+            user: process.env.MAIL_USER, // Your Hostinger email
+            pass: process.env.MAIL_PASS, // Your email password
         },
       });
 

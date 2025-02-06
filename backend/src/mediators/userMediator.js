@@ -7,10 +7,12 @@ const randomstring = require('randomstring');
 const { redisClient } = require("../../Infrastructure/redis");
 
 const transporter = nodemailer.createTransport({
-  service: "Gmail",
+  host: "smtp.hostinger.com", // Replace with your Hostinger SMTP server
+  port: 465, // Use 587 for TLS or 465 for SSL
+  secure: true, // true for SSL
   auth: {
-    user: process.env.MAIL_USER,
-    pass: process.env.MAIL_PASS,
+      user: process.env.MAIL_USER, // Your Hostinger email
+      pass: process.env.MAIL_PASS, // Your email password
   },
 });
 
@@ -24,7 +26,7 @@ const generateOTP = async () => {
 const sendVerificationEmail = async (email, verificationToken) => {
   try {
     const mailOptions = {
-      from: "fa21bscs0017@maju.edu.pk",
+      from: process.env.MAIL_USER,
       to: email,
       subject: "Email Verification",
       html: `
