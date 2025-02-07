@@ -59,7 +59,7 @@ const searchCourses = async (courseNames) => {
       .where("course.title ILIKE :courseName", {
         courseName: `%${courseName?.toString()}%`,
       })
-      .orWhere("course.learning_outcomes ILIKE :courseName", {
+      .orWhere("course.learning_outcomes::text ILIKE :courseName", {
         courseName: `%${courseName?.toString()}%`,
       })
       .andWhere("course.status='approved'")
