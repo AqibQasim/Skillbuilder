@@ -4,6 +4,7 @@ const {
   createAdmin: createAdminRepo,
   verifyAdminCredentials,
 } = require("../repositories/adminRepository");
+const jwt = require("jsonwebtoken");
 
 const createAdmin = async (request, reply) => {
   try {
@@ -49,13 +50,23 @@ const adminLogin = async (request, reply) => {
       });
     }
 
-    // TODO: Generate JWT token here if needed
+    // Generate JWT token
+    const tokenPayload = {
+      id: admin.id,
+      username: admin.username,
+      role: "admin",
+    };
+
+    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET);
 
     return reply.code(200).send({
       status: true,
       code: 200,
       message: "Login successful",
-      data: admin,
+      data: {
+        token,
+        admin,
+      },
     });
   } catch (error) {
     console.error("Error during login:", error);
