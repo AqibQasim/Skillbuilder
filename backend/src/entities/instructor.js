@@ -14,7 +14,7 @@ module.exports = new EntitySchema({
     },
     experience: {
       type: "jsonb",
-      default:null,
+      default: null,
     },
     specialization: {
       type: "varchar",
@@ -27,6 +27,18 @@ module.exports = new EntitySchema({
       enum: ["active", "pending"],
       default: "pending",
     },
+    courses_rights: {
+      type: "boolean",
+      default: true,
+    },
+    bootcamp_rights: {
+      type: "boolean",
+      default: true,
+    },
+    career_counselling_rights: {
+      type: "boolean",
+      default: false,
+    },
     created_at: {
       type: "timestamp",
     },
@@ -38,7 +50,7 @@ module.exports = new EntitySchema({
       inverseSide: "instructor",
       joinColumn: {
         name: "user_id",
-        referencedColumnName:"id"
+        referencedColumnName: "id",
       },
     },
     skills: {
