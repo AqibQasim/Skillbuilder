@@ -1,4 +1,8 @@
-const adminRoutes = async (fastify, options) => {
+const adminController = require("../controllers/adminController");
 
-    fastify.post('/admin-login',)
-}
+const adminRoutes = async (fastify, options) => {
+  fastify.post("/admin-login", adminController.adminLogin);
+  fastify.post("/admin-signup", adminController.createAdmin);
+};
+
+module.exports = adminRoutes;

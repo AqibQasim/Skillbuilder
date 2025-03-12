@@ -18,11 +18,11 @@ const purchsedCoursesRoutes = require("./routes/purchasedCourseRoutes");
 const { lockStatusRoutes } = require("./routes/lockStatusRoutes");
 const { notificationRoutes } = require("./routes/notificationRoutes");
 require("./Authentication/googleAuth");
-const fastifyMultipart = require('@fastify/multipart');
+const fastifyMultipart = require("@fastify/multipart");
 const searchRoutes = require("./routes/searchRoute");
 const paymentRoutes = require("./routes/paymentRoutes");
 const liveSessionCourseRoutes = require("./routes/liveSessionCourseRoutes");
-
+const adminRoutes = require("./routes/adminRoutes");
 
 const startServer = async () => {
   const app = fastify(fastifyOptions);
@@ -72,8 +72,8 @@ const startServer = async () => {
     limits: {
       files: 7,
       fileSize: 150 * 1024 * 1024, // Set file size limit to 150MB
-    }
-  })
+    },
+  });
 
   // app.register(require('fastify-multipart'));
   app.register(fastifyPassport.default.initialize());
@@ -121,9 +121,10 @@ const startServer = async () => {
   app.register(purchsedCoursesRoutes, { prefix: "/v1" });
   app.register(lockStatusRoutes, { prefix: "/v1" });
   app.register(notificationRoutes, { prefix: "/v1" });
-  app.register(searchRoutes,{prefix:"/v1"})
-  app.register(paymentRoutes,{prefix: '/v1'})
-  app.register(liveSessionCourseRoutes,{prefix: '/v1'})
+  app.register(searchRoutes, { prefix: "/v1" });
+  app.register(paymentRoutes, { prefix: "/v1" });
+  app.register(liveSessionCourseRoutes, { prefix: "/v1" });
+  app.register(adminRoutes, { prefix: "/v1" });
 
   try {
     await dataSource
