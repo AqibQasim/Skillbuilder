@@ -131,7 +131,7 @@ const fetchAllInstructor = async () => {
 //         "user.status_desc",
 //         "instructor.experience",
 //         "instructor.specialization",
-//         "instructor.video_url", 
+//         "instructor.video_url",
 //         "skills",
 //       ])
 //       .where("instructor.id = :inst_id", { inst_id })
@@ -185,7 +185,7 @@ const findByFilter = async (filter) => {
         "user.status_desc",
         "instructor.experience",
         "instructor.specialization",
-        "instructor.video_url", 
+        "instructor.video_url",
         "skills",
       ])
       .where("instructor.id = :inst_id", { inst_id })
@@ -209,21 +209,21 @@ const findByFilter = async (filter) => {
   }
 };
 
-const findInstructorById= async (id)=>{
+const findInstructorById = async (id) => {
   return await instructorRepository.findOne({
-    where:{
-      user_id:id
-    }
-  })
-}
+    where: {
+      user_id: id,
+    },
+  });
+};
 
-const findInstructorByInstructorId= async (id)=>{
+const findInstructorByInstructorId = async (id) => {
   return await instructorRepository.findOne({
-    where:{
-      id
-    }
-  })
-}
+    where: {
+      id,
+    },
+  });
+};
 
 // async function findByFilterThree()
 
@@ -231,18 +231,18 @@ const findInstructorByInstructorId= async (id)=>{
 
 async function findByFilterTwo(userId) {
   // const id = userId.id;
-  const instructor = await dataSource.getRepository("User")
+  const instructor = await dataSource
+    .getRepository("User")
     .createQueryBuilder("user")
     // .leftJoinAndSelect("instructor.skills", "skills")
     // .leftJoinAndSelect("instructor.education", "education")
     // .leftJoinAndSelect("instructor.reviews", "reviews")
     // .leftJoinAndSelect("instructor.user", "user")
-    .where("user.id = :userId", {  userId: userId.id }) // Filter by user's id
+    .where("user.id = :userId", { userId: userId.id }) // Filter by user's id
     .getOne();
 
   return instructor;
 }
-
 
 // const findByFilterTwo = async (filter) => {
 //   try {
@@ -259,7 +259,7 @@ async function findByFilterTwo(userId) {
 //     const instructorExist = await dataSource
 //       .getRepository("User")
 //       .createQueryBuilder("user")
-//       .innerJoinAndSelect("user.instructor", "instructor")  
+//       .innerJoinAndSelect("user.instructor", "instructor")
 //       // .innerJoinAndSelect("user.skills", "skills")
 //       .select([
 //         "user.id",
@@ -346,6 +346,6 @@ module.exports = {
   updateInstructor,
   findByFilterTwo,
   findInstructorById,
-  findInstructorByInstructorId
+  findInstructorByInstructorId,
   // fetchAllInstructorWithSkills,
 };

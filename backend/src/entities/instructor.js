@@ -31,7 +31,7 @@ module.exports = new EntitySchema({
       type: "boolean",
       default: true,
     },
-    bootcamp_rights: {
+    live_session_rights: {
       type: "boolean",
       default: true,
     },
