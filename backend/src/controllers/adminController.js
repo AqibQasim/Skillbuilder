@@ -1,9 +1,15 @@
 const bcrypt = require("bcrypt");
-const { adminSchema } = require("../Schema/adminSchema");
+const {
+  adminSchema,
+  updateInstructorRightsSchema,
+} = require("../Schema/adminSchema");
 const {
   createAdmin: createAdminRepo,
   verifyAdminCredentials,
 } = require("../repositories/adminRepository");
+const {
+  updateInstructorRights,
+} = require("../repositories/instructorRepository");
 const jwt = require("jsonwebtoken");
 
 const createAdmin = async (request, reply) => {
@@ -57,7 +63,9 @@ const adminLogin = async (request, reply) => {
       role: "admin",
     };
 
-    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET);
+    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
+      expiresIn: process.env.JWT_EXPIRES_IN,
+    });
 
     return reply.code(200).send({
       status: true,
@@ -78,7 +86,71 @@ const adminLogin = async (request, reply) => {
   }
 };
 
+const updateInstructorRightsController = async (request, reply) => {
+  try {
+    // Verify admin token
+    const token = request.headers.authorization?.split(" ")[1];
+    if (!token) {
+      return reply.code(401).send({
+        status: false,
+        code: 401,
+        message: "Admin authentication required",
+      });
+    }
+
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      if (decoded.role !== "admin") {
+        return reply.code(403).send({
+          status: false,
+          code: 403,
+          message: "Only admins can update instructor rights",
+        });
+      }
+    } catch (error) {
+      return reply.code(401).send({
+        status: false,
+        code: 401,
+        message: "Invalid or expired token",
+      });
+    }
+
+    // Validate request body
+    const { error, value } = updateInstructorRightsSchema.validate(
+      request.body
+    );
+    if (error) {
+      return reply.code(400).send({
+        status: false,
+        code: 400,
+        message: error.details[0].message,
+      });
+    }
+
+    const { instructor_id, rights } = value;
+    const updatedInstructor = await updateInstructorRights(
+      instructor_id,
+      rights
+    );
+
+    return reply.code(200).send({
+      status: true,
+      code: 200,
+      message: "Instructor rights updated successfully",
+      data: updatedInstructor,
+    });
+  } catch (error) {
+    console.error("Error updating instructor rights:", error);
+    return reply.code(500).send({
+      status: false,
+      code: 500,
+      message: error.message || "Internal server error",
+    });
+  }
+};
+
 module.exports = {
   createAdmin,
   adminLogin,
+  updateInstructorRightsController,
 };

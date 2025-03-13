@@ -29,4 +29,23 @@ const adminSchema = Joi.object({
     }),
 });
 
-module.exports = { adminSchema };
+const updateInstructorRightsSchema = Joi.object({
+  instructor_id: Joi.number().required(),
+  rights: Joi.object({
+    courses_rights: Joi.boolean(),
+    live_session_rights: Joi.boolean(),
+    career_counselling_rights: Joi.boolean(),
+  })
+    .required()
+    .min(1)
+    .messages({
+      "object.unknown":
+        "Only courses_rights, live_session_rights, and career_counselling_rights can be updated",
+      "object.min": "At least one right must be specified",
+    }),
+});
+
+module.exports = {
+  adminSchema,
+  updateInstructorRightsSchema,
+};
