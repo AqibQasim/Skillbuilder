@@ -339,6 +339,26 @@ const updateInstructor = async (instructorId, videoUrl) => {
 //   }
 // };
 
+const updateInstructorRights = async (instructorId, rights) => {
+  try {
+    const instructor = await instructorRepository.findOne({
+      where: { id: instructorId },
+    });
+
+    if (!instructor) {
+      throw new Error("Instructor not found");
+    }
+
+    // Update only the provided rights
+    Object.assign(instructor, rights);
+    const updatedInstructor = await instructorRepository.save(instructor);
+    return updatedInstructor;
+  } catch (error) {
+    logger.error("Error updating instructor rights:", error);
+    throw error;
+  }
+};
+
 module.exports = {
   instructorCreate,
   fetchAllInstructor,
@@ -347,5 +367,5 @@ module.exports = {
   findByFilterTwo,
   findInstructorById,
   findInstructorByInstructorId,
-  // fetchAllInstructorWithSkills,
+  updateInstructorRights,
 };
