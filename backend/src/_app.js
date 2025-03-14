@@ -32,7 +32,7 @@ const startServer = async () => {
   app.register(require("@fastify/cors"), {
     origin: "*",
     // origin: "*",
-    methods: ["GET", "POST", "DELETE", "PUT"],
+    methods: ["GET", "POST", "DELETE", "PUT", "PATCH"],
   });
 
   app.register(fastifySecureSession, {

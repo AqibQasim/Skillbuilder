@@ -1,51 +1,84 @@
+const { logger } = require("../../logger");
 const dataSource = require("../../Infrastructure/postgres");
-const { verifyPassword } = require("../mediators/userMediator");
-const admin = dataSource.getRepository("admin");
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 
+const adminRepository = dataSource.getRepository("Admin");
 
-const verifyAdmin = async (username, password) => {
-  const isAdminExist = await admin.findOne({
-    where: {
-      username,
-    },
-  });
-  if (admin) {
-    const passwordMatch = await bcrypt.compare(
-      password,
-      isAdminExist?.password
-    );
-    if (!passwordMatch) {
-      return {
-        status: 401,
-        message: "Password does not match",
-      };
+const createAdmin = async (adminInfo) => {
+  logger.info(["src > repository > adminRepository > createAdmin", adminInfo]);
+  try {
+    // Hash password before saving
+    const saltRounds = 12;
+    const hashedPassword = await bcrypt.hash(adminInfo.password, saltRounds);
+
+    const adminToCreate = adminRepository.create({
+      ...adminInfo,
+      password: hashedPassword,
+    });
+
+    const result = await adminRepository.save(adminToCreate);
+    logger.info(["admin created", { ...result, password: undefined }]);
+
+    // Remove password from response
+    delete result.password;
+    return result;
+  } catch (error) {
+    logger.error("Error while creating admin:", error);
+    throw error;
+  }
+};
+
+const findAdminByUsername = async (username) => {
+  logger.info(["src > repository > adminRepository > findAdminByUsername"]);
+  try {
+    const admin = await adminRepository.findOne({
+      where: { username },
+    });
+    return admin || null;
+  } catch (error) {
+    logger.error("Error fetching admin:", error);
+    throw error;
+  }
+};
+
+const verifyAdminCredentials = async (username, password) => {
+  logger.info(["src > repository > adminRepository > verifyAdminCredentials"]);
+  try {
+    const admin = await findAdminByUsername(username);
+    if (!admin) {
+      return null;
     }
 
-    const tokenPayload = {
-      id: isAdminExist?.id,
-      username: isAdminExist?.username,
-      role: "admin",
-    };
-    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET);
-    const option = {
-      headers: {
-        "Set-Cookie": cookie.serialize("token", token, {
-          // expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-          httpOnly: true,
-        }),
-      },
-    };
-    return {
-      status: 200,
-      message: "admin logged in successfully",
-      data:{
-        username: isAdminExist.username,
-        id: isAdminExist?.id,
-        token: token,
-        adminOptions: option
-      }
-    };
+    const isValidPassword = await bcrypt.compare(password, admin.password);
+    if (!isValidPassword) {
+      return null;
+    }
+
+    // Remove password from response
+    delete admin.password;
+    return admin;
+  } catch (error) {
+    logger.error("Error verifying admin credentials:", error);
+    throw error;
   }
+};
+
+const getAllAdmins = async () => {
+  logger.info(["src > repository > adminRepository > getAllAdmins"]);
+  try {
+    const admins = await adminRepository.find();
+    // Remove passwords from response
+    admins.forEach((admin) => delete admin.password);
+    return admins;
+  } catch (error) {
+    logger.error("Error fetching all admins:", error);
+    throw error;
+  }
+};
+
+module.exports = {
+  createAdmin,
+  findAdminByUsername,
+  verifyAdminCredentials,
+  getAllAdmins,
 };

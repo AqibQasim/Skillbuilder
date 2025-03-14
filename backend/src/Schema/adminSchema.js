@@ -32,9 +32,9 @@ const adminSchema = Joi.object({
 const updateInstructorRightsSchema = Joi.object({
   instructor_id: Joi.number().required(),
   rights: Joi.object({
-    courses_rights: Joi.boolean(),
-    live_session_rights: Joi.boolean(),
-    career_counselling_rights: Joi.boolean(),
+    courses_rights: Joi.boolean().optional(),
+    live_session_rights: Joi.boolean().optional(),
+    career_counselling_rights: Joi.boolean().optional(),
   })
     .required()
     .min(1)
