@@ -1,0 +1,282 @@
+const instructorPermissionRepo = require("../repositories/instructorPermissionRepository");
+const instructorRepo = require("../repositories/instructorRepository");
+const { logger } = require("../../logger");
+
+// Constants for request limits
+const MAX_REJECTED_REQUESTS = 5; // Maximum number of rejected requests to keep per instructor/type
+const REJECTION_COOLDOWN_DAYS = 7; // Cooldown period in days after rejection
+
+exports.requestPermission = async (instructor_id, type) => {
+  logger.info([
+    "src > services > instructorPermissionService > requestPermission",
+    { instructor_id, type },
+  ]);
+  try {
+    // Check for existing pending request only
+    const existingPendingRequest =
+      await instructorPermissionRepo.findPendingByInstructorAndType(
+        instructor_id,
+        type
+      );
+    if (existingPendingRequest) {
+      logger.warn([
+        "Duplicate pending request",
+        { instructor_id, type, existing_request_id: existingPendingRequest.id },
+      ]);
+      const error = new Error(
+        "A pending request for this permission type already exists"
+      );
+      error.statusCode = 400;
+      throw error;
+    }
+
+    // Check if instructor already has this permission
+    const instructor = await instructorRepo.findInstructorByInstructorId(
+      instructor_id
+    );
+    if (!instructor) {
+      logger.warn(["Instructor not found", { instructor_id }]);
+      const error = new Error("Instructor not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    // Check if instructor already has the permission
+    let hasPermission = false;
+    switch (type) {
+      case "courses":
+        hasPermission = instructor.courses_rights;
+        break;
+      case "live_sessions":
+        hasPermission = instructor.live_session_rights;
+        break;
+      case "career_counselling":
+        hasPermission = instructor.career_counselling_rights;
+        break;
+    }
+
+    if (hasPermission) {
+      logger.warn([
+        "Instructor already has permission",
+        { instructor_id, type },
+      ]);
+      const error = new Error("Instructor already has this permission");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    // Check for recent rejections (cooldown period)
+    const recentRejection =
+      await instructorPermissionRepo.findMostRecentRejection(
+        instructor_id,
+        type
+      );
+
+    if (recentRejection) {
+      const rejectionDate = new Date(recentRejection.updated_at);
+      const cooldownEndDate = new Date(rejectionDate);
+      cooldownEndDate.setDate(
+        cooldownEndDate.getDate() + REJECTION_COOLDOWN_DAYS
+      );
+
+      if (new Date() < cooldownEndDate) {
+        const daysLeft = Math.ceil(
+          (cooldownEndDate - new Date()) / (1000 * 60 * 60 * 24)
+        );
+        logger.warn([
+          "Request in cooldown period",
+          { instructor_id, type, daysLeft, rejectionDate },
+        ]);
+        const error = new Error(
+          `You must wait ${daysLeft} more day(s) before submitting a new request for this permission type`
+        );
+        error.statusCode = 400;
+        throw error;
+      }
+    }
+
+    // Create new request
+    const newRequest = await instructorPermissionRepo.createPermissionRequest(
+      instructor_id,
+      type
+    );
+
+    // Clean up old rejected requests if there are too many
+    await instructorPermissionRepo.cleanupOldRejectedRequests(
+      instructor_id,
+      type,
+      MAX_REJECTED_REQUESTS
+    );
+
+    logger.info([
+      "Permission request created successfully",
+      { request_id: newRequest.id, instructor_id, type },
+    ]);
+    return newRequest;
+  } catch (error) {
+    logger.error(["Error in requestPermission", error.message]);
+    throw error;
+  }
+};
+
+exports.getPendingRequests = async () => {
+  logger.info([
+    "src > services > instructorPermissionService > getPendingRequests",
+  ]);
+  try {
+    const pendingRequests =
+      await instructorPermissionRepo.findPendingRequests();
+    logger.info([
+      "Pending requests retrieved",
+      { count: pendingRequests.length },
+    ]);
+    return pendingRequests;
+  } catch (error) {
+    logger.error(["Error in getPendingRequests", error.message]);
+    throw error;
+  }
+};
+
+exports.getRequestStats = async () => {
+  logger.info([
+    "src > services > instructorPermissionService > getRequestStats",
+  ]);
+  try {
+    const stats = await instructorPermissionRepo.getRequestStats();
+    logger.info(["Request stats retrieved"]);
+    return stats;
+  } catch (error) {
+    logger.error(["Error in getRequestStats", error.message]);
+    throw error;
+  }
+};
+
+exports.getInstructorRequestHistory = async (instructor_id, type) => {
+  logger.info([
+    "src > services > instructorPermissionService > getInstructorRequestHistory",
+    { instructor_id, type },
+  ]);
+  try {
+    const history = await instructorPermissionRepo.findAllByInstructorAndType(
+      instructor_id,
+      type
+    );
+    logger.info(["Request history retrieved", { count: history.length }]);
+    return history;
+  } catch (error) {
+    logger.error(["Error in getInstructorRequestHistory", error.message]);
+    throw error;
+  }
+};
+
+exports.approveRequest = async (id) => {
+  logger.info([
+    "src > services > instructorPermissionService > approveRequest",
+    { id },
+  ]);
+  try {
+    const request = await instructorPermissionRepo.findRequestById(id);
+    if (!request) {
+      logger.warn(["Request not found", { id }]);
+      const error = new Error("Permission request not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    if (request.status !== "pending") {
+      logger.warn([
+        "Invalid request status for approval",
+        { id, current_status: request.status },
+      ]);
+      const error = new Error("Request is not in pending status");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    // Update instructor rights based on permission type
+    const updateData = {};
+    switch (request.type) {
+      case "courses":
+        updateData.courses_rights = true;
+        break;
+      case "live_sessions":
+        updateData.live_session_rights = true;
+        break;
+      case "career_counselling":
+        updateData.career_counselling_rights = true;
+        break;
+    }
+
+    // Update instructor rights
+    logger.info([
+      "Updating instructor rights",
+      { instructor_id: request.instructor_id, rights: updateData },
+    ]);
+    await instructorRepo.updateInstructorRights(
+      request.instructor_id,
+      updateData
+    );
+
+    // Update request status
+    const result = await instructorPermissionRepo.updateRequestStatus(
+      id,
+      "approved"
+    );
+    logger.info([
+      "Request approved successfully",
+      { id, instructor_id: request.instructor_id, type: request.type },
+    ]);
+    return result;
+  } catch (error) {
+    logger.error(["Error in approveRequest", error.message]);
+    throw error;
+  }
+};
+
+exports.rejectRequest = async (id) => {
+  logger.info([
+    "src > services > instructorPermissionService > rejectRequest",
+    { id },
+  ]);
+  try {
+    const request = await instructorPermissionRepo.findRequestById(id);
+    if (!request) {
+      logger.warn(["Request not found", { id }]);
+      const error = new Error("Permission request not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    if (request.status !== "pending") {
+      logger.warn([
+        "Invalid request status for rejection",
+        { id, current_status: request.status },
+      ]);
+      const error = new Error("Request is not in pending status");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    // Update request status
+    const result = await instructorPermissionRepo.updateRequestStatus(
+      id,
+      "rejected"
+    );
+
+    // Clean up old rejected requests if there are too many
+    await instructorPermissionRepo.cleanupOldRejectedRequests(
+      request.instructor_id,
+      request.type,
+      MAX_REJECTED_REQUESTS
+    );
+
+    logger.info([
+      "Request rejected successfully",
+      { id, instructor_id: request.instructor_id, type: request.type },
+    ]);
+    return result;
+  } catch (error) {
+    logger.error(["Error in rejectRequest", error.message]);
+    throw error;
+  }
+};

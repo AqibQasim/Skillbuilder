@@ -23,6 +23,7 @@ const searchRoutes = require("./routes/searchRoute");
 const paymentRoutes = require("./routes/paymentRoutes");
 const liveSessionCourseRoutes = require("./routes/liveSessionCourseRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const instructorPermissionRoutes = require("./routes/instructorPermissionRoutes");
 
 const startServer = async () => {
   const app = fastify(fastifyOptions);
@@ -125,6 +126,7 @@ const startServer = async () => {
   app.register(paymentRoutes, { prefix: "/v1" });
   app.register(liveSessionCourseRoutes, { prefix: "/v1" });
   app.register(adminRoutes, { prefix: "/v1" });
+  app.register(instructorPermissionRoutes, { prefix: "/v1" });
 
   try {
     await dataSource
