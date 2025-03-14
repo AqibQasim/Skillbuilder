@@ -6,7 +6,7 @@ const {
 const {
   createAdmin: createAdminRepo,
   verifyAdminCredentials,
-} = require("../repositories/adminRepository");
+} = require("../services/adminService");
 const {
   updateInstructorRights,
 } = require("../repositories/instructorRepository");

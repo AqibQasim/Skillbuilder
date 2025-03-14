@@ -340,6 +340,9 @@ const updateInstructor = async (instructorId, videoUrl) => {
 // };
 
 const updateInstructorRights = async (instructorId, rights) => {
+  logger.info([
+    "src > repository > instructorRepository > updateInstructorRights",
+  ]);
   try {
     const instructor = await instructorRepository.findOne({
       where: { id: instructorId },
