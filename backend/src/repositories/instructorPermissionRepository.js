@@ -239,7 +239,9 @@ exports.updateRequestStatus = async (id, status) => {
     const request = await repo.findOne({ where: { id } });
     if (!request) {
       logger.warn(["Request not found", { id }]);
-      const error = new Error("Permission request not found");
+      const error = new Error(
+        `Permission request with ID ${id} not found. Please verify the ID and try again.`
+      );
       error.statusCode = 404;
       throw error;
     }

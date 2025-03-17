@@ -1,22 +1,9 @@
 const instructorPermissionService = require("../services/instructorPermissionService");
-const {
-  createPermissionSchema,
-  updatePermissionSchema,
-  historyRequestSchema,
-} = require("../Schema/instructorPermissionSchema");
 
 // Schema for instructor history requests
 exports.requestPermission = async (req, reply) => {
   try {
-    const { error, value } = createPermissionSchema.validate(req.body);
-    if (error) {
-      return reply.code(400).send({
-        status: 400,
-        message: error.details[0].message,
-      });
-    }
-
-    const { instructor_id, type } = value;
+    const { instructor_id, type } = req.body;
     const result = await instructorPermissionService.requestPermission(
       instructor_id,
       type
@@ -74,15 +61,7 @@ exports.getRequestStats = async (req, reply) => {
 
 exports.getInstructorRequestHistory = async (req, reply) => {
   try {
-    const { error, value } = historyRequestSchema.validate(req.query);
-    if (error) {
-      return reply.code(400).send({
-        status: 400,
-        message: error.details[0].message,
-      });
-    }
-
-    const { instructor_id, type } = value;
+    const { instructor_id, type } = req.query;
     const result =
       await instructorPermissionService.getInstructorRequestHistory(
         instructor_id,
@@ -105,15 +84,7 @@ exports.getInstructorRequestHistory = async (req, reply) => {
 
 exports.approveRequest = async (req, reply) => {
   try {
-    const { error, value } = updatePermissionSchema.validate(req.params);
-    if (error) {
-      return reply.code(400).send({
-        status: 400,
-        message: error.details[0].message,
-      });
-    }
-
-    const { id } = value;
+    const { id } = req.params;
     const result = await instructorPermissionService.approveRequest(id);
     reply.send({
       status: 200,
@@ -132,15 +103,7 @@ exports.approveRequest = async (req, reply) => {
 
 exports.rejectRequest = async (req, reply) => {
   try {
-    const { error, value } = updatePermissionSchema.validate(req.params);
-    if (error) {
-      return reply.code(400).send({
-        status: 400,
-        message: error.details[0].message,
-      });
-    }
-
-    const { id } = value;
+    const { id } = req.params;
     const result = await instructorPermissionService.rejectRequest(id);
     reply.send({
       status: 200,

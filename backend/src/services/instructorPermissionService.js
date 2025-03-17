@@ -178,7 +178,9 @@ exports.approveRequest = async (id) => {
     const request = await instructorPermissionRepo.findRequestById(id);
     if (!request) {
       logger.warn(["Request not found", { id }]);
-      const error = new Error("Permission request not found");
+      const error = new Error(
+        `Permission request with ID ${id} not found. Please verify the ID and try again.`
+      );
       error.statusCode = 404;
       throw error;
     }
@@ -188,7 +190,9 @@ exports.approveRequest = async (id) => {
         "Invalid request status for approval",
         { id, current_status: request.status },
       ]);
-      const error = new Error("Request is not in pending status");
+      const error = new Error(
+        `Request with ID ${id} cannot be approved because it is not in pending status. Current status: ${request.status}`
+      );
       error.statusCode = 400;
       throw error;
     }
@@ -242,7 +246,9 @@ exports.rejectRequest = async (id) => {
     const request = await instructorPermissionRepo.findRequestById(id);
     if (!request) {
       logger.warn(["Request not found", { id }]);
-      const error = new Error("Permission request not found");
+      const error = new Error(
+        `Permission request with ID ${id} not found. Please verify the ID and try again.`
+      );
       error.statusCode = 404;
       throw error;
     }
@@ -252,7 +258,9 @@ exports.rejectRequest = async (id) => {
         "Invalid request status for rejection",
         { id, current_status: request.status },
       ]);
-      const error = new Error("Request is not in pending status");
+      const error = new Error(
+        `Request with ID ${id} cannot be rejected because it is not in pending status. Current status: ${request.status}`
+      );
       error.statusCode = 400;
       throw error;
     }
