@@ -1,5 +1,5 @@
 const notificationService = require("../services/notificationService");
-const webPush = require('web-push')
+const webPush = require("web-push");
 
 const createNotification = async (req, res) => {
   const { notification_for_instructor, notification_for_student } = req.body;
@@ -40,10 +40,10 @@ const getNotification = async (req, res) => {
     });
   }
 
-  res.status(notifications.status).send({...notifications});
+  res.status(notifications.status).send({ ...notifications });
 };
 
-const subscribe= (req, res) => {
+const subscribe = (req, res) => {
   const subscription = req.body;
   console.log("Subscription received:", subscription);
 
@@ -65,10 +65,10 @@ const subscribe= (req, res) => {
       console.error("Error sending notification:", error);
       res.status(500).send(error);
     });
-}
+};
 
 module.exports = {
   createNotification,
   getNotification,
-  subscribe
+  subscribe,
 };

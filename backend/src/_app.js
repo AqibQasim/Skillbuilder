@@ -17,6 +17,7 @@ const { authUrl } = require("../Infrastructure/youtubeConfig");
 const purchsedCoursesRoutes = require("./routes/purchasedCourseRoutes");
 const { lockStatusRoutes } = require("./routes/lockStatusRoutes");
 const { notificationRoutes } = require("./routes/notificationRoutes");
+const { appNotificationRoutes } = require("./routes/appNotificationRoutes");
 require("./Authentication/googleAuth");
 const fastifyMultipart = require("@fastify/multipart");
 const searchRoutes = require("./routes/searchRoute");
@@ -127,6 +128,7 @@ const startServer = async () => {
   app.register(liveSessionCourseRoutes, { prefix: "/v1" });
   app.register(adminRoutes, { prefix: "/v1" });
   app.register(instructorPermissionRoutes, { prefix: "/v1" });
+  app.register(appNotificationRoutes, { prefix: "/v1" });
 
   try {
     await dataSource

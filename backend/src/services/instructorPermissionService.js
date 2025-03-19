@@ -1,5 +1,6 @@
 const instructorPermissionRepo = require("../repositories/instructorPermissionRepository");
 const instructorRepo = require("../repositories/instructorRepository");
+const notificationService = require("../services/appNotificationService");
 const { logger } = require("../../logger");
 const dataSource = require("../../Infrastructure/postgres");
 
@@ -108,6 +109,21 @@ exports.requestPermission = async (instructor_id, type) => {
       type,
       MAX_REJECTED_REQUESTS
     );
+
+    // Send notification to admin about the new permission request
+    try {
+      await notificationService.sendPermissionRequestNotification({
+        instructorId: instructor_id,
+        permissionType: type,
+      });
+      logger.info([
+        "Notification sent to admin about permission request",
+        { request_id: newRequest.id },
+      ]);
+    } catch (notificationError) {
+      // Don't fail the request if notification fails, just log it
+      logger.error(["Error sending notification", notificationError.message]);
+    }
 
     logger.info([
       "Permission request created successfully",
@@ -245,53 +261,51 @@ exports.approveRequest = async (id) => {
     );
 
     // Update request status within the transaction
+    request.status = "approved";
+    await permissionRepo.save(request);
+
+    // Commit the transaction
+    await queryRunner.commitTransaction();
     logger.info([
-      "Updating request status within transaction",
-      { id, new_status: "approved" },
+      "Transaction committed successfully for approving request",
+      { id },
     ]);
 
-    await queryRunner.manager.update("InstructorPermission", id, {
-      status: "approved",
-      updated_at: new Date(),
-    });
-
-    // Commit the transaction with separate try-catch
+    // Send notification to instructor about approval (outside transaction)
     try {
-      await queryRunner.commitTransaction();
-      logger.info(["Transaction committed successfully", { id }]);
-    } catch (commitError) {
-      logger.error([
-        "Transaction commit failed, rolling back",
-        { id, error: commitError.message },
+      await notificationService.sendPermissionResponseNotification({
+        instructorId: request.instructor_id,
+        permissionType: request.type,
+        approved: true,
+      });
+      logger.info([
+        "Notification sent to instructor about permission approval",
+        { request_id: id, instructor_id: request.instructor_id },
       ]);
-      await queryRunner.rollbackTransaction();
-      throw commitError;
+    } catch (notificationError) {
+      // Just log the error, don't fail the request
+      logger.error([
+        "Error sending notification about approval",
+        notificationError.message,
+      ]);
     }
 
-    logger.info([
-      "Request approved successfully",
-      { id, instructor_id: request.instructor_id, type: request.type },
-    ]);
-
-    // Fetch and return the updated request
-    const updatedRequest = await instructorPermissionRepo.findRequestById(id);
-    return updatedRequest;
+    return request;
   } catch (error) {
-    // Rollback the transaction on error
+    // Rollback in case of error
     if (queryRunner.isTransactionActive) {
-      logger.error([
+      logger.warn([
         "Rolling back transaction due to error",
-        { id, error: error.message },
+        { error: error.message },
       ]);
       await queryRunner.rollbackTransaction();
     }
-
     logger.error(["Error in approveRequest", error.message]);
     throw error;
   } finally {
-    // Release the query runner regardless of success or failure
+    // Release query runner
     await queryRunner.release();
-    logger.info(["Query runner released", { id }]);
+    logger.info(["Query runner released"]);
   }
 };
 
@@ -311,7 +325,7 @@ exports.rejectRequest = async (id) => {
 
     logger.info(["Transaction started for rejecting request", { id }]);
 
-    // Get repository within the transaction
+    // Get repositories within the transaction
     const permissionRepo = queryRunner.manager.getRepository(
       "InstructorPermission"
     );
@@ -319,7 +333,6 @@ exports.rejectRequest = async (id) => {
     // Find the request with transaction
     const request = await permissionRepo.findOne({
       where: { id },
-      relations: ["instructor"],
     });
 
     if (!request) {
@@ -344,84 +357,50 @@ exports.rejectRequest = async (id) => {
     }
 
     // Update request status within the transaction
+    request.status = "rejected";
+    await permissionRepo.save(request);
+
+    // Commit the transaction
+    await queryRunner.commitTransaction();
     logger.info([
-      "Updating request status within transaction",
-      { id, new_status: "rejected" },
+      "Transaction committed successfully for rejecting request",
+      { id },
     ]);
 
-    await queryRunner.manager.update("InstructorPermission", id, {
-      status: "rejected",
-      updated_at: new Date(),
-    });
-
-    // Clean up old rejected requests within the transaction
-    const rejectedRequests = await permissionRepo.find({
-      where: {
-        instructor_id: request.instructor_id,
-        type: request.type,
-        status: "rejected",
-      },
-      order: {
-        updated_at: "DESC",
-      },
-    });
-
-    // If we have more than the max, delete the oldest ones
-    if (rejectedRequests.length > MAX_REJECTED_REQUESTS) {
-      const requestsToDelete = rejectedRequests.slice(MAX_REJECTED_REQUESTS);
-      const idsToDelete = requestsToDelete.map((req) => req.id);
-
-      logger.info([
-        "Cleaning up old rejected requests within transaction",
-        {
-          totalFound: rejectedRequests.length,
-          toDelete: idsToDelete.length,
-          idsToDelete,
-        },
-      ]);
-
-      if (idsToDelete.length > 0) {
-        // Use queryRunner.manager.delete instead of permissionRepo.delete for transaction safety
-        await queryRunner.manager.delete("InstructorPermission", idsToDelete);
-      }
-    }
-
-    // Commit the transaction with separate try-catch
+    // Send notification to instructor about rejection (outside transaction)
     try {
-      await queryRunner.commitTransaction();
-      logger.info(["Transaction committed successfully", { id }]);
-    } catch (commitError) {
-      logger.error([
-        "Transaction commit failed, rolling back",
-        { id, error: commitError.message },
+      await notificationService.sendPermissionResponseNotification({
+        instructorId: request.instructor_id,
+        permissionType: request.type,
+        approved: false,
+      });
+      logger.info([
+        "Notification sent to instructor about permission rejection",
+        { request_id: id, instructor_id: request.instructor_id },
       ]);
-      await queryRunner.rollbackTransaction();
-      throw commitError;
+    } catch (notificationError) {
+      // Just log the error, don't fail the request
+      logger.error([
+        "Error sending notification about rejection",
+        notificationError.message,
+      ]);
     }
 
-    logger.info([
-      "Request rejected successfully",
-      { id, instructor_id: request.instructor_id, type: request.type },
-    ]);
-
-    // Fetch and return the updated request
-    const updatedRequest = await instructorPermissionRepo.findRequestById(id);
-    return updatedRequest;
+    return request;
   } catch (error) {
-    // Rollback the transaction on error
+    // Rollback in case of error
     if (queryRunner.isTransactionActive) {
-      logger.error([
+      logger.warn([
         "Rolling back transaction due to error",
-        { id, error: error.message },
+        { error: error.message },
       ]);
       await queryRunner.rollbackTransaction();
     }
-
     logger.error(["Error in rejectRequest", error.message]);
     throw error;
   } finally {
-    // Release the query runner regardless of success or failure
+    // Release query runner
     await queryRunner.release();
-    logger.info(["Query runner released", { id }]);
+    logger.info(["Query runner released"]);
   }
 };
