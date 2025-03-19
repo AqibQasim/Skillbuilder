@@ -24,9 +24,9 @@ const sendNotification = async (notificationData) => {
       notificationData.senderType = "admin"; // Default sender type
     }
 
+    // Essential log - simplified
     logger.info("Sending notification", {
-      recipient: `${notificationData.recipientType}:${notificationData.recipientId}`,
-      sender: `${notificationData.senderType}:${notificationData.senderId}`,
+      to: `${notificationData.recipientType}:${notificationData.recipientId}`,
       type: notificationData.notificationType,
     });
 
@@ -34,9 +34,6 @@ const sendNotification = async (notificationData) => {
       notificationData
     );
 
-    logger.info("Notification sent successfully", {
-      notificationId: notification.id,
-    });
     return notification;
   } catch (error) {
     logger.error("Error sending notification", { error: error.message });
@@ -75,11 +72,6 @@ const sendPermissionRequestNotification = async (data) => {
       });
     }
 
-    logger.info("Found instructor record", {
-      instructorId: data.instructorId,
-      hasUserRelation: !!instructor.user,
-    });
-
     // Extract name from the user relation
     if (
       instructor.user &&
@@ -87,11 +79,9 @@ const sendPermissionRequestNotification = async (data) => {
       instructor.user.last_name
     ) {
       instructorName = `${instructor.user.first_name} ${instructor.user.last_name}`;
-      logger.info("Using name from user relation", { instructorName });
     } else {
       logger.warn("User relation missing or incomplete", {
         instructorId: data.instructorId,
-        userId: instructor.user_id || "unknown",
       });
 
       // Try a direct user query as fallback
@@ -103,9 +93,6 @@ const sendPermissionRequestNotification = async (data) => {
 
           if (userRecord && userRecord.first_name && userRecord.last_name) {
             instructorName = `${userRecord.first_name} ${userRecord.last_name}`;
-            logger.info("Using name from direct user query", {
-              instructorName,
-            });
           }
         } catch (userError) {
           logger.error("Error in fallback user query", {
@@ -161,35 +148,16 @@ const sendPermissionResponseNotification = async (data) => {
         break;
     }
 
-    // Get instructor with user relation to log details
-    const dataSource = require("../../Infrastructure/postgres");
-    try {
-      const instructor = await dataSource.getRepository("Instructor").findOne({
-        where: { id: data.instructorId },
-        relations: ["user"],
-      });
-
-      if (instructor && instructor.user) {
-        logger.info("Sending permission response notification to instructor", {
-          instructorId: data.instructorId,
-          instructorName: `${instructor.user.first_name} ${instructor.user.last_name}`,
-          permissionType: data.permissionType,
-          approved: data.approved,
-        });
-      }
-    } catch (lookupError) {
-      logger.warn(
-        "Failed to lookup instructor details for notification logging",
-        {
-          error: lookupError.message,
-          instructorId: data.instructorId,
-        }
-      );
-    }
-
     const message = data.approved
       ? `Your request for ${readablePermissionType} permission has been approved. You can now start using these features.`
       : `Your request for ${readablePermissionType} permission has been rejected. Please contact support if you need further information.`;
+
+    // Essential log for permission response
+    logger.info(
+      `Sending ${
+        data.approved ? "approval" : "rejection"
+      } notification to instructor ${data.instructorId}`
+    );
 
     return sendNotification({
       title,

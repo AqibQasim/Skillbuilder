@@ -187,10 +187,7 @@ exports.getInstructorRequestHistory = async (instructor_id, type) => {
 };
 
 exports.approveRequest = async (id) => {
-  logger.info([
-    "src > services > instructorPermissionService > approveRequest",
-    { id },
-  ]);
+  logger.info(["Approving permission request", { id }]);
 
   // Create a query runner for transaction management
   const queryRunner = dataSource.createQueryRunner();
@@ -199,8 +196,6 @@ exports.approveRequest = async (id) => {
     // Start transaction
     await queryRunner.connect();
     await queryRunner.startTransaction();
-
-    logger.info(["Transaction started for approving request", { id }]);
 
     // Get repositories within the transaction
     const permissionRepo = queryRunner.manager.getRepository(
@@ -249,11 +244,6 @@ exports.approveRequest = async (id) => {
     }
 
     // Update instructor rights within the transaction
-    logger.info([
-      "Updating instructor rights within transaction",
-      { instructor_id: request.instructor_id, rights: updateData },
-    ]);
-
     await queryRunner.manager.update(
       "Instructor",
       request.instructor_id,
@@ -266,10 +256,7 @@ exports.approveRequest = async (id) => {
 
     // Commit the transaction
     await queryRunner.commitTransaction();
-    logger.info([
-      "Transaction committed successfully for approving request",
-      { id },
-    ]);
+    logger.info(["Permission request approved", { id }]);
 
     // Send notification to instructor about approval (outside transaction)
     try {
@@ -278,10 +265,6 @@ exports.approveRequest = async (id) => {
         permissionType: request.type,
         approved: true,
       });
-      logger.info([
-        "Notification sent to instructor about permission approval",
-        { request_id: id, instructor_id: request.instructor_id },
-      ]);
     } catch (notificationError) {
       // Just log the error, don't fail the request
       logger.error([
@@ -305,15 +288,11 @@ exports.approveRequest = async (id) => {
   } finally {
     // Release query runner
     await queryRunner.release();
-    logger.info(["Query runner released"]);
   }
 };
 
 exports.rejectRequest = async (id) => {
-  logger.info([
-    "src > services > instructorPermissionService > rejectRequest",
-    { id },
-  ]);
+  logger.info(["Rejecting permission request", { id }]);
 
   // Create a query runner for transaction management
   const queryRunner = dataSource.createQueryRunner();
@@ -322,8 +301,6 @@ exports.rejectRequest = async (id) => {
     // Start transaction
     await queryRunner.connect();
     await queryRunner.startTransaction();
-
-    logger.info(["Transaction started for rejecting request", { id }]);
 
     // Get repositories within the transaction
     const permissionRepo = queryRunner.manager.getRepository(
@@ -362,10 +339,7 @@ exports.rejectRequest = async (id) => {
 
     // Commit the transaction
     await queryRunner.commitTransaction();
-    logger.info([
-      "Transaction committed successfully for rejecting request",
-      { id },
-    ]);
+    logger.info(["Permission request rejected", { id }]);
 
     // Send notification to instructor about rejection (outside transaction)
     try {
@@ -374,10 +348,6 @@ exports.rejectRequest = async (id) => {
         permissionType: request.type,
         approved: false,
       });
-      logger.info([
-        "Notification sent to instructor about permission rejection",
-        { request_id: id, instructor_id: request.instructor_id },
-      ]);
     } catch (notificationError) {
       // Just log the error, don't fail the request
       logger.error([
@@ -401,6 +371,5 @@ exports.rejectRequest = async (id) => {
   } finally {
     // Release query runner
     await queryRunner.release();
-    logger.info(["Query runner released"]);
   }
 };
