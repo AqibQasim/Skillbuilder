@@ -11,8 +11,15 @@ const appNotificationRepo = dataSource.getRepository("AppNotification");
 const createNotification = async (notificationData) => {
   try {
     logger.info("Creating new notification", {
-      recipient: notificationData.recipient_id,
+      recipientId: notificationData.recipientId,
+      recipientType: notificationData.recipientType,
+      senderId: notificationData.senderId,
+      senderType: notificationData.senderType,
     });
+
+    // Ensure senderId and senderType have default values if not provided
+    const senderId = notificationData.senderId || 0;
+    const senderType = notificationData.senderType || "system";
 
     const newNotification = appNotificationRepo.create({
       title: notificationData.title,
@@ -20,12 +27,18 @@ const createNotification = async (notificationData) => {
       recipient_id: notificationData.recipientId,
       recipient_type: notificationData.recipientType,
       notification_type: notificationData.notificationType,
-      sender_id: notificationData.senderId,
-      sender_type: notificationData.senderType,
+      sender_id: senderId,
+      sender_type: senderType,
       is_read: false,
     });
 
     const savedNotification = await appNotificationRepo.save(newNotification);
+
+    logger.info("Notification saved successfully", {
+      notificationId: savedNotification.id,
+      savedSenderId: savedNotification.sender_id,
+      savedSenderType: savedNotification.sender_type,
+    });
 
     // Transform the saved notification to camelCase for consistent API response
     return {
@@ -71,28 +84,66 @@ const getNotifications = async (
       unreadOnly,
     });
 
-    // Build query options
-    const queryOptions = {
-      where: {
-        recipient_id: userId,
-        recipient_type: userType,
-      },
+    // Build base where clause
+    let whereClause = [];
+
+    // Primary role condition - This will always apply based on the token
+    const primaryRoleCondition = {
+      recipient_id: userId,
+      recipient_type: userType,
+    };
+
+    if (unreadOnly) {
+      primaryRoleCondition.is_read = false;
+    }
+
+    whereClause.push(primaryRoleCondition);
+
+    // Check if student is also an instructor
+    if (userType === "student") {
+      try {
+        // Query the instructor table to see if this user is also an instructor
+        const instructorRepo = dataSource.getRepository("Instructor");
+        const instructor = await instructorRepo.findOne({
+          where: { user_id: userId },
+        });
+
+        if (instructor) {
+          logger.info("User is also an instructor", {
+            userId,
+            instructorId: instructor.id,
+          });
+
+          // Add instructor role condition
+          const instructorRoleCondition = {
+            recipient_id: instructor.id,
+            recipient_type: "instructor",
+          };
+
+          if (unreadOnly) {
+            instructorRoleCondition.is_read = false;
+          }
+
+          whereClause.push(instructorRoleCondition);
+        }
+      } catch (err) {
+        logger.warn("Error checking for instructor role", {
+          error: err.message,
+          userId,
+        });
+        // Continue with just the student role if there's an error
+      }
+    }
+
+    // Execute query with OR conditions if we have multiple roles
+    const [notifications, total] = await appNotificationRepo.findAndCount({
+      where: whereClause.length > 1 ? whereClause : whereClause[0],
       order: {
         created_at: "DESC",
       },
       skip: (page - 1) * limit,
       take: limit,
-    };
-
-    // Add unread filter if specified
-    if (unreadOnly) {
-      queryOptions.where.is_read = false;
-    }
-
-    // Execute query
-    const [notifications, total] = await appNotificationRepo.findAndCount(
-      queryOptions
-    );
+    });
 
     // Transform the notifications to camelCase
     const transformedNotifications = notifications.map((notification) => ({
@@ -129,7 +180,7 @@ const getNotifications = async (
  * @param {number} notificationId - The notification ID
  * @param {number} userId - The user's ID
  * @param {string} userType - The user's type
- * @returns {Promise<boolean>} Success status
+ * @returns {Promise<Object>} Success object with status
  */
 const markAsRead = async (notificationId, userId, userType) => {
   try {
@@ -139,14 +190,49 @@ const markAsRead = async (notificationId, userId, userType) => {
       userType,
     });
 
-    // Find the notification and verify ownership
-    const notification = await appNotificationRepo.findOne({
+    // Find the notification with primary role
+    let notification = await appNotificationRepo.findOne({
       where: {
         id: notificationId,
         recipient_id: userId,
         recipient_type: userType,
       },
     });
+
+    // If not found and user is a student, check if they have instructor notifications
+    if (!notification && userType === "student") {
+      try {
+        // Query the instructor table to see if this user is also an instructor
+        const instructorRepo = dataSource.getRepository("Instructor");
+        const instructor = await instructorRepo.findOne({
+          where: { user_id: userId },
+        });
+
+        if (instructor) {
+          logger.info(
+            "User is also an instructor, checking instructor notifications",
+            {
+              userId,
+              instructorId: instructor.id,
+            }
+          );
+
+          // Try to find the notification for the instructor role
+          notification = await appNotificationRepo.findOne({
+            where: {
+              id: notificationId,
+              recipient_id: instructor.id,
+              recipient_type: "instructor",
+            },
+          });
+        }
+      } catch (err) {
+        logger.warn("Error checking for instructor role", {
+          error: err.message,
+          userId,
+        });
+      }
+    }
 
     if (!notification) {
       logger.warn("Notification not found or not authorized", {
@@ -161,7 +247,7 @@ const markAsRead = async (notificationId, userId, userType) => {
     notification.is_read = true;
     await appNotificationRepo.save(notification);
 
-    return true;
+    return { success: true };
   } catch (error) {
     logger.error("Error marking notification as read", {
       error: error.message,
@@ -180,8 +266,10 @@ const markAllAsRead = async (userId, userType) => {
   try {
     logger.info("Marking all notifications as read", { userId, userType });
 
-    // Update all unread notifications for the user
-    const result = await appNotificationRepo.update(
+    let totalAffected = 0;
+
+    // Update notifications for primary role
+    const primaryRoleResult = await appNotificationRepo.update(
       {
         recipient_id: userId,
         recipient_type: userType,
@@ -192,7 +280,50 @@ const markAllAsRead = async (userId, userType) => {
       }
     );
 
-    return result.affected || 0;
+    totalAffected += primaryRoleResult.affected || 0;
+
+    // Check if student is also an instructor
+    if (userType === "student") {
+      try {
+        // Query the instructor table to see if this user is also an instructor
+        const instructorRepo = dataSource.getRepository("Instructor");
+        const instructor = await instructorRepo.findOne({
+          where: { user_id: userId },
+        });
+
+        if (instructor) {
+          logger.info(
+            "User is also an instructor, marking those notifications as read",
+            {
+              userId,
+              instructorId: instructor.id,
+            }
+          );
+
+          // Update instructor notifications
+          const instructorResult = await appNotificationRepo.update(
+            {
+              recipient_id: instructor.id,
+              recipient_type: "instructor",
+              is_read: false,
+            },
+            {
+              is_read: true,
+            }
+          );
+
+          totalAffected += instructorResult.affected || 0;
+        }
+      } catch (err) {
+        logger.warn("Error checking for instructor role", {
+          error: err.message,
+          userId,
+        });
+        // Continue with just the student notifications if there's an error
+      }
+    }
+
+    return totalAffected;
   } catch (error) {
     logger.error("Error marking all notifications as read", {
       error: error.message,

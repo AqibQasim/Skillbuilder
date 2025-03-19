@@ -18,8 +18,7 @@ exports.createNotificationSchema = {
       201: {
         type: "object",
         properties: {
-          success: { type: "boolean" },
-          message: { type: "string" },
+          status: { type: "number" },
           data: {
             type: "object",
             properties: {
@@ -55,7 +54,7 @@ exports.getNotificationsSchema = {
       200: {
         type: "object",
         properties: {
-          success: { type: "boolean" },
+          status: { type: "number" },
           data: {
             type: "object",
             properties: {
@@ -107,8 +106,13 @@ exports.markAsReadSchema = {
       200: {
         type: "object",
         properties: {
-          success: { type: "boolean" },
-          message: { type: "string" },
+          status: { type: "number" },
+          data: {
+            type: "object",
+            properties: {
+              id: { type: "number" },
+            },
+          },
         },
       },
     },
@@ -121,8 +125,15 @@ exports.markAllAsReadSchema = {
       200: {
         type: "object",
         properties: {
-          success: { type: "boolean" },
-          message: { type: "string" },
+          status: { type: "number" },
+          data: {
+            type: "object",
+            properties: {
+              updatedCount: { type: "number" },
+              userId: { type: "number" },
+              userType: { type: "string" },
+            },
+          },
         },
       },
     },

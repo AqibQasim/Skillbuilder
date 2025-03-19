@@ -9,8 +9,24 @@ const instructorRepo = require("../repositories/instructorRepository");
  */
 const sendNotification = async (notificationData) => {
   try {
+    // Ensure sender info exists (critical fix)
+    if (!notificationData.senderId || notificationData.senderId === 0) {
+      logger.warn("No sender ID provided, using admin default", {
+        originalSender: notificationData.senderId,
+      });
+      notificationData.senderId = 1; // Default to first admin
+    }
+
+    if (!notificationData.senderType || notificationData.senderType === "") {
+      logger.warn("No sender type provided, using admin default", {
+        originalType: notificationData.senderType,
+      });
+      notificationData.senderType = "admin"; // Default sender type
+    }
+
     logger.info("Sending notification", {
       recipient: `${notificationData.recipientType}:${notificationData.recipientId}`,
+      sender: `${notificationData.senderType}:${notificationData.senderId}`,
       type: notificationData.notificationType,
     });
 

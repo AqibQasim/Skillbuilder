@@ -1,4 +1,5 @@
 const appNotificationController = require("../controllers/appNotificationController");
+const verifyToken = require("../middleware/verifyToken");
 const adminAuth = require("../middleware/adminAuth");
 
 const {
@@ -14,7 +15,7 @@ const {
  * @param {Object} options - Options
  */
 const appNotificationRoutes = async (fastify, options) => {
-  // Send notification
+  // Send notification - Admin only
   fastify.post(
     "/notifications",
     {
@@ -28,9 +29,7 @@ const appNotificationRoutes = async (fastify, options) => {
   fastify.get(
     "/notifications",
     {
-      // login ho
-      // user ie instructor ho
-      //   preHandler: [adminAuth],
+      preHandler: [verifyToken],
       schema: getNotificationsSchema.schema,
     },
     appNotificationController.getUserNotifications
@@ -40,7 +39,7 @@ const appNotificationRoutes = async (fastify, options) => {
   fastify.patch(
     "/notifications/:id/read",
     {
-      preHandler: [adminAuth],
+      preHandler: [verifyToken],
       schema: markAsReadSchema.schema,
     },
     appNotificationController.markNotificationAsRead
@@ -50,7 +49,7 @@ const appNotificationRoutes = async (fastify, options) => {
   fastify.patch(
     "/notifications/read-all",
     {
-      preHandler: [adminAuth],
+      preHandler: [verifyToken],
       schema: markAllAsReadSchema.schema,
     },
     appNotificationController.markAllNotificationsAsRead

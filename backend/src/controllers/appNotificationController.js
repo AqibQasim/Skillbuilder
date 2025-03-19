@@ -12,8 +12,10 @@ const sendNotification = async (request, reply) => {
       request.body;
 
     // Add sender info from authenticated user
-    const senderId = request.user?.id;
-    const senderType = request.user?.role;
+    // Check if it's admin auth or user auth
+    const sender = request.admin || request.user || {};
+    const senderId = sender.id || 0;
+    const senderType = sender.role || "admin"; // Default to admin since only admins can send notifications
 
     const notification = await notificationService.sendNotification({
       title,
@@ -93,7 +95,7 @@ const markNotificationAsRead = async (request, reply) => {
 
     return reply.code(200).send({
       status: 200,
-      message: "Notification marked as read",
+      data: { id: notificationId },
     });
   } catch (error) {
     logger.error("Controller error marking notification as read", {
@@ -102,13 +104,14 @@ const markNotificationAsRead = async (request, reply) => {
 
     // Determine status code based on error message
     const statusCode = error.message.includes("not found") ? 404 : 500;
+    const errorMessage =
+      statusCode === 404
+        ? "Notification not found or not authorized"
+        : "Failed to mark notification as read";
 
     return reply.code(statusCode).send({
       status: statusCode,
-      message:
-        statusCode === 404
-          ? "Notification not found or not authorized"
-          : "Failed to mark notification as read",
+      message: errorMessage,
     });
   }
 };
@@ -130,7 +133,11 @@ const markAllNotificationsAsRead = async (request, reply) => {
 
     return reply.code(200).send({
       status: 200,
-      message: `${count} notifications marked as read`,
+      data: {
+        updatedCount: count,
+        userId: userId,
+        userType: userType,
+      },
     });
   } catch (error) {
     logger.error("Controller error marking all notifications as read", {
