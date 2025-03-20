@@ -8,6 +8,7 @@ const {
   checkPaymentRecordService,
   getinstructor,
   getOneInstByUserService,
+  getLiveSessionCoursesByInstructorService,
 } = require("../services/instructorService.js");
 const { updateInstructor } = require("../repositories/instructorRepository");
 const { logger } = require("../../logger");
@@ -138,7 +139,7 @@ const getCoursesByInstructor = async (request, reply) => {
 
     if (!isUserAnInstructor) {
       reply.status(403).send({
-        message: "this user is not an instructor"
+        message: "this user is not an instructor",
       });
     }
     const allCoursesByInstructor = await getCoursesByInstService(id);
@@ -146,6 +147,47 @@ const getCoursesByInstructor = async (request, reply) => {
   } catch (e) {
     console.log("ERR:", e);
     reply.status(500).send("Some server side exception has occured");
+  }
+};
+
+const getLiveCoursesByInstructor = async (request, reply) => {
+  try {
+    const id = request?.params?.id;
+    const authenticatedUserId = request.user?.id;
+
+    // Check if the user exists and is an instructor
+    const isUserAnInstructor = await getInstructorById(id);
+
+    if (!isUserAnInstructor) {
+      return reply.code(403).send({
+        status: 403,
+        message: "This user is not an instructor",
+      });
+    }
+
+    // Verify that the authenticated user is either:
+    // 1. The same user associated with this instructor record
+    // 2. An admin (if you have admin roles)
+    if (authenticatedUserId !== isUserAnInstructor.user_id) {
+      logger.warn(
+        `User ${authenticatedUserId} tried to access instructor ${id}'s courses without permission`
+      );
+      return reply.code(403).send({
+        status: 403,
+        message:
+          "You don't have permission to access this instructor's courses",
+      });
+    }
+
+    // Get live courses from dedicated live-course table
+    const liveCourses = await getLiveSessionCoursesByInstructorService(id);
+    return reply.code(liveCourses.status).send(liveCourses);
+  } catch (error) {
+    logger.error("Error getting live courses by instructor:", error.message);
+    return reply.code(500).send({
+      status: 500,
+      message: "Internal server error",
+    });
   }
 };
 
@@ -174,8 +216,6 @@ const checkPaymentRecord = async (request, reply) => {
     reply.status(500).send("Some server side exception has occured");
   }
 };
-
-
 
 async function uploadInstVideo(request, reply) {
   console.log("API IS HITTTINGGGGGGGG");
@@ -223,7 +263,10 @@ async function uploadInstVideo(request, reply) {
   // }
   try {
     console.log("video file path in controller:", videoFilePath);
-    const updatedInstructor = await updateInstructor(instructorId, request?.video_url);
+    const updatedInstructor = await updateInstructor(
+      instructorId,
+      request?.video_url
+    );
     console.log("instructor:", updatedInstructor);
     console.log("result in upload inst video:", result);
     if (result?.video_url) {
@@ -248,9 +291,10 @@ module.exports = {
   getAllInstructor,
   instructorDetail,
   getCoursesByInstructor,
+  getLiveCoursesByInstructor,
   uploadInstVideo,
   stripeAccRegister,
   checkPaymentRecord,
   getOneInstByUser,
-  getInstructorsall
+  getInstructorsall,
 };

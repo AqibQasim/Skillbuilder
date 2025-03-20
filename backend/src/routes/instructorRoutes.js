@@ -1,8 +1,10 @@
+const { logger } = require("../../logger");
 const {
   getAllInstructor,
   instructorDetail,
   createInstructor,
   getCoursesByInstructor,
+  getLiveCoursesByInstructor,
   uploadInstVideo,
   stripeAccRegister,
   checkPaymentRecord,
@@ -15,6 +17,7 @@ const {
   getAllInstructorsSchema,
   instructorDetailSchema,
 } = require("../Schema/instructorSchema");
+const verifyToken = require("../middleware/verifyToken");
 
 const instructorRoutes = async (fastify, options) => {
   fastify.post("/create-instructor", createInstructorSchema, createInstructor);
@@ -24,10 +27,16 @@ const instructorRoutes = async (fastify, options) => {
   fastify.get(
     "/instructor-detail/:id",
     instructorDetailSchema,
-    instructorDetail  
+    instructorDetail
   );
- 
+
   fastify.get("/get-courses-inst/:id", getCoursesByInstructor);
+
+  fastify.get(
+    "/get-live-courses-inst/:id",
+    { preHandler: [verifyToken] },
+    getLiveCoursesByInstructor
+  );
 
   fastify.post("/upload", uploadInstVideo);
 

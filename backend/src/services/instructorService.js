@@ -10,7 +10,7 @@ const {
   findAllCoursesByInst,
   updateCourse,
 } = require("../repositories/courseRepository");
-const { findUser } = require('../repositories/userRepository')
+const { findUser } = require("../repositories/userRepository");
 const { logger } = require("../../logger");
 
 const { uploadSingle } = require("../mediators/s3Mediator");
@@ -74,8 +74,8 @@ const createNewInstructor = async (instructorData, filePath) => {
 
     if (!result) {
       return {
-        message : "User doesn't exist"
-      }
+        message: "User doesn't exist",
+      };
     }
 
     const instructorPayload = {
@@ -89,20 +89,26 @@ const createNewInstructor = async (instructorData, filePath) => {
     };
 
     const isInstructorExist = await findInstructorById(user_id);
-    console.log("///////////////////////////////////////////////",isInstructorExist)
+    console.log(
+      "///////////////////////////////////////////////",
+      isInstructorExist
+    );
     if (isInstructorExist) {
-      return{
+      return {
         status: 400,
-        message:"instructor already exists"
-      }
+        message: "instructor already exists",
+      };
     }
 
-    const isInstructorCreated= await instructorCreate({ ...instructorPayload, video_url });
-    if(isInstructorCreated){
-      return{
+    const isInstructorCreated = await instructorCreate({
+      ...instructorPayload,
+      video_url,
+    });
+    if (isInstructorCreated) {
+      return {
         status: 200,
-        message:"instructor created successfully"
-      }
+        message: "instructor created successfully",
+      };
     }
     // }
   } catch (error) {
@@ -124,7 +130,7 @@ const getInstructors = async () => {
 const getInstructorById = async (id) => {
   try {
     logger.info("src > instructorServices > getInstructorById");
-    const InstructorReceive = await findByFilter({id: id });
+    const InstructorReceive = await findByFilter({ id: id });
     return InstructorReceive;
   } catch (error) {
     throw new Error(error);
@@ -145,16 +151,16 @@ const getOneInstByUserService = async (id) => {
 const getCoursesByInstService = async (id) => {
   try {
     const InstructorReceive = await findAllCoursesByInst(id);
-    if(InstructorReceive==null){
+    if (InstructorReceive == null) {
       return {
         status: 404,
-        message: "no courses uploaded yet"
-      }
+        message: "no courses uploaded yet",
+      };
     }
     return {
       status: 200,
-      message:"courses fetched successfully",
-      data: InstructorReceive
+      message: "courses fetched successfully",
+      data: InstructorReceive,
     };
   } catch (e) {
     throw new Error(error);
@@ -169,9 +175,7 @@ const stripeAccRegisterService = async ({
   try {
     const payload = { user_id, instructor_id, account_reg_id };
 
-    const InstructorReceive = await findByFilter(
-     { id: instructor_id },
-    );
+    const InstructorReceive = await findByFilter({ id: instructor_id });
     if (InstructorReceive) {
       const checkAlreadyExists = await checkIfAccounRegIdExists(instructor_id);
       if (checkAlreadyExists?.length === 0) {
@@ -204,7 +208,7 @@ const stripeAccRegisterService = async ({
 const checkPaymentRecordService = async ({ id }) => {
   try {
     const InstructorReceive = await findByFilter({
-      id
+      id,
     });
     if (InstructorReceive && InstructorReceive?.id) {
       const res = await checkIfAccounRegIdExists(id);
@@ -291,6 +295,29 @@ const uploadVideoToYT = async (instructorId, videoFilePath, user_role) => {
   }
 };
 
+const getLiveSessionCoursesByInstructorService = async (instructorId) => {
+  try {
+    // Get live courses from the dedicated live-course table
+    const liveCourseRepository = dataSource.getRepository("live-course");
+    const liveCourses = await liveCourseRepository.find({
+      where: { instructor_id: instructorId },
+    });
+
+    // Return 200 with empty array if no courses found
+    return {
+      status: 200,
+      message:
+        liveCourses.length === 0
+          ? "No live session courses found for this instructor"
+          : "Live session courses fetched successfully",
+      data: liveCourses || [],
+    };
+  } catch (error) {
+    logger.error("Error fetching live session courses:", error.message);
+    throw error;
+  }
+};
+
 module.exports = {
   getInstructors,
   createNewInstructor,
@@ -300,5 +327,6 @@ module.exports = {
   stripeAccRegisterService,
   checkPaymentRecordService,
   getOneInstByUserService,
-  getinstructor
+  getinstructor,
+  getLiveSessionCoursesByInstructorService,
 };

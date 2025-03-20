@@ -397,6 +397,16 @@ const studentEnrolledCoursesOnInstructorRepository = async (
   };
 };
 
+/**
+ * Find all live session courses by instructor ID
+ * @param {number} instructorId - The instructor ID
+ * @returns {Promise<Array>} Array of live session courses
+ */
+const findLiveSessionCoursesByInstructor = async (instructorId) => {
+  // This function is now obsolete since we're using the dedicated live-course repository
+  // Code moved to getLiveSessionCoursesByInstructorService in instructorService.js
+};
+
 module.exports = {
   createCourse,
   findAllCourses,
