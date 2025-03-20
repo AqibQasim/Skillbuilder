@@ -332,9 +332,47 @@ const markAllAsRead = async (userId, userType) => {
   }
 };
 
+/**
+ * Get a notification by ID
+ * @param {number} notificationId - The notification ID
+ * @returns {Promise<Object|null>} The notification or null if not found
+ */
+const getNotificationById = async (notificationId) => {
+  try {
+    logger.info("Getting notification by ID", { notificationId });
+
+    const notification = await appNotificationRepo.findOne({
+      where: { id: notificationId },
+    });
+
+    if (!notification) {
+      logger.info("Notification not found", { notificationId });
+      return null;
+    }
+
+    // Transform to camelCase for consistent API response
+    return {
+      id: notification.id,
+      title: notification.title,
+      message: notification.message,
+      recipientId: notification.recipient_id,
+      recipientType: notification.recipient_type,
+      notificationType: notification.notification_type,
+      senderId: notification.sender_id,
+      senderType: notification.sender_type,
+      isRead: notification.is_read,
+      createdAt: notification.created_at,
+    };
+  } catch (error) {
+    logger.error("Error getting notification by ID", { error: error.message });
+    throw error;
+  }
+};
+
 module.exports = {
   createNotification,
   getNotifications,
   markAsRead,
   markAllAsRead,
+  getNotificationById,
 };

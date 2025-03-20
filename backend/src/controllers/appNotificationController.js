@@ -87,7 +87,7 @@ const markNotificationAsRead = async (request, reply) => {
     const userId = request.user.id;
     const userType = request.user.role;
 
-    await notificationService.markNotificationAsRead(
+    const result = await notificationService.markNotificationAsRead(
       notificationId,
       userId,
       userType
@@ -100,18 +100,22 @@ const markNotificationAsRead = async (request, reply) => {
   } catch (error) {
     logger.error("Controller error marking notification as read", {
       error: error.message,
+      notificationId: request.params.id,
+      userId: request.user.id,
     });
 
-    // Determine status code based on error message
-    const statusCode = error.message.includes("not found") ? 404 : 500;
-    const errorMessage =
-      statusCode === 404
-        ? "Notification not found or not authorized"
-        : "Failed to mark notification as read";
+    // Return 404 for "not found or not authorized" errors
+    if (error.message.includes("Notification not found or not authorized")) {
+      return reply.code(404).send({
+        status: 404,
+        message: "Notification not found or not authorized",
+      });
+    }
 
-    return reply.code(statusCode).send({
-      status: statusCode,
-      message: errorMessage,
+    // For all other errors, return 500
+    return reply.code(500).send({
+      status: 500,
+      message: "Failed to mark notification as read",
     });
   }
 };

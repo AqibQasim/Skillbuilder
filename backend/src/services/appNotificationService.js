@@ -214,11 +214,72 @@ const getUserNotifications = async (
  * @param {number} notificationId - Notification ID
  * @param {number} userId - User ID
  * @param {string} userType - User type
- * @returns {Promise<boolean>} Success status
+ * @returns {Promise<Object>} Result object
  */
 const markNotificationAsRead = async (notificationId, userId, userType) => {
   try {
-    return await notificationRepo.markAsRead(notificationId, userId, userType);
+    // Get the notification
+    const notification = await notificationRepo.getNotificationById(
+      notificationId
+    );
+
+    // If notification doesn't exist, return error
+    if (!notification) {
+      logger.warn("Notification not found", { notificationId });
+      throw new Error("Notification not found or not authorized");
+    }
+
+    // Check if this notification belongs to the user
+    let isAuthorized = false;
+
+    // Check primary role ownership
+    if (
+      notification.recipientId === userId &&
+      notification.recipientType === userType
+    ) {
+      isAuthorized = true;
+    }
+
+    // If not authorized and user is a student, check if they're also an instructor
+    if (!isAuthorized && userType === "student") {
+      try {
+        // Get the instructor record for this student
+        const instructor = await instructorRepo.findByUserId(userId);
+
+        // If user is also an instructor and the notification is for that instructor
+        if (
+          instructor &&
+          notification.recipientId === instructor.id &&
+          notification.recipientType === "instructor"
+        ) {
+          isAuthorized = true;
+          logger.info("User authorized via dual role (student+instructor)", {
+            userId,
+            instructorId: instructor.id,
+          });
+        }
+      } catch (err) {
+        logger.warn("Error checking instructor role", { error: err.message });
+        // Continue with authorization check - default to not authorized
+      }
+    }
+
+    // If user is not authorized to access this notification
+    if (!isAuthorized) {
+      logger.warn("User not authorized to mark notification as read", {
+        userId,
+        userType,
+        notificationId,
+        recipientId: notification.recipientId,
+        recipientType: notification.recipientType,
+      });
+      throw new Error("Notification not found or not authorized");
+    }
+
+    // User is authorized, proceed with marking as read
+    await notificationRepo.markAsRead(notificationId, userId, userType);
+
+    return { success: true, id: notificationId };
   } catch (error) {
     logger.error("Error marking notification as read", {
       error: error.message,

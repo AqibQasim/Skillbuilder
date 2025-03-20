@@ -362,6 +362,28 @@ const updateInstructorRights = async (instructorId, rights) => {
   }
 };
 
+/**
+ * Find an instructor by their user ID
+ * @param {number} userId - The user ID
+ * @returns {Promise<Object|null>} The instructor or null if not found
+ */
+const findByUserId = async (userId) => {
+  logger.info("Finding instructor by user ID", { userId });
+  try {
+    const instructor = await instructorRepository.findOne({
+      where: { user_id: userId },
+    });
+
+    return instructor || null;
+  } catch (error) {
+    logger.error("Error finding instructor by user ID", {
+      error: error.message,
+      userId,
+    });
+    return null;
+  }
+};
+
 module.exports = {
   instructorCreate,
   fetchAllInstructor,
@@ -371,4 +393,5 @@ module.exports = {
   findInstructorById,
   findInstructorByInstructorId,
   updateInstructorRights,
+  findByUserId,
 };
