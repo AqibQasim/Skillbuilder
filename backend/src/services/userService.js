@@ -107,7 +107,7 @@ const sendEmailService = async (email, content, subject) => {
 
     if (checkIfUserIsInDb) {
       const mailOptions = {
-        from: "fa21bscs0017@maju.edu.pk",
+        from: process.env.MAIL_USER,
         to: email,
         subject: subject,
         html: ` <p>

@@ -81,7 +81,7 @@ const sendOTPMail = async (email) => {
     const OTP = await generateOTP();
     console.log("generated OTPPPP >>", OTP);
     const mailOptions = {
-      from: "captain.shahab2002@gmail.com",
+      from: process.env.MAIL_USER,
       to: email,
       subject: "Your OTP",
       html: `<h1> Please enter the below mentioned OTP for reset password </h1> <br> <h2> ${OTP} </h2>`,
