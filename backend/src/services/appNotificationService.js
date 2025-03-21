@@ -61,6 +61,9 @@ const sendPermissionRequestNotification = async (data) => {
 
     if (!instructor) {
       logger.warn(`Instructor not found for ID: ${data.instructorId}`);
+      // Even though the instructor wasn't found, we still send the notification
+      // to ensure the permission request is captured. This prevents data loss
+      // and maintains system functionality even with incomplete information.
       return sendNotification({
         title: "New Permission Request",
         message: `An instructor (ID: ${data.instructorId}) has requested permission for ${data.permissionType}`,
