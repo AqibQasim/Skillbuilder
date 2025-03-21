@@ -153,7 +153,7 @@ const getCoursesByInstructor = async (request, reply) => {
 const getLiveCoursesByInstructor = async (request, reply) => {
   try {
     const id = request?.params?.id;
-    const authenticatedUserId = request.user?.id;
+    // const authenticatedUserId = request.user?.id;
 
     // Check if the user exists and is an instructor
     const isUserAnInstructor = await getInstructorById(id);
@@ -168,16 +168,17 @@ const getLiveCoursesByInstructor = async (request, reply) => {
     // Verify that the authenticated user is either:
     // 1. The same user associated with this instructor record
     // 2. An admin (if you have admin roles)
-    if (authenticatedUserId !== isUserAnInstructor.user_id) {
-      logger.warn(
-        `User ${authenticatedUserId} tried to access instructor ${id}'s courses without permission`
-      );
-      return reply.code(403).send({
-        status: 403,
-        message:
-          "You don't have permission to access this instructor's courses",
-      });
-    }
+    // Uncomment once auth preHandler added in the route
+    // if (authenticatedUserId !== isUserAnInstructor.user_id) {
+    //   logger.warn(
+    //     `User ${authenticatedUserId} tried to access instructor ${id}'s courses without permission`
+    //   );
+    //   return reply.code(403).send({
+    //     status: 403,
+    //     message:
+    //       "You don't have permission to access this instructor's courses",
+    //   });
+    // }
 
     // Get live courses from dedicated live-course table
     const liveCourses = await getLiveSessionCoursesByInstructorService(id);

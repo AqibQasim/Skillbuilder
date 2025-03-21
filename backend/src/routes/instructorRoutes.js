@@ -34,7 +34,7 @@ const instructorRoutes = async (fastify, options) => {
 
   fastify.get(
     "/get-live-courses-inst/:id",
-    { preHandler: [verifyToken] },
+    // { preHandler: [verifyToken] }, // No auth for now
     getLiveCoursesByInstructor
   );
 
