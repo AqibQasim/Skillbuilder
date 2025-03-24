@@ -93,6 +93,11 @@ module.exports = new EntitySchema({
       nullable: true,
       default: null,
     },
+    status:{
+      type:"enum",
+      enum:["pending","approved","declined"],
+      default:"pending"
+    }
     // live_session_course_id: {
     //   type: "int",
     //   nullable: true,
