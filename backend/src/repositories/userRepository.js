@@ -51,13 +51,27 @@ const findOneUser = async (id) => {
   if (id === null) {
     return null;
   }
-  const user = await userRepository.findOne({
-    where: { id: id },
-  });
+  const user = await userRepository
+    .createQueryBuilder("user")
+    .whereInIds(id)
+    .select([
+      "profile",
+      "first_name",
+      "last_name",
+      "email",
+      "profession",
+      "location",
+      "is_active",
+      "role",
+      "source",
+      "",
+    ])
+    .getOne();
 
   if (!user) {
     return null;
   }
+  profession;
 
   const coursesRepository = dataSource.getRepository("Course");
   const courses = await coursesRepository.find();
@@ -88,10 +102,6 @@ const findOneUser = async (id) => {
   }
 
   return { ...user, enrolled_courses_by_student };
-  // } catch (err) {
-  //   console.log("ERR:", err);
-  //   return null;
-  // }
 };
 
 const updateUserByEmail = async (email, newData) => {
@@ -148,10 +158,10 @@ const updateUserById = async (id, payload) => {
     if (!user) {
       throw Error("User not found");
     }
-    const prevImage= user?.profile;
+    const prevImage = user?.profile;
     let randomFileName = null;
     let update = null;
-    if (payload?.profile?.image!=null) {
+    if (payload?.profile?.image != null) {
       randomFileName = uuid.v4() + "." + payload.profile.extension;
       const targetDir = path.join(process.cwd(), "media", "images", "profile");
       base64_decode(payload.profile.image, randomFileName, targetDir);
@@ -162,7 +172,7 @@ const updateUserById = async (id, payload) => {
     } else {
       update = userRepository.merge(user, {
         ...payload,
-        profile: prevImage
+        profile: prevImage,
       });
     }
 

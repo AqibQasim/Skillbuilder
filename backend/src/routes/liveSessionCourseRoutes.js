@@ -24,6 +24,11 @@ const liveSessionCourseRoutes = async (fastify, options) => {
     "/get-live-session-course/:course_id",
     liveSessionCourseController.getLiveSessionCourseById
   );
+
+  fastify.get(
+    "/get-live-session-courses/:instructor_id",
+    liveSessionCourseController.getLiveSessionCourseOfInstrcutor
+  )
 };
 
 module.exports = liveSessionCourseRoutes;

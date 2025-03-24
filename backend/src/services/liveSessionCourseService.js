@@ -126,30 +126,16 @@ const getLiveSessionCourseEnrolledStudents = async (req) => {
     const getLiveCourseStudents = await liveCoursePaymentsRepository
       .createQueryBuilder("live_payments")
       .leftJoinAndSelect("live_payments.student", "student")
-      // .leftJoinAndSelect("live_payments.instructor", "instructor")
-      // .leftJoinAndSelect("instructor.user","instructor_info")
-      // .leftJoinAndSelect("live_payments.course","course")
       .select([
         "live_payments.id",
         "live_payments.amount",
         "live_payments.created_at",
-        // "course.discount",
-        // "course.description",
-        // "course.image",
-        // "course.title",
-        // "course.instructor_id",
-        // "instructor.id",
-        // "instructor.experience",
-        // "instructor.specialization",
-        // "instructor_info.id",
-        // "instructor_info.first_name",
-        // "instructor_info.last_name",
         "student.id", // students's id
         "student.first_name", // student's first name
         "student.last_name", // students's last name
         "student.email",
       ])
-      .where("live_payments.course_id= :course_id",{course_id})
+      .where("live_payments.course_id= :course_id", { course_id })
       .getMany();
 
     return {
@@ -165,9 +151,35 @@ const getLiveSessionCourseEnrolledStudents = async (req) => {
   }
 };
 
+const getLiveSessionCourseOfInstrcutor = async (req) => {
+  const { instructor_id } = req.params;
+  try {
+    const getLiveCourses = await liveSessionCourseRepository
+      .createQueryBuilder("live-course")
+      .leftJoinAndSelect("live-course.modules", "modules")
+      .leftJoinAndSelect("live-course.instructor", "instructor")
+      .leftJoinAndSelect("instructor.user", "user")
+      .where("modules.live_session_course_id = live-course.id")
+      .andWhere("instructor.id=:id", { id: instructor_id })
+      .getMany();
+
+    return {
+      status: 200,
+      message: "live courses of instructor found",
+      data: getLiveCourses,
+    };
+  } catch (e) {
+    return {
+      status: 500,
+      message: e.message,
+    };
+  }
+};
+
 module.exports = {
   createLiveSessionCourse,
   getLiveSessionCourseEnrolledStudents,
   getLiveSessionCourse,
   getLiveSessionCourseById,
+  getLiveSessionCourseOfInstrcutor,
 };
