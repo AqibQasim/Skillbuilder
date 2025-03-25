@@ -53,7 +53,7 @@ const findOneUser = async (id) => {
   }
   const user = await userRepository
     .createQueryBuilder("user")
-    .whereInIds(id)
+    .where("user.id= :id",{id})
     .select([
       "profile",
       "first_name",
@@ -63,8 +63,7 @@ const findOneUser = async (id) => {
       "location",
       "is_active",
       "role",
-      "source",
-      "",
+      "source"
     ])
     .getOne();
 

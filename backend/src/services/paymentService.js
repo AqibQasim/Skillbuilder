@@ -159,18 +159,23 @@ const getCareerCounsellingPayments = async () => {
 
 const getLiveSessionCoursesOfStudent = async (req) => {
   const { student_id, course_id } = req?.query;
-  const courses = await liveSessionPaymentRepository?.findOne({
-    where: {
-      student_id,
-      course_id,
-    },
-  });
+  const course= await liveSessionPaymentRepository.createQueryBuilder("live-session-course-payment")
+  .leftJoinAndSelect("live-session-course-payment.course","course")
+  .where("course.id= :id",{id:course_id})
+  .select()
+  .getOne();
+  // const courses = await liveSessionPaymentRepository?.findOne({
+  //   where: {
+  //     student_id,
+  //     course_id,
+  //   },
+  // });
 
-  if (courses) {
+  if (course) {
     return {
       status: 200,
       message: "live courses",
-      data: courses,
+      data: course,
     };
   }
 
