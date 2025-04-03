@@ -661,9 +661,7 @@ const getOneInstCourseStudentsService = async ({
 
 const setStudentStatusService = async ({ id, status, status_desc }) => {
   try {
-    // const enrolledStudents = await checkIfUserIsStudent({id});
-    // console.log("enrolled students:", enrolledStudents);
-
+    
     const enrolledStudents = await getEnrolledStudentsService();
     console.log("enrolled students:", enrolledStudents);
     let requestedUser;
